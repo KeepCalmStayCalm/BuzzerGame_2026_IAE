@@ -3,7 +3,6 @@ package view;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -12,14 +11,10 @@ import javafx.stage.Window;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
-import com.sun.glass.ui.Application;
-
-import application.RaspiBuzzer;
+import application.IBuzzer;
 import javafx.event.ActionEvent;
 
 import javafx.scene.control.ComboBox;
@@ -81,7 +76,7 @@ public class EditSettingsViewController implements Initializable {
 		}
 	}
 	
-	public void setBuzzers(RaspiBuzzer buzzer1, RaspiBuzzer buzzer2, RaspiBuzzer buzzer3) {
+	public void setBuzzers(IBuzzer buzzer1, IBuzzer buzzer2, IBuzzer buzzer3) {
 		if (buzzer1 != null) {
 			gpio1A.selectedProperty().bind(buzzer1.btnAState);
 			gpio1B.selectedProperty().bind(buzzer1.btnBState);

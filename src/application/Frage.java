@@ -12,6 +12,15 @@ public class Frage implements Serializable {
 
 	private String frage;
 	private List<Antwort> antworten;
+	private String imagePath;
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
+	}
 
 	/**
 	 * 

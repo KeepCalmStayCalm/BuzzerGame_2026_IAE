@@ -1,16 +1,7 @@
 package application;
 
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -41,6 +32,8 @@ import view.StartupViewController;
 
 public class GameController extends Application {
 
+	public static final boolean IS_DEV_MODE = true;
+
 	private Stage myStage = null;
 	private double screenHeight, screenWidth;
 
@@ -50,7 +43,7 @@ public class GameController extends Application {
 
 	private Spielrunde spielrunde;
 	private Set<Spieler> alleSpieler = new HashSet<Spieler>();
-	private RaspiBuzzer buzzer1, buzzer2, buzzer3;
+	private IBuzzer buzzer1, buzzer2, buzzer3;
 	
 	private int MAX_ZEIT;
 	private int MAX_FRAGEN;
@@ -62,17 +55,23 @@ public class GameController extends Application {
 	private String style;
 	
 	public static void main(String[] args) {
+
+		System.out.println("DEVELOPMENT_MODE: "+System.getenv("DEVELOPMENT_MODE"));
+
 		launch(args);
 	}
 	
 	private void readPreferences(){
 		System.out.println("Prefs-File: "+Preferences.userRoot().node(this.getClass().getName()));
 		prefs = Preferences.userRoot().node(this.getClass().getName());
-		MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "1"));
+		MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "3"));
 		fullScreen = prefs.getBoolean("full_screen", true);
 		MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "10"));	
 		shuffleQuestions = prefs.getBoolean("shuffle_questions", true);	
 		questionFile = prefs.get("questions_file", "/home/pi/Desktop/fragenBuzzerGame_290620.csv");
+		if (IS_DEV_MODE) {
+			questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+		}
 		
 		System.out.println("MAX_ZEIT: "+MAX_ZEIT);
 		System.out.println("MAX_FRAGEN: "+MAX_FRAGEN);
@@ -84,7 +83,7 @@ public class GameController extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		readPreferences();
 		
-		style = getClass().getResource("buzzerStyle.css").toExternalForm();
+		style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
 		
 		eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
 		screenWidth = 1200;
@@ -117,10 +116,16 @@ public class GameController extends Application {
 	public void showStartupView() {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
 		
-		buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
-		buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
-		buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
-		
+		if (!IS_DEV_MODE) {
+			buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
+			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
+			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
+		} else {
+			buzzer1 = new MouseBuzzer();
+			buzzer2 = new DummyBuzzer(2);
+			buzzer3 = new DummyBuzzer(3);
+		}
+			
 		
 		try {
 			Scene startupScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -147,9 +152,20 @@ public class GameController extends Application {
 			lobbyScene.getStylesheets().add(style);
 			LobbyViewController lobbyController = loader.getController();
 			lobbyController.setMainController(this);
-			
-			
-			buzzer1.getAnswer().addListener(new ChangeListener<Number>() {
+
+
+			if (IS_DEV_MODE) {
+				Spieler s = new Spieler("Spieler 1", buzzer1);
+				alleSpieler.add(s);
+				lobbyController.setReady1();
+				Spieler s2 = new Spieler("Spieler 2", buzzer2);
+				alleSpieler.add(s2);
+				lobbyController.setReady2();
+				Spieler s3 = new Spieler("Spieler 3", buzzer3);
+				alleSpieler.add(s3);
+				lobbyController.setReady3();
+			} else {
+				buzzer1.getAnswer().addListener(new ChangeListener<Number>() {
 	
 				@Override
 				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -160,31 +176,33 @@ public class GameController extends Application {
 					lobbyController.setReady1();				
 					
 				}			
-			});
+				});
 			
-			buzzer2.getAnswer().addListener(new ChangeListener<Number>() {
+				buzzer2.getAnswer().addListener(new ChangeListener<Number>() {
+		
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+						Spieler s = new Spieler("Spieler 2", buzzer2);
+						alleSpieler.add(s);
+						buzzer2.getAnswer().removeListener(this);
+						System.out.println("Spieler2 erstellt");
+						lobbyController.setReady2();
+					}			
+				});
+
+				buzzer3.getAnswer().addListener(new ChangeListener<Number>() {
 	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 2", buzzer2);
-					alleSpieler.add(s);
-					buzzer2.getAnswer().removeListener(this);
-					System.out.println("Spieler2 erstellt");
-					lobbyController.setReady2();
-				}			
-			});
-			
-			buzzer3.getAnswer().addListener(new ChangeListener<Number>() {
-	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 3", buzzer3);
-					alleSpieler.add(s);
-					buzzer3.getAnswer().removeListener(this);
-					System.out.println("Spieler3 erstellt");
-					lobbyController.setReady3();
-				}			
-			});
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+						Spieler s = new Spieler("Spieler 3", buzzer3);
+						alleSpieler.add(s);
+						buzzer3.getAnswer().removeListener(this);
+						System.out.println("Spieler3 erstellt");
+						lobbyController.setReady3();
+					}			
+				});
+
+			}
 			
 			if (shuffleQuestions)
 				Collections.shuffle(eingeleseneFragen);
@@ -243,7 +261,7 @@ public class GameController extends Application {
 	}
 
 	public void showQuestionView(Frage question) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
 		try {
 
 			Scene questionScene = new Scene(loader.load(), screenWidth, screenHeight);
