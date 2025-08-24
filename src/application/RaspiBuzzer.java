@@ -1,103 +1,65 @@
 
 package application;
 
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalInputConfig;
+import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
+import com.pi4j.io.gpio.digital.PullResistance;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public class RaspiBuzzer implements IBuzzer {
-	
-	private IntegerProperty answer = new SimpleIntegerProperty();
-	
-	
-	GpioController gpio;
-    GpioPinDigitalInput btnA, btnB, btnC;
 
-    
-    public RaspiBuzzer(Pin p1, Pin p2, Pin p3){
+    private final IntegerProperty answer = new SimpleIntegerProperty();
 
-        gpio = GpioFactory.getInstance();
-        
-        btnA = gpio.provisionDigitalInputPin(p1, PinPullResistance.PULL_DOWN);
-        btnB = gpio.provisionDigitalInputPin(p2, PinPullResistance.PULL_DOWN);
-        btnC = gpio.provisionDigitalInputPin(p3, PinPullResistance.PULL_DOWN);
-        
-	
-	
-	
-	    btnA.addListener(new GpioPinListenerDigital() {
-                @Override   
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnAState.set(event.getState().isHigh());
-                    if(btnA.getState().isHigh()) {
-                        getAnswer().setValue(1);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-            
-            
-    	btnB.addListener(new GpioPinListenerDigital() {
-                @Override
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnBState.set(event.getState().isHigh());
-                    if(btnB.getState().isHigh()) {
-                        getAnswer().setValue(2);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-            
-            
-	    btnC.addListener(new GpioPinListenerDigital() {
-                @Override
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnCState.set(event.getState().isHigh());
-                    if(btnC.getState().isHigh()) {
-                        getAnswer().setValue(3);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-	
-	}
+    private final Context pi4j;
+    private final DigitalInput btnA, btnB, btnC;
 
-	@Override
-	public IntegerProperty getAnswer() {
-		if(answer == null) {
-			answer = new SimpleIntegerProperty();
-		}
-		return answer;
-	
-	}
+    public RaspiBuzzer(int p1, int p2, int p3) {
+        // Create Pi4J context (can be shared across the app)
+        this.pi4j = Pi4J.newAutoContext();
 
+        // Configure buttons
+        this.btnA = createButton(pi4j, p1);
+        this.btnB = createButton(pi4j, p2);
+        this.btnC = createButton(pi4j, p3);
+
+        // Register listeners
+        btnA.addListener(handleButton(1));
+        btnB.addListener(handleButton(2));
+        btnC.addListener(handleButton(3));
+    }
+
+    private DigitalInput createButton(Context pi4j, int pin) {
+        DigitalInputConfig config = DigitalInput.newConfigBuilder(pi4j)
+                .id("pin-" + pin)
+                .name("Button " + pin)
+                .address(pin)                     // BCM pin number
+                .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
+                .build();
+        return pi4j.create(config);
+    }
+
+    private DigitalStateChangeListener handleButton(int buttonNumber) {
+        return event -> {
+            boolean pressed = event.state().isHigh();
+            System.out.println("GPIO-PIN " + event.source().id() + ": " + event.state());
+            if (pressed) {
+                answer.set(buttonNumber);
+            } else {
+                answer.set(0);
+            }
+        };
+    }
+
+    @Override
+    public IntegerProperty getAnswer() {
+        return answer;
+    }
+
+    public void shutdown() {
+        pi4j.shutdown();
+    }
 }
-
-
-	
-	
-	

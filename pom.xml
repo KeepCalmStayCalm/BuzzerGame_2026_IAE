@@ -6,6 +6,9 @@
   <name>IFZ826_LW_Buzzer</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4j.version>1.7.32</slf4j.version>
+    <pi4j.version>2.4.0</pi4j.version>
+    <javafx.version>15.0.1</javafx.version>
   </properties>
   <repositories>
 	<repository>
@@ -19,21 +22,43 @@
 	</repository>
 </repositories>
 <dependencies>
+ <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+  </dependency>
   <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-controls</artifactId>
-    <version>11.0.2</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-core</artifactId>
+    <version>${pi4j.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-plugin-raspberrypi</artifactId>
+      <version>${pi4j.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-plugin-pigpio</artifactId>
+      <version>${pi4j.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjfx</groupId>
+    <artifactId>javafx-controls</artifactId>
+    <version>${javafx.version}</version>
+  </dependency>
+
+  <dependency>
+    <groupId>org.openjfx</groupId>
     <artifactId>javafx-fxml</artifactId>
-    <version>11.0.2</version>
+    <version>${javafx.version}</version>
 </dependency>
-<dependency>
-    <groupId>com.pi4j</groupId>
-    <artifactId>pi4j-core</artifactId>
-   <version>1.4</version>
-</dependency>
+
 </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>

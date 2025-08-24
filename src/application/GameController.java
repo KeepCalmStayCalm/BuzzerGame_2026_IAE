@@ -1,7 +1,5 @@
 package application;
 
-
-import com.pi4j.io.gpio.RaspiPin;
 import java.io.IOException;
 import java.util.*;
 
@@ -117,9 +115,15 @@ public class GameController extends Application {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
 		
 		if (!IS_DEV_MODE) {
-			buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
+			/*buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
 			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
-			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
+			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);*/
+
+			buzzer1 = new RaspiBuzzer(16, 20, 21);
+			buzzer2 = new RaspiBuzzer(22, 27, 17);
+			buzzer3 = new RaspiBuzzer(13, 19, 26);
+
+
 		} else {
 			buzzer1 = new MouseBuzzer();
 			buzzer2 = new DummyBuzzer(2);
