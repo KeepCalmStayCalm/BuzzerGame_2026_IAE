@@ -53,7 +53,6 @@ public class QuestionViewController implements Initializable {
 
 	
 	private IntegerProperty restzeit;
-	private int btnClickCounter = 0;
 	private Timer timer;
 	long timeStart;
 	int maxZeit;

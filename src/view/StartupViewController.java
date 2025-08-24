@@ -39,7 +39,7 @@ public class StartupViewController implements Initializable{
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		if (wissHome.getImage() == null) {
+		if (wissHome.getImage() != null) {
 			wissHome.fitWidthProperty().bind(imageRoot.widthProperty());
     		//wissHome.fitHeightProperty().bind(imageRoot.heightProperty());
 		}

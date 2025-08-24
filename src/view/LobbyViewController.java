@@ -2,22 +2,35 @@ package view;
 
 
 
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import application.GameController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 
-public class LobbyViewController {
+public class LobbyViewController implements Initializable{
 	
 	
 	@FXML
 	Label lblS1, lblS2, lblS3, lblS1Ready, lblS2Ready, lblS3Ready;
 	
 	@FXML
-	ImageView imgS1, imgS2, imgS3;
+	ImageView avatar1;
+	
+	@FXML
+	ImageView avatar2;
+	
+	@FXML
+	ImageView avatar3;
+	
 	
 	@FXML
 	Button btnSpieler1, btnSpieler2, btnSpieler3;
@@ -29,19 +42,14 @@ public class LobbyViewController {
 	}
 	
 	public void btnSpieler1Pressed() {
-		
-		//imgS1.setImage(img);
 		gameController.createBuzzerView("Spieler 1", 800, 400);
 	}
 	
 	public void btnSpieler2Pressed() {
-		//imgS2.setImage(img);
-		
 		gameController.createBuzzerView("Spieler 2", 800, 710);
 	}
 	
 	public void btnSpieler3Pressed() {
-		//imgS3.setImage(img);
 		gameController.createBuzzerView("Spieler 3", 800, 1020);
 	}
 	
@@ -73,5 +81,16 @@ public class LobbyViewController {
 				lbl.setStyle("-fx-text-fill: black");
 			}
 		});
+	}
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		
+		String[] avatars = new File("@../../resources/images/avatars").list();
+		System.out.println("Avatars fetched: " + avatars.length);
+		avatar1.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[0]).toURI().toString()).getImage());
+		avatar2.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[1]).toURI().toString()).getImage());
+		avatar3.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[2]).toURI().toString()).getImage());
+
 	}
 }
