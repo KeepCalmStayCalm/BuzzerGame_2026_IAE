@@ -50,7 +50,7 @@ public class EditSettingsViewController implements Initializable {
 	@FXML
 	public void openFileChooser(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")+"/Desktop"));
+		fileChooser.setInitialDirectory(new File("resources/fragenBuzzerGame.csv"));
 		fileChooser.setTitle("Frage-Datei auswählen");
 		fileChooser.getExtensionFilters().addAll(
 		         new ExtensionFilter("CSV-Dateien", "*.csv"));
@@ -65,7 +65,7 @@ public class EditSettingsViewController implements Initializable {
 	public void setPreferences(Preferences prefs) {
 		this.prefs = prefs;
 		
-		txtQuestionFile.setText(prefs.get("questions_file", System.getProperty("user.home")+"/Desktop"));
+		txtQuestionFile.setText(prefs.get("questions_file", "resources/fragenBuzzerGame.csv"));
 		comboAnzahlFragen.getSelectionModel().select(prefs.get("anzahl_fragen", "5"));
 		comboZeitFrage.getSelectionModel().select(prefs.get("time_out", "10"));
 		boolean isRandom = prefs.getBoolean("shuffle_questions", true);

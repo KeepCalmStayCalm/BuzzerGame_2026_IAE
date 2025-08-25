@@ -14,22 +14,53 @@ public class RaspiBuzzer implements IBuzzer {
 
     private final IntegerProperty answer = new SimpleIntegerProperty();
 
-    private final Context pi4j;
     private final DigitalInput btnA, btnB, btnC;
+    
+    public static void main(String[] args){
+        Context pi4j = Pi4J.newAutoContext();
+        RaspiBuzzer demo = new RaspiBuzzer(pi4j, 13,19,26);
+        System.out.println("RaspiBuzzer instance created");
+        demo.getAnswer().addListener((x, oldVal, newVal) -> {
+           System.out.println("Button state changed: "+newVal);  
+        });
+        
+        while (true) {
+            try {
+                Thread.sleep(500);
+            }
+            catch (Exception ex) {
+                System.out.println("Done");
+                pi4j.shutdown();
+            }   
+        }     
+        
+    }
 
-    public RaspiBuzzer(int p1, int p2, int p3) {
-        // Create Pi4J context (can be shared across the app)
-        this.pi4j = Pi4J.newAutoContext();
-
+    public RaspiBuzzer(Context pi4j, int p1, int p2, int p3) {
         // Configure buttons
         this.btnA = createButton(pi4j, p1);
         this.btnB = createButton(pi4j, p2);
         this.btnC = createButton(pi4j, p3);
 
         // Register listeners
-        btnA.addListener(handleButton(1));
-        btnB.addListener(handleButton(2));
-        btnC.addListener(handleButton(3));
+        btnA.addListener((event)->{
+            if (btnA.isHigh()){
+                System.out.println("Button A pressed");
+                answer.set(1);
+            }
+        });
+        btnB.addListener((event)->{
+            if (btnB.isHigh()){
+                System.out.println("Button B pressed");
+                answer.set(2);
+            }
+        });
+        btnC.addListener((event)->{
+            if (btnC.isHigh()){
+                System.out.println("Button C pressed");
+                answer.set(3);
+            }
+        });
     }
 
     private DigitalInput createButton(Context pi4j, int pin) {
@@ -38,10 +69,12 @@ public class RaspiBuzzer implements IBuzzer {
                 .name("Button " + pin)
                 .address(pin)                     // BCM pin number
                 .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
+                .debounce(3000L)
                 .build();
         return pi4j.create(config);
     }
 
+    // i guess this doesnt work as it should...
     private DigitalStateChangeListener handleButton(int buttonNumber) {
         return event -> {
             boolean pressed = event.state().isHigh();
@@ -59,7 +92,4 @@ public class RaspiBuzzer implements IBuzzer {
         return answer;
     }
 
-    public void shutdown() {
-        pi4j.shutdown();
-    }
 }

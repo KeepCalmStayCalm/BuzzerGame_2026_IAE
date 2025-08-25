@@ -20,6 +20,9 @@ import javafx.scene.control.ButtonType;
 
 import java.util.prefs.Preferences;
 
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+
 import view.FXBuzzerController;
 import view.EndViewController;
 import view.LobbyViewController;
@@ -51,6 +54,7 @@ public class GameController extends Application {
 
 	private Preferences prefs;
 	private String style;
+	private Context pi4j;
 	
 	public static void main(String[] args) {
 
@@ -75,7 +79,10 @@ public class GameController extends Application {
 		System.out.println("MAX_FRAGEN: "+MAX_FRAGEN);
 	}
 	
-	
+	@Override
+	public void stop(){
+		pi4j.shutdown();
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -118,10 +125,10 @@ public class GameController extends Application {
 			/*buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
 			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
 			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);*/
-
-			buzzer1 = new RaspiBuzzer(16, 20, 21);
-			buzzer2 = new RaspiBuzzer(22, 27, 17);
-			buzzer3 = new RaspiBuzzer(13, 19, 26);
+			pi4j = Pi4J.newAutoContext();
+			buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
+			buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
+			buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
 
 
 		} else {

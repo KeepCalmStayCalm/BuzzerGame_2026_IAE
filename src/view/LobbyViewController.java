@@ -86,11 +86,11 @@ public class LobbyViewController implements Initializable{
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		String[] avatars = new File("@../../resources/images/avatars").list();
+		String[] avatars = new File("resources/images/avatars").list();
 		System.out.println("Avatars fetched: " + avatars.length);
-		avatar1.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[0]).toURI().toString()).getImage());
-		avatar2.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[1]).toURI().toString()).getImage());
-		avatar3.setImage(new ImageView(new File("@../../resources/images/avatars/" + avatars[2]).toURI().toString()).getImage());
+		avatar1.setImage(new ImageView(new File("resources/images/avatars/" + avatars[0]).toURI().toString()).getImage());
+		avatar2.setImage(new ImageView(new File("resources/images/avatars/" + avatars[1]).toURI().toString()).getImage());
+		avatar3.setImage(new ImageView(new File("resources/images/avatars/" + avatars[2]).toURI().toString()).getImage());
 
 	}
 }
