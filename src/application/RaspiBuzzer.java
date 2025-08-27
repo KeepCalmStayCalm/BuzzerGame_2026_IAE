@@ -1,10 +1,19 @@
-
 package application;
+
+///usr/bin/env jbang "$0" "$@" ; exit $?
+
+//DEPS org.slf4j:slf4j-api:2.0.12
+//DEPS org.slf4j:slf4j-simple:2.0.12
+//DEPS com.pi4j:pi4j-core:2.8.0
+//DEPS com.pi4j:pi4j-plugin-raspberrypi:2.8.0
+//DEPS com.pi4j:pi4j-plugin-gpiod:2.8.0
+//DEPS org.openjfx:javafx-controls:15.0.1
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalInput;
-import com.pi4j.io.gpio.digital.DigitalInputConfig;
+import com.pi4j.io.gpio.digital.DigitalInputProvider;
+import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
 import com.pi4j.io.gpio.digital.PullResistance;
 import javafx.beans.property.IntegerProperty;
@@ -18,15 +27,40 @@ public class RaspiBuzzer implements IBuzzer {
     
     public static void main(String[] args){
         Context pi4j = Pi4J.newAutoContext();
-        RaspiBuzzer demo = new RaspiBuzzer(pi4j, 13,19,26);
-        System.out.println("RaspiBuzzer instance created");
-        demo.getAnswer().addListener((x, oldVal, newVal) -> {
-           System.out.println("Button state changed: "+newVal);  
+        
+        System.out.println("------------------");
+        System.out.println("Pi4J Provider: ");   
+        pi4j.providers().describe().print(System.out);
+        System.out.println();
+        System.out.println("------------------");
+        
+        
+        int pin = 26;
+        //RaspiBuzzer demo = new RaspiBuzzer(pi4j, 13,24,26);
+        //System.out.println("RaspiBuzzer instance created");
+        DigitalInput di26 = pi4j.create(
+            DigitalInput.newConfigBuilder(pi4j)
+                .id("pin-" + pin)
+                .name("Button-" + pin)
+                .address(pin)                     // BCM pin number
+                .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
+                .debounce(1000L)
+                );
+        
+        di26.addListener(ev -> {
+           System.out.println("Button state changed: "+ev.state());  
         });
+        
+        System.out.println("Pi4J registered GPIOs:");
+        pi4j.registry().describe().print(System.out);
+        System.out.println();
+        System.out.println("------------------");
+        
         
         while (true) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
+                System.out.println("Buzzer Answer: "+di26);
             }
             catch (Exception ex) {
                 System.out.println("Done");
@@ -43,47 +77,28 @@ public class RaspiBuzzer implements IBuzzer {
         this.btnC = createButton(pi4j, p3);
 
         // Register listeners
-        btnA.addListener((event)->{
-            if (btnA.isHigh()){
-                System.out.println("Button A pressed");
-                answer.set(1);
-            }
-        });
-        btnB.addListener((event)->{
-            if (btnB.isHigh()){
-                System.out.println("Button B pressed");
-                answer.set(2);
-            }
-        });
-        btnC.addListener((event)->{
-            if (btnC.isHigh()){
-                System.out.println("Button C pressed");
-                answer.set(3);
-            }
-        });
+        btnA.addListener(handleButton(1));
+        btnB.addListener(handleButton(2));
+        btnC.addListener(handleButton(3));
     }
 
     private DigitalInput createButton(Context pi4j, int pin) {
-        DigitalInputConfig config = DigitalInput.newConfigBuilder(pi4j)
+        var config = DigitalInput.newConfigBuilder(pi4j)
                 .id("pin-" + pin)
                 .name("Button " + pin)
                 .address(pin)                     // BCM pin number
                 .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
-                .debounce(3000L)
-                .build();
+                .debounce(3000L);
         return pi4j.create(config);
     }
 
-    // i guess this doesnt work as it should...
     private DigitalStateChangeListener handleButton(int buttonNumber) {
         return event -> {
             boolean pressed = event.state().isHigh();
             System.out.println("GPIO-PIN " + event.source().id() + ": " + event.state());
             if (pressed) {
                 answer.set(buttonNumber);
-            } else {
-                answer.set(0);
-            }
+            } 
         };
     }
 
