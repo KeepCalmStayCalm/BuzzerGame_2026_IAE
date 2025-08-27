@@ -71,8 +71,15 @@ Was ist ein CIO?;Chief Information Officer;Computer Information Operation;Compac
 Was ist ein Thin Client?;Ein dünner Kunde;Ein High-End PC in schlankem Gehäuse;Ein PC mit Grundfunktionalität und Serverzugriff;3
 Welches ist kein Intel Prozessor?;Xeon;Pentium;Ryzen;3
 Wofür steht die Abkürzung SSD?;Solid State Drive;Solid Sound Device;Solid State Developper;1
-Welches hier ist keine Grafikschnittstelle?;DVI;VGA;PS/2;3
+Welche Dateien kann der Webbrowser nativ öffnen?;HTML-Dateien;Excel-Dateien;Exe-Dateien;1
+Welches Speichermedium ist am schnellsten?;HDD;SSD;USB-Stick;2
+GPT in ChatGPT steht für ...;Generative Pre-Trained Transformer;Generally Programmed Text;Great Party Tool;1
+Handy-Apps programmiert man meist auf ;dem Handy;dem PC;einem Server;2
+Was ist keine Programmiersprache?;HTML;Python;JavaScript;1
+Welche Tastenkombination wechselt zwischen Programmen?;ALT + TAB;CTRL + S;ALT + F4;1
+Welche Tastenkombination dient zum Speichern?;ALT + TAB;CTRL + S;ALT + F4;2
+Welche Tastenkombination beendet Programme?;ALT + TAB;CTRL + S;ALT + F4;3
 Was für ein Gerät ist auf dem Bild zu sehen?;Handy;PC;Arduino;3;arduino.jpg
 Was für ein Gerät ist auf dem Bild zu sehen?;Handy;Raspi;Arduino;2;raspi.jpg
 Was für ein Gerät ist auf dem Bild zu sehen?;Handy;SSD;Arduino;3;ssd.jpg
-Ein Raspberry Pi ist ein...?;Microcontroller;Bastelcomputer;Kuchen;2
+Ein Raspberry Pi ist ein...?;Microcontroller;Bastelcomputer;Kuchen;2;raspi.jpg
