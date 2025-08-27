@@ -33,7 +33,7 @@ import view.StartupViewController;
 
 public class GameController extends Application {
 
-	public static final boolean IS_DEV_MODE = true;
+	public static final boolean IS_DEV_MODE = false;
 
 	private Stage myStage = null;
 	private double screenHeight, screenWidth;
@@ -58,8 +58,7 @@ public class GameController extends Application {
 	
 	public static void main(String[] args) {
 
-		System.out.println("DEVELOPMENT_MODE: "+System.getenv("DEVELOPMENT_MODE"));
-
+		//System.out.println("DEVELOPMENT_MODE: "+System.getenv("DEVELOPMENT_MODE"));
 		launch(args);
 	}
 	
@@ -70,7 +69,7 @@ public class GameController extends Application {
 		fullScreen = prefs.getBoolean("full_screen", true);
 		MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "10"));	
 		shuffleQuestions = prefs.getBoolean("shuffle_questions", true);	
-		questionFile = prefs.get("questions_file", "/home/pi/Desktop/fragenBuzzerGame_290620.csv");
+		questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
 		if (IS_DEV_MODE) {
 			questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
 		}
@@ -132,6 +131,7 @@ public class GameController extends Application {
 
 
 		} else {
+			System.out.println("<-- DEV MODE ohne Hardware-Buzzer -->");
 			buzzer1 = new MouseBuzzer();
 			buzzer2 = new DummyBuzzer(2);
 			buzzer3 = new DummyBuzzer(3);

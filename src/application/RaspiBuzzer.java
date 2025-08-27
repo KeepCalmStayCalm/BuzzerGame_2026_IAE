@@ -94,9 +94,10 @@ public class RaspiBuzzer implements IBuzzer {
 
     private DigitalStateChangeListener handleButton(int buttonNumber) {
         return event -> {
-            boolean pressed = event.state().isHigh();
+            boolean pressed = event.state() == DigitalState.HIGH;
             System.out.println("GPIO-PIN " + event.source().id() + ": " + event.state());
             if (pressed) {
+                System.out.println("setting answer number: "+buttonNumber);
                 answer.set(buttonNumber);
             } 
         };
