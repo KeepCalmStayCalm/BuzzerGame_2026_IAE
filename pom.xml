@@ -172,7 +172,7 @@
                                     <fileset dir="assets" includes="*.sh"/>
                                 </copy>
                                 <copy todir="${project.build.directory}/distribution/resources" overwrite="true" flatten="false">
-                                    <fileset dir="resources" includes="*.*"/>
+                                    <fileset dir="resources" includes="**.*"/>
                                 </copy>
                                 
                                 <copy todir="${project.build.directory}/distribution/openjfx" overwrite="true">
