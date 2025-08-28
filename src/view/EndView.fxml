@@ -115,7 +115,7 @@
       </AnchorPane>
    </center>
    <bottom>
-      <Button fx:id="btnEndGame" mnemonicParsing="false" onAction="#endGameRound" text="Neues Spiel" BorderPane.alignment="CENTER">
+      <Button fx:id="btnEndGame" mnemonicParsing="false" onAction="#endGameRound" text="Spiel beenden" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="50.0" />
          </BorderPane.margin>
