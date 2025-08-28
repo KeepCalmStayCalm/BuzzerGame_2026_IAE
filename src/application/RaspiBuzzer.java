@@ -12,7 +12,6 @@ package application;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalInput;
-import com.pi4j.io.gpio.digital.DigitalInputProvider;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
 import com.pi4j.io.gpio.digital.PullResistance;
@@ -21,7 +20,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public class RaspiBuzzer implements IBuzzer {
 
-    private final IntegerProperty answer = new SimpleIntegerProperty();
+    private final IntegerProperty answer;
 
     private final DigitalInput btnA, btnB, btnC;
     
@@ -76,6 +75,8 @@ public class RaspiBuzzer implements IBuzzer {
         this.btnB = createButton(pi4j, p2);
         this.btnC = createButton(pi4j, p3);
 
+        this.answer = new SimpleIntegerProperty();
+
         // Register listeners
         btnA.addListener(handleButton(1));
         btnB.addListener(handleButton(2));
@@ -98,7 +99,7 @@ public class RaspiBuzzer implements IBuzzer {
             System.out.println("GPIO-PIN " + event.source().id() + ": " + event.state());
             if (pressed) {
                 System.out.println("setting answer number: "+buttonNumber);
-                answer.set(buttonNumber);
+                this.answer.set(buttonNumber);
             } 
         };
     }
