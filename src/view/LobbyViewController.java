@@ -61,16 +61,12 @@ public class LobbyViewController implements Initializable{
 	}
 	
 	
-	public void setReady1(){
-		setReady(lblS1Ready);
-	}
-	
-	public void setReady2(){
-		setReady(lblS2Ready);
-	}
-	
-	public void setReady3(){
-		setReady(lblS3Ready);
+	public void setReady(int playerNumber){
+		switch (playerNumber) {
+			case 1: setReady(lblS1Ready); break;
+			case 2: setReady(lblS2Ready); break;
+			case 3: setReady(lblS3Ready); break;	
+		}
 	}
 	
 	private void setReady(Label lbl){

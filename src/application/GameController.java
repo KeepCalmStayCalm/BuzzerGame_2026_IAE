@@ -117,26 +117,9 @@ public class GameController extends Application {
 		});
 	}
 
+
 	public void showStartupView() {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
-		
-		if (!IS_DEV_MODE) {
-			/*buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
-			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
-			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);*/
-			pi4j = Pi4J.newAutoContext();
-			buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
-			buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
-			buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
-
-
-		} else {
-			System.out.println("<-- DEV MODE ohne Hardware-Buzzer -->");
-			buzzer1 = new MouseBuzzer();
-			buzzer2 = new DummyBuzzer(2);
-			buzzer3 = new DummyBuzzer(3);
-		}
-			
 		
 		try {
 			Scene startupScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -156,6 +139,25 @@ public class GameController extends Application {
 
 	public void showLobbyView() {
 		alleSpieler.clear();
+		if (!IS_DEV_MODE) {
+			/*old pi4j numbering style
+			buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
+			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
+			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
+			*/
+			pi4j = Pi4J.newAutoContext();
+			buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
+			buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
+			buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
+
+
+		} else {
+			System.out.println("<-- DEV MODE ohne Hardware-Buzzer -->");
+			buzzer1 = new MouseBuzzer();
+			buzzer2 = new DummyBuzzer(2);
+			buzzer3 = new DummyBuzzer(3);
+		}		
+		
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
 		try {
 			Scene lobbyScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -164,56 +166,25 @@ public class GameController extends Application {
 			LobbyViewController lobbyController = loader.getController();
 			lobbyController.setMainController(this);
 
-
+			List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
 			if (IS_DEV_MODE) {
-				Spieler s = new Spieler("Spieler 1", buzzer1);
-				alleSpieler.add(s);
-				lobbyController.setReady1();
-				Spieler s2 = new Spieler("Spieler 2", buzzer2);
-				alleSpieler.add(s2);
-				lobbyController.setReady2();
-				Spieler s3 = new Spieler("Spieler 3", buzzer3);
-				alleSpieler.add(s3);
-				lobbyController.setReady3();
-			} else {
-				buzzer1.getAnswer().addListener(new ChangeListener<Number>() {
-	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 1", buzzer1);
+				
+				for (int index = 0; index < buzzers.size(); index++){
+					Spieler s = new Spieler("Spieler "+(index+1), buzzers.get(index));
 					alleSpieler.add(s);
-					buzzer1.getAnswer().removeListener(this);
-					System.out.println("Spieler1 erstellt");
-					lobbyController.setReady1();				
-					
-				}			
-				});
-			
-				buzzer2.getAnswer().addListener(new ChangeListener<Number>() {
-		
-					@Override
-					public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-						Spieler s = new Spieler("Spieler 2", buzzer2);
-						alleSpieler.add(s);
-						buzzer2.getAnswer().removeListener(this);
-						System.out.println("Spieler2 erstellt");
-						lobbyController.setReady2();
-					}			
-				});
+					lobbyController.setReady(index);			
+				};
 
-				buzzer3.getAnswer().addListener(new ChangeListener<Number>() {
-	
-					@Override
-					public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-						Spieler s = new Spieler("Spieler 3", buzzer3);
-						alleSpieler.add(s);
-						buzzer3.getAnswer().removeListener(this);
-						System.out.println("Spieler3 erstellt");
-						lobbyController.setReady3();
-					}			
-				});
+			} else {
 
-			}
+				for (int index = 0; index < buzzers.size(); index++){
+					buzzers.get(index).getAnswer().addListener(
+						setupBuzzerListener("Spieler "+(index+1), buzzers.get(index))
+					);
+					lobbyController.setReady(index);
+				};
+
+			}	
 			
 			if (shuffleQuestions)
 				Collections.shuffle(eingeleseneFragen);
@@ -232,6 +203,20 @@ public class GameController extends Application {
 			Platform.exit();
 		}
 		
+	}
+
+	private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer) {
+		return new ChangeListener<Number>() {
+	
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				Spieler s = new Spieler(name, buzzer);
+				alleSpieler.add(s);
+				// prevents multiple activations of the same buzzer
+				buzzer.getAnswer().removeListener(this);
+				System.out.println(name + " erstellt");
+			}			
+		};
 	}
 
 	public void createBuzzerView(String playername, double yPosition, double xPosition) {
@@ -412,6 +397,5 @@ public class GameController extends Application {
 			Platform.exit();
 		}
 	}
-
 
 }

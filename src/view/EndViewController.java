@@ -40,8 +40,8 @@ public class EndViewController{
 	}
 
 	public void endGameRound(){
-		//gameController.showLobbyView();
-		Platform.exit();
+		gameController.showStartupView();
+		//Platform.exit();
 	}
 
 	public void setSpielerInformation(Set<Spieler> spielerSet) {
