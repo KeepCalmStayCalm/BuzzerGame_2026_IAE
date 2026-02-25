@@ -1,29 +1,22 @@
 package view;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import application.Frage;
-import application.GameController;
 import application.Spieler;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 
@@ -56,7 +49,6 @@ public class AnswerViewController{
 	@FXML
 	HBox hBoxS3;
 	
-	@FXML Label lblFrage;
 	@FXML Label lblAntwort;
 	
 
@@ -84,8 +76,7 @@ public class AnswerViewController{
 
 	public void setInformation(Frage frage, Set<Spieler> spielerSet) {
 		
-		lblFrage.setText(frage.getFrage());
-		lblAntwort.setText(frage.getAntworten().get(frage.korrekteAntwortInt()-1).getAntwort());
+		lblAntwort.setText(frage.getFrage() + ": " + frage.getAntworten().get(frage.korrekteAntwortInt()-1).getAntwort());
 		
 		List<Spieler> spielerliste = spielerSet.stream().collect(Collectors.toList());
 		Collections.sort(spielerliste, new Comparator<Spieler>() {
@@ -96,9 +87,6 @@ public class AnswerViewController{
 			}
 		});
 		
-		int S1punkteDavor = (spielerliste.get(0).getPunktestand().getValue()) - (spielerliste.get(0).getRundenpunkte());
-		int S2punkteDavor = (spielerliste.get(1).getPunktestand().getValue()) - (spielerliste.get(1).getRundenpunkte());
-
 		//lblS1Name.getStyleClass().clear();
 		lblS1Name.getStyleClass().add(spielerliste.get(0).getName().toString().toLowerCase().replace(" ",""));
 		

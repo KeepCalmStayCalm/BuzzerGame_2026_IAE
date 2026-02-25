@@ -1,117 +1,112 @@
-
 package application;
 
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import java.util.ArrayList;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import application.IBuzzer;
+///usr/bin/env jbang "$0" "$@" ; exit $?
+
+//DEPS org.slf4j:slf4j-api:2.0.12
+//DEPS org.slf4j:slf4j-simple:2.0.12
+//DEPS com.pi4j:pi4j-core:2.8.0
+//DEPS com.pi4j:pi4j-plugin-raspberrypi:2.8.0
+//DEPS com.pi4j:pi4j-plugin-gpiod:2.8.0
+//DEPS org.openjfx:javafx-controls:15.0.1
+
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
+import com.pi4j.io.gpio.digital.PullResistance;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 
 public class RaspiBuzzer implements IBuzzer {
-	
-	private IntegerProperty answer = new SimpleIntegerProperty();
-	
-	
-	GpioController gpio;
-        GpioPinDigitalInput btnA, btnB, btnC;
-        public BooleanProperty btnAState;
-        public BooleanProperty btnBState;
-        public BooleanProperty btnCState;
-        
-        public RaspiBuzzer(Pin p1, Pin p2, Pin p3){
-	
-	    btnAState = new SimpleBooleanProperty();
-            btnBState = new SimpleBooleanProperty();
-            btnCState = new SimpleBooleanProperty();
-            gpio = GpioFactory.getInstance();
-            
-            btnA = gpio.provisionDigitalInputPin(p1, PinPullResistance.PULL_DOWN);
-            btnB = gpio.provisionDigitalInputPin(p2, PinPullResistance.PULL_DOWN);
-            btnC = gpio.provisionDigitalInputPin(p3, PinPullResistance.PULL_DOWN);
-            
-	
-	
-	
-	btnA.addListener(new GpioPinListenerDigital() {
-                @Override   
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnAState.set(event.getState().isHigh());
-                    if(btnA.getState().isHigh()) {
-                        getAnswer().setValue(1);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-            
-            
-	btnB.addListener(new GpioPinListenerDigital() {
-                @Override
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnBState.set(event.getState().isHigh());
-                    if(btnB.getState().isHigh()) {
-                        getAnswer().setValue(2);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-            
-            
-	btnC.addListener(new GpioPinListenerDigital() {
-                @Override
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    // when button is pressed, speed up the blink rate on LED #2
-                    System.out.println("GPIO-PIN: "+event.getPin() + ": " + event.getState());
-                    btnCState.set(event.getState().isHigh());
-                    if(btnC.getState().isHigh()) {
-                        getAnswer().setValue(3);
-                    }
-                    else {
-                        getAnswer().setValue(0);
-                        
-                   
-                    }
-                }
-            });
-	
-	}
 
-	@Override
-	public IntegerProperty getAnswer() {
-		if(answer == null) {
-			answer = new SimpleIntegerProperty();
-		}
-		return answer;
-	
-	}
+    private final IntegerProperty answer;
+
+    private final DigitalInput btnA, btnB, btnC;
+    
+    public static void main(String[] args){
+        Context pi4j = Pi4J.newAutoContext();
+        
+        System.out.println("------------------");
+        System.out.println("Pi4J Provider: ");   
+        pi4j.providers().describe().print(System.out);
+        System.out.println();
+        System.out.println("------------------");
+        
+        
+        int pin = 26;
+        //RaspiBuzzer demo = new RaspiBuzzer(pi4j, 13,24,26);
+        //System.out.println("RaspiBuzzer instance created");
+        DigitalInput di26 = pi4j.create(
+            DigitalInput.newConfigBuilder(pi4j)
+                .id("pin-" + pin)
+                .name("Button-" + pin)
+                .address(pin)                     // BCM pin number
+                .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
+                .debounce(1000L)
+                );
+        
+        di26.addListener(ev -> {
+           System.out.println("Button state changed: "+ev.state());  
+        });
+        
+        System.out.println("Pi4J registered GPIOs:");
+        pi4j.registry().describe().print(System.out);
+        System.out.println();
+        System.out.println("------------------");
+        
+        
+        while (true) {
+            try {
+                Thread.sleep(1000);
+                System.out.println("Buzzer Answer: "+di26);
+            }
+            catch (Exception ex) {
+                System.out.println("Done");
+                pi4j.shutdown();
+            }   
+        }     
+        
+    }
+
+    public RaspiBuzzer(Context pi4j, int p1, int p2, int p3) {
+        // Configure buttons
+        this.btnA = createButton(pi4j, p1);
+        this.btnB = createButton(pi4j, p2);
+        this.btnC = createButton(pi4j, p3);
+
+        this.answer = new SimpleIntegerProperty();
+
+        // Register listeners
+        btnA.addListener(handleButton(1));
+        btnB.addListener(handleButton(2));
+        btnC.addListener(handleButton(3));
+    }
+
+    private DigitalInput createButton(Context pi4j, int pin) {
+        var config = DigitalInput.newConfigBuilder(pi4j)
+                .id("pin-" + pin)
+                .name("Button " + pin)
+                .address(pin)                     // BCM pin number
+                .pull(PullResistance.PULL_DOWN)   // internal pull-down resistor
+                .debounce(3000L);
+        return pi4j.create(config);
+    }
+
+    private DigitalStateChangeListener handleButton(int buttonNumber) {
+        return event -> {
+            boolean pressed = event.state() == DigitalState.HIGH;
+            System.out.println("GPIO-PIN " + event.source().id() + ": " + event.state());
+            if (pressed) {
+                System.out.println("setting answer number: "+buttonNumber);
+                this.answer.set(buttonNumber);
+            } 
+        };
+    }
+
+    @Override
+    public IntegerProperty getAnswer() {
+        return answer;
+    }
 
 }
-
-
-	
-	
-	

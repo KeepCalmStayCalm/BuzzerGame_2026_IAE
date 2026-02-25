@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Wiss BuzzerGame
+Exec=sudo /home/raspi/Desktop/Wiss_BuzzerGame-0.0.1-SNAPSHOT/run.sh
+Icon=launch
+Terminal=true
+Comment=This script runs my custom shell script
+Path=/home/raspi/Desktop/Wiss_BuzzerGame-0.0.1-SNAPSHOT
+X-KeepTerminal=true
+Comment[en_GB]=Starts the Buzzer Game

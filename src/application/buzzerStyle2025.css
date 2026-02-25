@@ -11,28 +11,55 @@
     /*-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); */
 }
 
-.button{
+#wiss_pane_small{
+    -fx-background-image: url("../res/LogoWISS.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: 200 54;
+    -fx-background-position: top right;
+    /*-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); */
+}
+
+
+
+.button, .label {
+	-fx-text-fill: #212529;
+	-fx-font-weight: bold;
 	-fx-font-size: 24pt;
+}
+
+.label_bigger {
+	-fx-text-fill: #212529;
+	-fx-font-weight: bold;
+	-fx-font-size: 36pt;
 }
 
 .spieler1{
 	-fx-background-color: #00e9ff;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
 }
 .spieler2{
 	-fx-background-color: #f7ff00;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
 }
 .spieler3{
 	-fx-background-color: #ff3c00;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
 }
 
 
 
-.label {
+.vbox {
 	-fx-text-fill: #212529;
 	-fx-padding: 15pt;
 	-fx-border-color: #a8a8a8;
 	-fx-border-width: 5pt;
-	-fx-border-radius: 10pt;
+	-fx-border-radius: 20pt;
 	-fx-font-weight: bold;
 	-fx-font-size: 30pt;
 }
@@ -54,9 +81,22 @@
 	-fx-font-size: 90pt;
 }
 
-/*#lblFrage {
-	-fx-font-size: 35pt;
-}*/
+#lblTitle {
+	-fx-text-fill: #212529;
+	-fx-border-color: none;
+	-fx-font-size: 90pt;
+}
+
+#lblTitle2 {
+	-fx-text-fill: #212529;
+	-fx-border-color: none;
+	-fx-font-size: 60pt;
+}
+
+#lblFrage {
+	-fx-text-fill: #212529;
+	-fx-font-size: 45pt;
+}
 
 #lblSpieler {
 	-fx-font-size: 30pt;
@@ -80,15 +120,25 @@
 	-fx-border-color: none;
 }
 
+#lblBildenZukunft {
+	-fx-border-color: none;
+	-fx-font-size: 30pt;
+}
+
+.btnStartScreen {
+	font-weight: bold;
+}
+
 /*/.vBox {
 	-fx-padding: 15pt;
 	-fx-border-color: red;
 	-fx-border-width: 5pt;
 	-fx-border-radius: 10pt;
 }*/
-
+/*
 #labelBox {
 	-fx-border-color: #a8a8a8;
 	-fx-border-width: 5pt;
 	-fx-border-radius: 10pt;
 	}
+*/

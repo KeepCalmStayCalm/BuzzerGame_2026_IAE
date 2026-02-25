@@ -1,16 +1,5 @@
 package application;
 
-
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -31,6 +20,9 @@ import javafx.scene.control.ButtonType;
 
 import java.util.prefs.Preferences;
 
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+
 import view.FXBuzzerController;
 import view.EndViewController;
 import view.LobbyViewController;
@@ -41,6 +33,8 @@ import view.StartupViewController;
 
 public class GameController extends Application {
 
+	public static final boolean IS_DEV_MODE = false;
+
 	private Stage myStage = null;
 	private double screenHeight, screenWidth;
 
@@ -50,7 +44,7 @@ public class GameController extends Application {
 
 	private Spielrunde spielrunde;
 	private Set<Spieler> alleSpieler = new HashSet<Spieler>();
-	private RaspiBuzzer buzzer1, buzzer2, buzzer3;
+	private IBuzzer buzzer1, buzzer2, buzzer3;
 	
 	private int MAX_ZEIT;
 	private int MAX_FRAGEN;
@@ -60,31 +54,40 @@ public class GameController extends Application {
 
 	private Preferences prefs;
 	private String style;
+	private Context pi4j;
 	
 	public static void main(String[] args) {
+
+		//System.out.println("DEVELOPMENT_MODE: "+System.getenv("DEVELOPMENT_MODE"));
 		launch(args);
 	}
 	
 	private void readPreferences(){
 		System.out.println("Prefs-File: "+Preferences.userRoot().node(this.getClass().getName()));
 		prefs = Preferences.userRoot().node(this.getClass().getName());
-		MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "1"));
+		MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "3"));
 		fullScreen = prefs.getBoolean("full_screen", true);
 		MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "10"));	
 		shuffleQuestions = prefs.getBoolean("shuffle_questions", true);	
-		questionFile = prefs.get("questions_file", "/home/pi/Desktop/fragenBuzzerGame_290620.csv");
+		questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+		if (IS_DEV_MODE) {
+			questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+		}
 		
 		System.out.println("MAX_ZEIT: "+MAX_ZEIT);
 		System.out.println("MAX_FRAGEN: "+MAX_FRAGEN);
 	}
 	
-	
+	@Override
+	public void stop(){
+		pi4j.shutdown();
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		readPreferences();
 		
-		style = getClass().getResource("buzzerStyle.css").toExternalForm();
+		style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
 		
 		eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
 		screenWidth = 1200;
@@ -114,13 +117,9 @@ public class GameController extends Application {
 		});
 	}
 
+
 	public void showStartupView() {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
-		
-		buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
-		buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
-		buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
-		
 		
 		try {
 			Scene startupScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -140,6 +139,25 @@ public class GameController extends Application {
 
 	public void showLobbyView() {
 		alleSpieler.clear();
+		if (!IS_DEV_MODE) {
+			/*old pi4j numbering style
+			buzzer1 = new RaspiBuzzer(RaspiPin.GPIO_27, RaspiPin.GPIO_28, RaspiPin.GPIO_29);
+			buzzer2 = new RaspiBuzzer(RaspiPin.GPIO_03, RaspiPin.GPIO_02, RaspiPin.GPIO_00);
+			buzzer3 = new RaspiBuzzer(RaspiPin.GPIO_23, RaspiPin.GPIO_24, RaspiPin.GPIO_25);
+			*/
+			pi4j = Pi4J.newAutoContext();
+			buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
+			buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
+			buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
+
+
+		} else {
+			System.out.println("<-- DEV MODE ohne Hardware-Buzzer -->");
+			buzzer1 = new MouseBuzzer();
+			buzzer2 = new DummyBuzzer(2);
+			buzzer3 = new DummyBuzzer(3);
+		}		
+		
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
 		try {
 			Scene lobbyScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -147,44 +165,26 @@ public class GameController extends Application {
 			lobbyScene.getStylesheets().add(style);
 			LobbyViewController lobbyController = loader.getController();
 			lobbyController.setMainController(this);
-			
-			
-			buzzer1.getAnswer().addListener(new ChangeListener<Number>() {
-	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 1", buzzer1);
+
+			List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
+			if (IS_DEV_MODE) {
+				
+				for (int index = 0; index < buzzers.size(); index++){
+					Spieler s = new Spieler("Spieler "+(index+1), buzzers.get(index));
 					alleSpieler.add(s);
-					buzzer1.getAnswer().removeListener(this);
-					System.out.println("Spieler1 erstellt");
-					lobbyController.setReady1();				
-					
-				}			
-			});
-			
-			buzzer2.getAnswer().addListener(new ChangeListener<Number>() {
-	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 2", buzzer2);
-					alleSpieler.add(s);
-					buzzer2.getAnswer().removeListener(this);
-					System.out.println("Spieler2 erstellt");
-					lobbyController.setReady2();
-				}			
-			});
-			
-			buzzer3.getAnswer().addListener(new ChangeListener<Number>() {
-	
-				@Override
-				public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-					Spieler s = new Spieler("Spieler 3", buzzer3);
-					alleSpieler.add(s);
-					buzzer3.getAnswer().removeListener(this);
-					System.out.println("Spieler3 erstellt");
-					lobbyController.setReady3();
-				}			
-			});
+					lobbyController.setReady(index);			
+				};
+
+			} else {
+
+				for (int index = 0; index < buzzers.size(); index++){
+					buzzers.get(index).getAnswer().addListener(
+						setupBuzzerListener("Spieler "+(index+1), buzzers.get(index))
+					);
+					lobbyController.setReady(index);
+				};
+
+			}	
 			
 			if (shuffleQuestions)
 				Collections.shuffle(eingeleseneFragen);
@@ -203,6 +203,20 @@ public class GameController extends Application {
 			Platform.exit();
 		}
 		
+	}
+
+	private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer) {
+		return new ChangeListener<Number>() {
+	
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				Spieler s = new Spieler(name, buzzer);
+				alleSpieler.add(s);
+				// prevents multiple activations of the same buzzer
+				buzzer.getAnswer().removeListener(this);
+				System.out.println(name + " erstellt");
+			}			
+		};
 	}
 
 	public void createBuzzerView(String playername, double yPosition, double xPosition) {
@@ -243,7 +257,7 @@ public class GameController extends Application {
 	}
 
 	public void showQuestionView(Frage question) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
 		try {
 
 			Scene questionScene = new Scene(loader.load(), screenWidth, screenHeight);
@@ -383,6 +397,5 @@ public class GameController extends Application {
 			Platform.exit();
 		}
 	}
-
 
 }
