@@ -69,6 +69,9 @@
                </children>
             </GridPane>
          </children>
+         <BorderPane.margin>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </BorderPane.margin>
       </AnchorPane>
    </center>
    <bottom>
@@ -79,6 +82,9 @@
                   <Font size="36.0" />
                </font></Button>
          </children>
+         <BorderPane.margin>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </BorderPane.margin>
       </AnchorPane>
    </bottom>
 </BorderPane>
