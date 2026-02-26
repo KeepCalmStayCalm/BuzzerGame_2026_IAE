@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <groupId>ch.wiss</groupId>
-  <artifactId>IAE_Buzzergame</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
-  <name>IAE_Buzzergame SNAPSHOT 0.0.2</name>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.wiss</groupId>
+    <artifactId>IAE_Buzzergame</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+    <name>IAE_Buzzergame SNAPSHOT 0.0.2</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,99 +18,79 @@
 
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
     </properties>
 
-<dependencies>
-  <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-  </dependency>
-  <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.version}</version>
-  </dependency>
-  <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-core</artifactId>
-      <version>${pi4j.version}</version>
-  </dependency>
-  <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-plugin-raspberrypi</artifactId>
-      <version>${pi4j.version}</version>
-  </dependency>
-  <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-plugin-pigpio</artifactId>
-      <version>${pi4j.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-controls</artifactId>
-    <version>${javafx.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-fxml</artifactId>
-    <version>${javafx.version}</version>
-  </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-raspberrypi</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-pigpio</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
 
-  <build>
-    <finalName>IAE_Buzzergame_SNAPSHOT_0.0.2</finalName>
+    <build>
+        <finalName>IAE_Buzzergame_SNAPSHOT_0.0.2</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        
+        <resources>
+            <resource>
+                <directory>src</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
 
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-          <configuration>
-              <release>${java.version}</release>
-          </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-maven-plugin</artifactId>
-        <version>0.0.8</version>
-        <configuration>
-            <mainClass>application.RaspiBuzzer</mainClass>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
-        <configuration>
-          <outputDirectory>${project.build.directory}/distribution</outputDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>${exec-maven-plugin.version}</version>
-          <configuration>
-              <executable>java</executable>
-              <arguments>
-                  <argument>--module-path</argument>
-                  <argument>${project.build.directory}/distribution</argument>
-                  <argument>--module</argument>
-                  <argument>application.GameController</argument>
-              </arguments>
-          </configuration>
-      </plugin>
-      <plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/distribution</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
@@ -135,6 +115,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -153,8 +134,10 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
@@ -171,6 +154,6 @@
                     </execution>
                 </executions>
             </plugin>
-  </plugins>
-  </build>
+        </plugins>
+    </build>
 </project>
