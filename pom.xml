@@ -4,128 +4,156 @@
   <artifactId>Wiss_BuzzerGame</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Wiss - BuzzerGame</name>
-
+    <!-- BUILD PROPERTIES -->
     <properties>
+        <!-- PROJECT ENCODING PROPERTIES -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- JAVA COMPILER VERSIONS -->
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
+        <!-- DEPENDENCIES VERSIONS -->
         <slf4j.version>1.7.32</slf4j.version>
         <pi4j.version>2.8.0</pi4j.version>
         <javafx.version>15.0.1</javafx.version>
 
+        <!-- BUILD PLUGIN VERSIONS -->
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
+
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-core</artifactId>
-            <version>${pi4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-plugin-raspberrypi</artifactId>
-            <version>${pi4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-plugin-pigpio</artifactId>
-            <version>${pi4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-    </dependencies>
+  <!--repositories>
+	<repository>
+		<id>oss-snapshots-repo</id>
+		<name>Sonatype OSS Maven Repository</name>
+		<url>https://oss.sonatype.org/content/groups/public</url>
+		<snapshots>
+			<enabled>true</enabled>
+			<updatePolicy>always</updatePolicy>
+		</snapshots>
+	</repository>
+</repositories-->
+<dependencies>
+ <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+  </dependency>
+  <!-- include Pi4J Core -->
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-core</artifactId>
+      <version>${pi4j.version}</version>
+  </dependency>
 
-    <build>
-        <sourceDirectory>src</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>src</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </resource>
-        </resources>
+  <!-- include Pi4J Plugins (Platforms and I/O Providers) -->
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-plugin-raspberrypi</artifactId>
+      <version>${pi4j.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>com.pi4j</groupId>
+      <artifactId>pi4j-plugin-pigpio</artifactId>
+      <version>${pi4j.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-controls</artifactId>
+    <version>${javafx.version}</version>
+  </dependency>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <release>${java.version}</release>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                    <verbose>false</verbose>
-                </configuration>
-            </plugin>
+  <dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-fxml</artifactId>
+    <version>${javafx.version}</version>
+</dependency>
 
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
-                <configuration>
-                    <mainClass>application.RaspiBuzzer</mainClass>
-                </configuration>
-            </plugin>
+</dependencies>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+              <release>${java.version}</release>
+              <showDeprecation>true</showDeprecation>
+              <showWarnings>true</showWarnings>
+              <verbose>false</verbose>
+          </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+            <mainClass>application.RaspiBuzzer</mainClass>
+        </configuration>
+      </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/distribution</outputDirectory>
-                </configuration>
-            </plugin>
+      <!-- BUILD THE FINAL JAR FILE IN THE /target/distribution PATH -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <!--archive>
+            <manifest>
+              <mainClass>application.RaspiBuzzer</mainClass>
+            </manifest>
+          </archive-->
+          <outputDirectory>${project.build.directory}/distribution</outputDirectory>
+        </configuration>
+      </plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>--module-path</argument>
-                        <argument>${project.build.directory}/distribution</argument>
-                        <argument>--module</argument>
-                        <argument>application.GameController</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
+      <!-- DEFAULT JAR EXECUTABLE CLASS -->
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>${exec-maven-plugin.version}</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>java</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <executable>java</executable>
+              <arguments>
+                  <argument>--module-path</argument>
+                  <argument>${project.build.directory}/distribution</argument>
+                  <argument>--module</argument>
+                  <argument>application.GameController</argument>
+              </arguments>
+          </configuration>
+      </plugin>
 
+      <!-- COPY ANY RUNTIME SCRIPTS TO THE /target/distribution PATH  -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
+
                     <execution>
                         <id>copy</id>
                         <phase>package</phase>
@@ -138,6 +166,7 @@
                                 <exec executable="cmd" osfamily="windows">
                                     <arg line="/c ${project.basedir}\download_openjfx.bat"/>
                                 </exec>
+
                                 <echo message="Copying distribution files..."/>
                                 <copy todir="${project.build.directory}/distribution" overwrite="true" flatten="true">
                                     <fileset dir="assets" includes="*.sh"/>
@@ -145,6 +174,7 @@
                                 <copy todir="${project.build.directory}/distribution/resources" overwrite="true" flatten="false">
                                     <fileset dir="resources" includes="**/*"/>
                                 </copy>
+                                
                                 <copy todir="${project.build.directory}/distribution/openjfx" overwrite="true">
                                     <fileset dir="download/openjfx/extracted_files/openjfx"/>
                                 </copy>
@@ -165,6 +195,7 @@
                 </dependencies>
             </plugin>
 
+            <!-- DOWNLOAD RUNTIME DEPENDENCIES -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -182,12 +213,16 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
+                            <!--
+                             On the Raspberry Pi we use specific JavaFX dependencies,
+                             so we exclude them here and they are added in the run-script.
+                             -->
+                            <!-- exclude platform specific dependencies, as we add the runtime in the assembly-->
                             <excludeClassifiers>linux,win,mac</excludeClassifiers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -206,6 +241,8 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
+       
+  </plugins>
+    
+  </build>
 </project>
