@@ -3,12 +3,11 @@
   
   <groupId>ch.wiss</groupId>
   <artifactId>IAE_Buzzergame</artifactId>
-  <version>SNAPSHOT_0.0.2</version>
-  <name>IAE_Buzzergame SNAPOSHOT 0.0.2</name>
+  <version>0.0.2-SNAPSHOT</version>
+  <name>IAE_Buzzergame SNAPSHOT 0.0.2</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -20,11 +19,10 @@
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-
     </properties>
 
 <dependencies>
- <dependency>
+  <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
@@ -39,7 +37,6 @@
       <artifactId>pi4j-core</artifactId>
       <version>${pi4j.version}</version>
   </dependency>
-
   <dependency>
       <groupId>com.pi4j</groupId>
       <artifactId>pi4j-plugin-raspberrypi</artifactId>
@@ -55,14 +52,13 @@
     <artifactId>javafx-controls</artifactId>
     <version>${javafx.version}</version>
   </dependency>
-
   <dependency>
     <groupId>org.openjfx</groupId>
     <artifactId>javafx-fxml</artifactId>
     <version>${javafx.version}</version>
-</dependency>
-
+  </dependency>
 </dependencies>
+
   <build>
     <finalName>IAE_Buzzergame_SNAPSHOT_0.0.2</finalName>
 
@@ -82,9 +78,6 @@
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
               <release>${java.version}</release>
-              <showDeprecation>true</showDeprecation>
-              <showWarnings>true</showWarnings>
-              <verbose>false</verbose>
           </configuration>
       </plugin>
       <plugin>
@@ -95,7 +88,6 @@
             <mainClass>application.RaspiBuzzer</mainClass>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -104,18 +96,10 @@
           <outputDirectory>${project.build.directory}/distribution</outputDirectory>
         </configuration>
       </plugin>
-
       <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>${exec-maven-plugin.version}</version>
-          <executions>
-              <execution>
-                  <goals>
-                      <goal>java</goal>
-                  </goals>
-              </execution>
-          </executions>
           <configuration>
               <executable>java</executable>
               <arguments>
@@ -126,35 +110,21 @@
               </arguments>
           </configuration>
       </plugin>
-
       <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
-
                     <execution>
                         <id>copy</id>
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <echo message="Running OpenJFX download script..."/>
-                                <exec executable="/bin/bash" osfamily="unix">
-                                    <arg line="${project.basedir}/download_openjfx.sh"/>
-                                </exec>
-                                <exec executable="cmd" osfamily="windows">
-                                    <arg line="/c ${project.basedir}\download_openjfx.bat"/>
-                                </exec>
-
                                 <echo message="Copying distribution files..."/>
                                 <copy todir="${project.build.directory}/distribution" overwrite="true" flatten="true">
                                     <fileset dir="assets" includes="*.sh"/>
                                 </copy>
                                 <copy todir="${project.build.directory}/distribution/resources" overwrite="true" flatten="false">
                                     <fileset dir="resources" includes="**/*"/>
-                                </copy>
-                                
-                                <copy todir="${project.build.directory}/distribution/openjfx" overwrite="true">
-                                    <fileset dir="download/openjfx/extracted_files/openjfx"/>
                                 </copy>
                                 <chmod dir="${project.build.directory}/distribution" perm="ugo+rx" includes="**/*.sh"/>
                             </target>
@@ -164,15 +134,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant</artifactId>
-                        <version>1.10.11</version>
-                    </dependency>
-                </dependencies>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -186,10 +148,6 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/distribution/lib</outputDirectory>
                             <includeScope>runtime</includeScope>
-                            <excludeTransitive>false</excludeTransitive>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
                             <excludeClassifiers>linux,win,mac</excludeClassifiers>
                         </configuration>
                     </execution>
@@ -213,8 +171,6 @@
                     </execution>
                 </executions>
             </plugin>
-       
   </plugins>
-    
   </build>
 </project>
