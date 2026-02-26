@@ -6,4 +6,4 @@ sudo java \
   -Djdk.gtk.version=2 \
   --module-path "${SCRIPT_DIR}:${SCRIPT_DIR}/lib" \
   --add-modules javafx.controls,javafx.fxml,java.prefs \
-  -jar "${SCRIPT_DIR}/IAE_Buzzergame_SNAPSHOT_0.0.2.jar"
+  -jar "${SCRIPT_DIR}/IAE_BuzzerGame-0.0.1-SNAPSHOT.jar"
