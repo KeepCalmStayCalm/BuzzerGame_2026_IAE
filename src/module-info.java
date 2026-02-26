@@ -1,11 +1,11 @@
-module buzzer.app {
+module IAE_Buzzergame {
     requires javafx.controls;
     requires javafx.fxml;
     requires com.pi4j;
-    requires java.prefs;
+    requires com.pi4j.plugin.raspberrypi;
+    requires com.pi4j.plugin.pigpio;
+    requires org.slf4j;
 
-    opens application to javafx.fxml;
-    opens view to javafx.fxml;
-
+    opens application to javafx.graphics, javafx.fxml;
     exports application;
 }
