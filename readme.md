@@ -1,71 +1,44 @@
-# Buzzer-Game
+# Projektdokumentation: Buzzer-Game IAE
 
-## Buzzergame - Bedienung
+## 1. Projektübersicht
+Das Projekt **«BuzzerGame»** ist ein Java-basiertes interaktives Spiel für den Raspberry Pi. Es wurde für ein Firmenprojekt der **IAE** im Jahr 2026 adaptiert. Die Hardware-Interaktion erfolgt über physische Taster (Buzzer), die an die GPIO-Pins des Raspberry Pi angeschlossen sind. Die grafische Benutzeroberfläche wird mit JavaFX realisiert und die Projektverwaltung erfolgt über Maven (`mvn`).
 
-![img/einloggen](img/einloggen.jpg)
+## 2. Bedienungsanleitung
 
-### Nach dem Start des Spiels:
-* Spieler melden sich vor jeder Runde durch Drücken ihres Buzzers an, mindestens zwei Spieler
-* Frageanzeige wird automatisch beendet nach eingestellter Zeit oder wenn alle beteiligten Spieler eine Antwort abgegeben haben
-* Weiterschalten der Ergebnis-Anzeige nach Zeitablauf (10 sek) oder mit Leertaste
+### Spielablauf
+* **Anmeldung**: Spieler melden sich vor jeder Runde durch Drücken ihres Buzzers an (mindestens zwei Teilnehmer erforderlich).
+* **Fragerunde**: Die Anzeige der Fragen endet automatisch nach der vordefinierten Zeit oder sobald alle beteiligten Spieler eine Antwort abgegeben haben.
+* **Ergebnis**: Die Ergebnis-Anzeige schaltet nach 10 Sekunden automatisch weiter oder kann manuell mit der **Leertaste** übersprungen werden.
 
 ### Einstellungen
+Im Menü „Einstellungen bearbeiten“ können folgende Konfigurationen vorgenommen werden:
+* **Fragenkatalog**: Auswahl der Datei im **CSV-Format** (Excel-Dateien werden nicht unterstützt).
+* **Runden-Konfiguration**: Festlegung der Fragenanzahl pro Runde und der Zeit pro Frage.
+* **Hardware-Check**: Echtzeit-Anzeige aller Tasterzustände der angeschlossenen Buzzer zur Funktionskontrolle.
 
-Unter "Einstellungen bearbeiten" befinden sich folgende Einstellungen
-* Fragenkatalog ausgewählen (CSV, kein Excel)
-* Anzahl der Fragen je Runde
-* Zeit je Frage
+## 3. Raspberry Pi Setup
 
-Zusätzlich werden alle Tasterzustände der angeschlossenen Buzzern angezeigt.
+### Bildschirmauflösung
+Die Anwendung ist für Auflösungen zwischen 1600x1000 und 1920x1080 px optimiert. Die Einstellung erfolgt wie folgt:
+1. Menü (Himbeere oben links) -> Preferences -> **Screen Configuration**.
+2. Rechtsklick auf den HDMI-Monitor und die gewünschte **Resolution** auswählen.
 
-![img/buzzergame_einstellungen.png](img/buzzergame_einstellungen.png)
-*
+## 4. Entwicklung & Versionsverwaltung
 
-## Raspi-Setup
+### Repository (IAE Fork)
+Das Projekt wird über GitHub verwaltet und für die IAE unter folgendem Link geführt:
+`https://github.com/KeepCalmStayCalm/BuzzerGame_2026_IAE.git`
 
-Aktuelles Passwort: test
+### Systemanforderungen (Requirements)
+* **Software**: `wiringpi`, `openjfx11`.
+* **IDE**: Die Eclipse-IDE wird für den direkten Einsatz auf dem Raspberry Pi nicht empfohlen; alternativ kann **Geany** verwendet werden.
 
-### Bildschirmauflösung anpassen
-
-Das BuzzerGame ist optimiert für eine Bildschirmauflösung vom 1600x1000 bis 1920x1080 px (oder ähnlich). Die Bildschirmäuflösung wird auf dem Raspi folgendermassen eingestellt:
-
-1. auf Himbeere oben link klicken, Preferences -> Screen Configuration ausgewählen
-2. HDMI-Monitor sollte angezeigt werden, gewünschte Auflösung (Resolution) mit rechtem Mausklick auf Monitorsymbol auswählen
-
-## Development
-
-### Github-Repo:
-
-[https://github.com/greenorca/BuzzerGame_2020_WISS](https://github.com/greenorca/BuzzerGame_2020_WISS)
-
-Die Eclipse-IDE ist derzeit nicht Raspi-tauglich. Alternativ kann mit Geany programmiert werden.
-
-### requirements
-
-wiringpi, openjfx11
-
-### compile
-
-```
-mvn javafx:run
-```
-
-### package
-
-```
-mvn clean compile package
-```
-
-### run
-
-```
-export OPENJFX=/opt/openjfx/armv6hf-sdk/lib
-# or, if openjfx was installed using apt:
-export OPENJFX=/usr/share/openjfx/lib
-
-java --module-path $OPENJFX --add-modules javafx.controls,javafx.fxml -jar /home/pi/git/BuzzerGame_2020_WISS/target/IFZ826_LW_Buzzer-0.0.1-SNAPSHOT-jar-with-dependencies.jar application.GameController
-```
-
-### Wiring
-
-![img(schaltung_bb.png](img/schaltung_bb.png)
+### Build-Befehle
+* **Kompilieren und Starten**:
+    ```bash
+    mvn javafx:run
+    ```
+* **Paketieren (Deployment)**:
+    ```bash
+    mvn clean compile package
+    ```
