@@ -6,7 +6,7 @@
 	<groupId>ch.wiss</groupId>
 	<artifactId>IAE_Buzzergame</artifactId>
 	<version>SNAPSHOT_0.0.2</version>
-	<name>IAE_Buzzergame SNAPOSHOT 0.0.2</name>
+	<name>IAE_Buzzergame SNAPSHOT 0.0.2</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
