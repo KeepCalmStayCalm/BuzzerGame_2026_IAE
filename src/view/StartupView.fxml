@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane id="IAE_pane" fx:id="imageRoot" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.StartupViewController">
+<BorderPane id="wiss_pane" fx:id="imageRoot" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.StartupViewController">
    <top>
       <AnchorPane prefHeight="250.0" BorderPane.alignment="CENTER">
          <children>
@@ -52,7 +52,7 @@
       </HBox>
    </bottom>
    <center>
-      <ImageView fx:id="IAEHome" fitWidth="1600.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="wissHome" fitWidth="1600.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../resources/images/IAE Logo - S.png" />
          </image>
