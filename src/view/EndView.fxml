@@ -10,118 +10,22 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane id="wiss_pane" prefHeight="1045.0" prefWidth="1525.0" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.EndViewController">
+<BorderPane id="iae_pane" prefHeight="1045.0" prefWidth="1525.0" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.EndViewController">
    <top>
       <AnchorPane maxHeight="-Infinity" prefHeight="250.0" BorderPane.alignment="CENTER">
          <children>
             <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0">
                <children>
-                  <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/WISS_bilden_zukunft.png" />
+                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
-                  <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="#wir_bilden_die_zukunft" textFill="#8d8484">
-                     </Label>
                </children>
             </HBox>
-            <Label id="lblTitle2" alignment="CENTER" text="Herzlichen Glückwunsch!" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding></Label>
          </children>
       </AnchorPane>
    </top>
    <center>
-      <AnchorPane id="endergebnis" BorderPane.alignment="CENTER">
-         <children>
-            <HBox layoutX="412.0" layoutY="106.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
-               <children>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label fx:id="lblS2Name" styleClass="label_bigger" text="lblS2Name">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <Label fx:id="lblS2PunkteGesamt" text="300">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <AnchorPane fx:id="rectPlatz2" minHeight="300.0" prefHeight="300.0">
-                           <children>
-                              <Label alignment="CENTER" layoutX="98.0" layoutY="73.0" styleClass="label_bigger" text="Platz 2" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Label>
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </VBox>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
-                     <padding>
-                              <Insets bottom="0.0" left="15.0" right="15.0" top="0.0" />
-                           </padding>
-                     <children>
-                        <Label fx:id="lblS1Name" styleClass="label_bigger" text="lblS1Name">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <Label fx:id="lblS1PunkteGesamt" text="200">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <AnchorPane fx:id="rectPlatz1" minHeight="400.0" prefHeight="400.0">
-                           <children>
-                              <Label alignment="CENTER" styleClass="label_bigger" text="Platz 1" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Label>
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </VBox>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label fx:id="lblS3Name" styleClass="label_bigger" text="lblS3Name">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <Label fx:id="lblS3PunkteGesamt" text="100">
-                           <padding>
-                              <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <AnchorPane fx:id="rectPlatz3" minHeight="150.0" prefHeight="150.0">
-                           <children>
-                              <Label alignment="CENTER" styleClass="label_bigger" text="Platz 3" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Label>
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </VBox>
-               </children>
-            </HBox>
-         </children>
-      </AnchorPane>
-   </center>
-   <bottom>
-      <Button fx:id="btnEndGame" mnemonicParsing="false" onAction="#endGameRound" text="Spiel beenden" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="50.0" />
-         </BorderPane.margin>
-         <padding>
-            <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
-         </padding>
-      </Button>
-   </bottom>
+      </center>
 </BorderPane>
