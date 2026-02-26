@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 declare SCRIPT_DIR="$(cd "${0%/*}" ; pwd)"
 
-# Wir nutzen sudo für GPIO-Zugriff
 sudo java \
   -Dglass.platform=gtk \
   -Djdk.gtk.version=2 \
