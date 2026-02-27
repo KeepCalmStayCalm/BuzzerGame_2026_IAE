@@ -19,18 +19,14 @@
       <AnchorPane prefHeight="250.0" BorderPane.alignment="CENTER">
          <children>
             <Label id="lblTitle" alignment="CENTER" text="Aktiviere deinen Buzzer" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="100.0" />
-            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" spacing="10.0">
+            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" spacing="15.0">
                <children>
                   <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
-                  <VBox alignment="CENTER_LEFT">
-                     <children>
-                        <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
-                     </children>
-                  </VBox>
+                  <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
                </children>
             </HBox>
          </children>
@@ -50,19 +46,19 @@
             <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="0">
                <children>
                   <ImageView fx:id="avatar1" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady1" styleClass="label_bigger" text="READY" visible="false" />
+                  <Label fx:id="lblReady1" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
                </children>
             </VBox>
             <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="1">
                <children>
                   <ImageView fx:id="avatar2" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady2" styleClass="label_bigger" text="READY" visible="false" />
+                  <Label fx:id="lblReady2" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
                </children>
             </VBox>
             <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="2">
                <children>
                   <ImageView fx:id="avatar3" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady3" styleClass="label_bigger" text="READY" visible="false" />
+                  <Label fx:id="lblReady3" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
                </children>
             </VBox>
          </children>
