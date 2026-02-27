@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane id="wiss_pane" maxHeight="1080.0" maxWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" styleClass="zwischenstand" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.AnswerViewController">
+<BorderPane id="wiss_pane" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" styleClass="zwischenstand" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.AnswerViewController">
    <top>
       <AnchorPane prefHeight="250.0">
          <children>
@@ -20,7 +20,7 @@
                <children>
                   <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/IAE Logo - S.png" />
+                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
                   <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
