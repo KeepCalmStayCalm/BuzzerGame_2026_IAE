@@ -10,7 +10,7 @@
 
 /* ── Background panes ──────────────────────────────────────── */
 #wiss_pane, #wiss_pane_small {
-    -fx-background-image: url("../resources/images/IAE - BG - V3.png");
+    -fx-background-image: url("../resources/images/IAE_BG_V3.png");
     -fx-background-size: cover;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
@@ -306,3 +306,4 @@
     -fx-border-color: #2e2e50;
     -fx-border-width: 1px;
 }
+
