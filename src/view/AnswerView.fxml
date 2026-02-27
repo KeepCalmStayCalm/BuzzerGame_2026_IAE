@@ -27,7 +27,7 @@
     <!-- ── Top header ──────────────────────────────────────── -->
     <top>
         <AnchorPane prefHeight="220.0"
-                    style="-fx-background-color: rgba(8,8,20,0.50);">
+                    style="-fx-background-color: rgba(13,17,23,0.70);">
             <children>
                 <!-- Logo -->
                 <HBox alignment="CENTER_LEFT" spacing="18.0"
@@ -62,15 +62,16 @@
 
             <!-- ── Score table ─────────────────────────────── -->
             <VBox spacing="0.0"
-                  style="-fx-background-color: rgba(16,16,38,0.80);
-                         -fx-border-color: #33335a;
-                         -fx-border-width: 1.5px;
+                  style="-fx-background-color: rgba(22,27,34,0.85);
+                         -fx-border-color: #30363d;
+                         -fx-border-width: 2px;
                          -fx-border-radius: 16px;
-                         -fx-background-radius: 16px;">
+                         -fx-background-radius: 16px;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 6);">
 
                 <!-- Column headers -->
                 <GridPane hgap="20.0"
-                          style="-fx-background-color: rgba(30,30,60,0.70);
+                          style="-fx-background-color: rgba(48,54,61,0.50);
                                  -fx-background-radius: 14px 14px 0 0;
                                  -fx-padding: 14 30 14 30;">
                     <columnConstraints>
@@ -120,16 +121,17 @@
 
             <!-- ── Correct answer reveal ───────────────────── -->
             <VBox alignment="CENTER" spacing="12.0"
-                  style="-fx-background-color: rgba(16,16,38,0.80);
-                         -fx-border-color: #33335a;
-                         -fx-border-width: 1.5px;
+                  style="-fx-background-color: rgba(22,27,34,0.85);
+                         -fx-border-color: #30363d;
+                         -fx-border-width: 2px;
                          -fx-border-radius: 14px;
                          -fx-background-radius: 14px;
-                         -fx-padding: 24 40 24 40;">
+                         -fx-padding: 24 40 24 40;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 6);">
                 <children>
                     <Label
                         text="Die richtige Antwort war:"
-                        style="-fx-text-fill: #66667a; -fx-font-size: 20pt; -fx-font-weight: normal;" />
+                        style="-fx-text-fill: #8b949e; -fx-font-size: 20pt; -fx-font-weight: normal;" />
                     <Label
                         fx:id="lblAntwort"
                         id="lblAntwort"
