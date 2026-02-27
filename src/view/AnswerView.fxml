@@ -21,60 +21,56 @@
                <children>
                   <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/WISS_bilden_zukunft.png" />
+                        <Image url="@../resources/images/IAE Logo - S.png" />
                      </image>
                   </ImageView>
-                  <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="#wir_bilden_die_zukunft" textFill="#575555">
-                     </Label>
+                  <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="#IAE_Future_Skills" textFill="#575555" />
                </children>
             </HBox>
-            <VBox alignment="CENTER" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Label fx:id="lblAntwort" alignment="CENTER" text="Frage: Antwort" textAlignment="CENTER" />
-               </children>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </BorderPane.margin>
-            </VBox>
-
+            <Label id="lblTitle" alignment="CENTER" layoutX="502.0" layoutY="98.0" text="Zwischenstand" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="130.0" />
          </children>
       </AnchorPane>
    </top>
    <center>
-      <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+      <AnchorPane BorderPane.alignment="CENTER">
          <children>
-            <Label id="lblTitle2" alignment="CENTER" text="Zwischenstand">
-               <font>
-                  <Font size="24.0" />
-               </font></Label>
-            <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" vgap="10.0" VBox.vgrow="ALWAYS">
-              <columnConstraints>
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+            <VBox alignment="CENTER" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="50.0">
                <children>
-                  <Label id="lblZwischenstand" styleClass="labelZwischenstand" text="Spieler" />
-                  <Label id="lblZwischenstand" styleClass="labelZwischenstand" text="Diese Runde" GridPane.columnIndex="1" />
-                  <Label id="lblZwischenstand" styleClass="labelZwischenstand" text="Gesamt" GridPane.columnIndex="2" />
-                  <Label id="lblZwischenstand" fx:id="lblS1Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="1" />
-                  <Label id="lblZwischenstand" fx:id="lblS1PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label id="lblZwischenstand" fx:id="lblS1PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <Label id="lblZwischenstand" fx:id="lblS2Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="2" />
-                  <Label id="lblZwischenstand" fx:id="lblS2PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label id="lblZwischenstand" fx:id="lblS2PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <Label id="lblZwischenstand" fx:id="lblS3Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="3" />
-                  <Label id="lblZwischenstand" fx:id="lblS3PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label id="lblZwischenstand" fx:id="lblS3PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <GridPane alignment="CENTER" hgap="20.0" vgap="10.0">
+                    <columnConstraints>
+                      <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label id="lblZwischenstandHeader" text="Spieler" />
+                        <Label id="lblZwischenstandHeader" text="Rundenpunkte" GridPane.columnIndex="1" />
+                        <Label id="lblZwischenstandHeader" text="Gesamtpunkte" GridPane.columnIndex="2" />
+                        <Label id="lblZwischenstand" fx:id="lblS1Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="1" />
+                        <Label id="lblZwischenstand" fx:id="lblS1PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label id="lblZwischenstand" fx:id="lblS1PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label id="lblZwischenstand" fx:id="lblS2Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="2" />
+                        <Label id="lblZwischenstand" fx:id="lblS2PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label id="lblZwischenstand" fx:id="lblS2PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Label id="lblZwischenstand" fx:id="lblS3Name" styleClass="labelZwischenstand" text="" GridPane.rowIndex="3" />
+                        <Label id="lblZwischenstand" fx:id="lblS3PunkteDazu" styleClass="labelZwischenstand" text="" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label id="lblZwischenstand" fx:id="lblS3PunkteGesamt" styleClass="labelZwischenstand" text="" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                     </children>
+                  </GridPane>
+                  <Label id="lblAntwort" fx:id="lblAntwort" text="Richtig war: Test" textAlignment="CENTER" wrapText="true">
+                     <VBox.margin>
+                        <Insets top="100.0" />
+                     </VBox.margin>
+                  </Label>
                </children>
-            </GridPane>
+            </VBox>
          </children>
-      </VBox>
+      </AnchorPane>
    </center>
 </BorderPane>
