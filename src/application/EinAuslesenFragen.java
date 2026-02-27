@@ -1,59 +1,95 @@
 package application;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
-import  java.nio.charset.*;
 
 /**
- * Kümmert sich um ein- und auslesen aller Fragen
+ * Klasse Frage verwaltet eine Fragen und die dazugehörigen Antworten
  * @author jacmo
  * 
  */
-public class EinAuslesenFragen {	
+public class Frage implements Serializable {
 
-	public static List<Frage> einlesenFragen(String fileCSV) {
-		List<Frage> fragen = new ArrayList<Frage>();
+	private String frage;
+	private List<Antwort> antworten;
+	private String imagePath;
 
-		String line = "";
-		String splitBy = ";";
-		File file = new File(fileCSV);
+	public String getImagePath() {
+		return imagePath;
+	}
 
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(fileCSV, StandardCharsets.UTF_8));
-			while ((line = br.readLine()) != null && line.trim().length() > 0) {
-				String[] bestandTeilLinie = line.split(splitBy);
-				if (bestandTeilLinie.length >= 5){
-					ArrayList<Antwort> antworten = new ArrayList<Antwort>();
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
+	}
 
-					for (int i = 1; i < 4; i++) {
-						Antwort a = new Antwort(bestandTeilLinie[i], false);					 
-						antworten.add(a);					
-					}
-					int correctIndex = Integer.parseInt(bestandTeilLinie[4])-1;
-					antworten.get(correctIndex).setCorrect(true);
+	/**
+	 * 
+	 * @param frage: Frage als String eingeben
+	 * @param a: ArrayListe mit Antworten
+	 */
+	public Frage(String frage, List<Antwort> a) {
+		this.setFrage(frage);
+		this.antworten = a;
+	}	
 
-					Frage f = new Frage(bestandTeilLinie[0], antworten);
-					if (bestandTeilLinie.length > 5){
-						f.setImagePath(file.getParent() + File.separator + bestandTeilLinie[5]);
-					}
-						
-					fragen.add(f);
-				}
-			}
-			System.out.println("Fragen einlesen länge: " + fragen.size());
-		} 
-		catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return fragen;
+	/**
+	 * 
+	 * @param a: eine Antwort
+	 * @return: gibt boolean zurück, ob Antwort korrekt ist
+	 */
+	public boolean pruefeAntwort(Antwort a) {
+		return a.isCorrect();
 	}
 
 
+
+	/**
+	 * Alle Antworten werden durchgeschleift und die richtige herausgesucht
+	 * @return: die richtige Antwort wird als String zurückgegeben
+	 */
+	public String korrekteAntwort() {
+		String korrekteAntwort = null;
+		for (int i = 0; i < antworten.size(); i++) {
+			if(antworten.get(i).isCorrect()) {
+				korrekteAntwort = antworten.get(i).getAntwort();
+			}
+		}
+		return korrekteAntwort;		
+	}
+
+	/**
+	 * Ermittelt die Nr, die vom Buzzer gedrückt werden muss
+	 * @return gibt die AntwortNummer zurück
+	 */		
+	public int korrekteAntwortInt() {
+		int korrekteAntwort = 0;
+		for (int i = 0; i < antworten.size(); i++) {
+			if(antworten.get(i).isCorrect()) {
+				korrekteAntwort = i+1;
+			}
+		}
+		return korrekteAntwort;
+	}
+
+	public String getFrage() {
+		return frage;
+	}
+
+	public void setFrage(String frage) {
+		this.frage = frage;
+	}
+
+	public List<Antwort> getAntworten() {
+		return antworten;
+	}
+
+	public void setAntworten(List<Antwort> antworten) {
+		this.antworten = antworten;
+	}
+
+	/*public void frageAnzeigen() {
+		System.out.println(frage);		
+	}*/
+
+
 }
-
-
