@@ -22,7 +22,7 @@
     fx:controller="view.EndViewController">
 
     <top>
-        <AnchorPane prefHeight="230.0" style="-fx-background-color: rgba(8,8,20,0.55);">
+        <AnchorPane prefHeight="230.0" style="-fx-background-color: rgba(13,17,23,0.75);">
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="18.0" layoutX="50.0" layoutY="30.0">
                     <children>
@@ -56,7 +56,7 @@
                         <Label
                             text="🥈  Platz 2"
                             alignment="CENTER"
-                            style="-fx-text-fill: #909090; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
+                            style="-fx-text-fill: #b8b8b8; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
                         
                         <Label
@@ -64,7 +64,7 @@
                             alignment="CENTER"
                             text="0 Punkte"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #909090; -fx-font-size: 18pt; -fx-padding: 0 0 5 0;" />
+                            style="-fx-text-fill: #b8b8b8; -fx-font-size: 18pt; -fx-padding: 0 0 5 0;" />
 
                         <Label
                             fx:id="lblS2Name"
@@ -72,13 +72,13 @@
                             text="–"
                             wrapText="true"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #c0c4d8; -fx-font-size: 28pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+                            style="-fx-text-fill: #e6edf3; -fx-font-size: 28pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
                         
                         <AnchorPane
                             fx:id="rectPlatz2"
                             minHeight="230.0" prefHeight="230.0"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-background-color: #707070; -fx-background-radius: 10px 10px 0 0;" />
+                            style="-fx-background-color: #888888; -fx-background-radius: 10px 10px 0 0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 12, 0, 0, 3);" />
                     </children>
                 </VBox>
 
@@ -87,7 +87,7 @@
                         <Label
                             text="🥇  Platz 1"
                             alignment="CENTER"
-                            style="-fx-text-fill: #c8a200; -fx-font-size: 24pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
+                            style="-fx-text-fill: #f7d058; -fx-font-size: 24pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
                         
                         <Label
@@ -95,7 +95,7 @@
                             alignment="CENTER"
                             text="0 Punkte"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #c8a200; -fx-font-size: 20pt; -fx-padding: 0 0 5 0;" />
+                            style="-fx-text-fill: #f7d058; -fx-font-size: 20pt; -fx-padding: 0 0 5 0;" />
 
                         <Label
                             fx:id="lblS1Name"
@@ -103,13 +103,13 @@
                             text="–"
                             wrapText="true"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #eef0ff; -fx-font-size: 32pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+                            style="-fx-text-fill: #ffffff; -fx-font-size: 32pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
                         
                         <AnchorPane
                             fx:id="rectPlatz1"
                             minHeight="420.0" prefHeight="420.0"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-background-color: #b08800; -fx-background-radius: 10px 10px 0 0;" />
+                            style="-fx-background-color: #c8a200; -fx-background-radius: 10px 10px 0 0; -fx-effect: dropshadow(gaussian, rgba(200,162,0,0.5), 16, 0, 0, 4);" />
                     </children>
                 </VBox>
 
@@ -118,7 +118,7 @@
                         <Label
                             text="🥉  Platz 3"
                             alignment="CENTER"
-                            style="-fx-text-fill: #8c5a28; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
+                            style="-fx-text-fill: #b87333; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
                         
                         <Label
@@ -126,7 +126,7 @@
                             alignment="CENTER"
                             text="0 Punkte"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #8c5a28; -fx-font-size: 18pt; -fx-padding: 0 0 5 0;" />
+                            style="-fx-text-fill: #b87333; -fx-font-size: 18pt; -fx-padding: 0 0 5 0;" />
 
                         <Label
                             fx:id="lblS3Name"
@@ -134,13 +134,13 @@
                             text="–"
                             wrapText="true"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #a0a4b8; -fx-font-size: 28pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+                            style="-fx-text-fill: #c9d1d9; -fx-font-size: 28pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
                         
                         <AnchorPane
                             fx:id="rectPlatz3"
                             minHeight="140.0" prefHeight="140.0"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-background-color: #7a3e14; -fx-background-radius: 10px 10px 0 0;" />
+                            style="-fx-background-color: #9c5a28; -fx-background-radius: 10px 10px 0 0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 12, 0, 0, 3);" />
                     </children>
                 </VBox>
 
