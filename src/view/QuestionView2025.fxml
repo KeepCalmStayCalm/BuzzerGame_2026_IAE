@@ -252,7 +252,7 @@
 
          <!-- Timer label - giant glowing countdown -->
          <Label
-            fx:id="lblZeit"
+            fx:id="lblRestzeit"
             alignment="CENTER"
             text="20"
             style="-fx-font-family: 'Courier New';
