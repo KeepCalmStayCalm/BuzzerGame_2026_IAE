@@ -77,7 +77,7 @@
                     <children>
                         <Label
                             text="SPIELER 1"
-                            style="-fx-text-fill: #55557a; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
+                            style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
                             fx:id="avatar1"
                             fitHeight="360.0" fitWidth="360.0"
@@ -87,10 +87,10 @@
                             fx:id="lblReady1"
                             opacity="0.0"
                             text="✓  BEREIT"
-                            style="-fx-text-fill: #44cc66; -fx-font-size: 36pt; -fx-font-weight: bold;" />
+                            style="-fx-text-fill: #3fb950; -fx-font-size: 36pt; -fx-font-weight: bold;" />
                         <Label
                             text="Buzzer drücken"
-                            style="-fx-text-fill: #44445a; -fx-font-size: 18pt; -fx-font-weight: normal;" />
+                            style="-fx-text-fill: #6e7681; -fx-font-size: 18pt; -fx-font-weight: normal;" />
                     </children>
                 </VBox>
 
@@ -102,7 +102,7 @@
                     <children>
                         <Label
                             text="SPIELER 2"
-                            style="-fx-text-fill: #55557a; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
+                            style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
                             fx:id="avatar2"
                             fitHeight="360.0" fitWidth="360.0"
@@ -112,10 +112,10 @@
                             fx:id="lblReady2"
                             opacity="0.0"
                             text="✓  BEREIT"
-                            style="-fx-text-fill: #44cc66; -fx-font-size: 36pt; -fx-font-weight: bold;" />
+                            style="-fx-text-fill: #3fb950; -fx-font-size: 36pt; -fx-font-weight: bold;" />
                         <Label
                             text="Buzzer drücken"
-                            style="-fx-text-fill: #44445a; -fx-font-size: 18pt; -fx-font-weight: normal;" />
+                            style="-fx-text-fill: #6e7681; -fx-font-size: 18pt; -fx-font-weight: normal;" />
                     </children>
                 </VBox>
 
@@ -127,7 +127,7 @@
                     <children>
                         <Label
                             text="SPIELER 3"
-                            style="-fx-text-fill: #55557a; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
+                            style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
                             fx:id="avatar3"
                             fitHeight="360.0" fitWidth="360.0"
@@ -137,10 +137,10 @@
                             fx:id="lblReady3"
                             opacity="0.0"
                             text="✓  BEREIT"
-                            style="-fx-text-fill: #44cc66; -fx-font-size: 36pt; -fx-font-weight: bold;" />
+                            style="-fx-text-fill: #3fb950; -fx-font-size: 36pt; -fx-font-weight: bold;" />
                         <Label
                             text="Buzzer drücken"
-                            style="-fx-text-fill: #44445a; -fx-font-size: 18pt; -fx-font-weight: normal;" />
+                            style="-fx-text-fill: #6e7681; -fx-font-size: 18pt; -fx-font-weight: normal;" />
                     </children>
                 </VBox>
 
