@@ -1,150 +1,296 @@
+/* ============================================================
+   BuzzerGame 2026 – Dark Matte Theme
+   ============================================================ */
+
+/* ---------- Root / Background ---------- */
 .root {
-	-fx-background-color: white;
+    -fx-background-color: #1a1a2e;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
-
-#wiss_pane{
-    -fx-background-image: url("../res/LogoWISS.jpg");
-    -fx-background-repeat: stretch;   
-    -fx-background-size: 300 81;
-    -fx-background-position: top right;
-    /*-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); */
-}
-
-#wiss_pane_small{
-    -fx-background-image: url("../res/LogoWISS.jpg");
-    -fx-background-repeat: stretch;   
-    -fx-background-size: 200 54;
-    -fx-background-position: top right;
-    /*-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); */
-}
-
-#wiss_pane, #wiss_pane_small {
+#wiss_pane,
+#wiss_pane_small {
     -fx-background-image: url("../resources/images/IAE - BG - V3.png");
-    -fx-background-size: 1920 1080; /* Forces exact size */
+    -fx-background-size: 1920 1080;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
 }
 
-.button, .label {
-	-fx-text-fill: #212529;
-	-fx-font-weight: bold;
-	-fx-font-size: 24pt;
+/* ---------- Base label & button defaults ---------- */
+.label {
+    -fx-text-fill: #e8e8f0;
+    -fx-font-weight: bold;
+    -fx-font-size: 24pt;
 }
 
+.button {
+    -fx-text-fill: #e8e8f0;
+    -fx-font-weight: bold;
+    -fx-font-size: 24pt;
+    -fx-background-color: #2c2c3e;
+    -fx-background-radius: 12px;
+    -fx-border-color: #44445a;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 12px;
+    -fx-cursor: hand;
+    -fx-padding: 10px 22px;
+    /* smooth hover/press transitions */
+    -fx-transition: -fx-background-color 120ms ease,
+                    -fx-border-color 120ms ease,
+                    -fx-scale-x 80ms ease,
+                    -fx-scale-y 80ms ease;
+}
+
+.button:hover {
+    -fx-background-color: #3a3a52;
+    -fx-border-color: #6868a0;
+}
+
+.button:pressed {
+    -fx-background-color: #252538;
+    -fx-border-color: #4a4a7a;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* ---------- Bigger label ---------- */
 .label_bigger {
-	-fx-text-fill: #212529;
-	-fx-font-weight: bold;
-	-fx-font-size: 36pt;
+    -fx-text-fill: #e8e8f0;
+    -fx-font-weight: bold;
+    -fx-font-size: 36pt;
 }
 
-.spieler1{
-	-fx-background-color: #00e9ff;
-	-fx-font-weight: bold;
-	-fx-font-size: 40pt;
-	-fx-padding: 15pt;
-}
-.spieler2{
-	-fx-background-color: #f7ff00;
-	-fx-font-weight: bold;
-	-fx-font-size: 40pt;
-	-fx-padding: 15pt;
-}
-.spieler3{
-	-fx-background-color: #ff3c00;
-	-fx-font-weight: bold;
-	-fx-font-size: 40pt;
-	-fx-padding: 15pt;
+/* ---------- Startup screen primary button ---------- */
+.btnStartScreen {
+    -fx-font-weight: bold;
 }
 
+/* ---------- Player colour chips ---------- */
+.spieler1 {
+    -fx-background-color: #0098aa;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 40pt;
+    -fx-padding: 15pt;
+    -fx-background-radius: 14px;
+}
 
+.spieler2 {
+    -fx-background-color: #c8a800;
+    -fx-text-fill: #111111;
+    -fx-font-weight: bold;
+    -fx-font-size: 40pt;
+    -fx-padding: 15pt;
+    -fx-background-radius: 14px;
+}
 
+.spieler3 {
+    -fx-background-color: #c43000;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 40pt;
+    -fx-padding: 15pt;
+    -fx-background-radius: 14px;
+}
+
+/* ---------- Answer / score cards ---------- */
 .vbox {
-	-fx-text-fill: #212529;
-	-fx-padding: 15pt;
-	-fx-border-color: #a8a8a8;
-	-fx-border-width: 5pt;
-	-fx-border-radius: 20pt;
-	-fx-font-weight: bold;
-	-fx-font-size: 30pt;
+    -fx-text-fill: #e8e8f0;
+    -fx-padding: 15pt;
+    -fx-border-color: #44445a;
+    -fx-border-width: 2pt;
+    -fx-border-radius: 16pt;
+    -fx-background-color: rgba(35, 35, 55, 0.82);
+    -fx-background-radius: 16pt;
+    -fx-font-weight: bold;
+    -fx-font-size: 30pt;
 }
 
-.zwischenstand .label{
-	-fx-padding: 10pt;
-	-fx-font-weight: bold;
-	-fx-font-size: 30pt;
+/* ---------- Intermediate standings ---------- */
+.zwischenstand .label {
+    -fx-padding: 10pt;
+    -fx-font-weight: bold;
+    -fx-font-size: 30pt;
+    -fx-text-fill: #e8e8f0;
 }
 
-#endergebnis .label{
-	-fx-border-color: none;
-}
-
-
+/* ---------- Named IDs ---------- */
 #lblZeit {
-	-fx-text-fill: #212529;
-	-fx-border-color: none;
-	-fx-font-size: 90pt;
+    -fx-text-fill: #c8c8e8;
+    -fx-border-color: transparent;
+    -fx-font-size: 90pt;
 }
 
 #lblTitle {
-	-fx-text-fill: #212529;
-	-fx-border-color: none;
-	-fx-font-size: 90pt;
+    -fx-text-fill: #e8e8f0;
+    -fx-border-color: transparent;
+    -fx-font-size: 80pt;
+    -fx-font-weight: bold;
 }
 
 #lblTitle2 {
-	-fx-text-fill: #212529;
-	-fx-border-color: none;
-	-fx-font-size: 60pt;
+    -fx-text-fill: #e8e8f0;
+    -fx-border-color: transparent;
+    -fx-font-size: 60pt;
 }
 
 #lblFrage {
-	-fx-text-fill: #212529;
-	-fx-font-size: 45pt;
+    -fx-text-fill: #e8e8f0;
+    -fx-font-size: 45pt;
+    -fx-border-color: transparent;
 }
 
 #lblSpieler {
-	-fx-font-size: 30pt;
-	-fx-border-color: none;
-	-fx-font-weight: normal;
+    -fx-font-size: 30pt;
+    -fx-border-color: transparent;
+    -fx-font-weight: normal;
+    -fx-text-fill: #c0c0d8;
 }
 
-#lblZwischenstand, #lblEndstand {
-	-fx-border-color: none;
+#lblZwischenstand,
+#lblEndstand {
+    -fx-border-color: transparent;
+    -fx-text-fill: #e8e8f0;
 }
 
-#hBoxZwischenstand, #hBoxEndstand {
-	/*-fx-border-color: #a8a8a8;*/
-	-fx-border-width: 5pt;
-	-fx-border-radius: 10pt;
-	-fx-margin-top: 15pt;
+#endergebnis .label {
+    -fx-border-color: transparent;
+    -fx-text-fill: #e8e8f0;
+}
+
+#hBoxZwischenstand,
+#hBoxEndstand {
+    -fx-border-color: #44445a;
+    -fx-border-width: 2pt;
+    -fx-border-radius: 10pt;
 }
 
 #lblReady {
-	-fx-text-fill: white;
-	-fx-border-color: none;
+    -fx-text-fill: #5ad66a;
+    -fx-border-color: transparent;
+    -fx-font-weight: bold;
 }
 
 #lblBildenZukunft {
-	-fx-border-color: none;
-	-fx-font-size: 30pt;
+    -fx-border-color: transparent;
+    -fx-font-size: 28pt;
+    -fx-text-fill: #888899;
 }
 
-.btnStartScreen {
-	font-weight: bold;
+/* ---------- Lobby "BEREIT" label ---------- */
+#lblReady1,
+#lblReady2,
+#lblReady3 {
+    -fx-text-fill: #5ad66a;
+    -fx-font-size: 48pt;
+    -fx-font-weight: bold;
 }
 
-/*/.vBox {
-	-fx-padding: 15pt;
-	-fx-border-color: red;
-	-fx-border-width: 5pt;
-	-fx-border-radius: 10pt;
-}*/
-/*
-#labelBox {
-	-fx-border-color: #a8a8a8;
-	-fx-border-width: 5pt;
-	-fx-border-radius: 10pt;
-	}
+/* ---------- Lobby & answer card panels ---------- */
+#wiss_pane .vbox,
+.lobbyCard {
+    -fx-background-color: rgba(30, 30, 50, 0.75);
+    -fx-background-radius: 20px;
+    -fx-border-color: #3a3a54;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 20px;
+}
 
-*/
+/* ---------- Startup / Lobby primary action buttons ---------- */
+#btnPlay,
+.btnPrimary {
+    -fx-background-color: #3a5bbf;
+    -fx-text-fill: white;
+    -fx-font-size: 36pt;
+    -fx-font-weight: bold;
+    -fx-background-radius: 50px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 14px 40px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0, 0, 5);
+}
+
+#btnPlay:hover {
+    -fx-background-color: #4a6dd0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0, 0, 7);
+}
+
+#btnPlay:pressed {
+    -fx-background-color: #2e4aaa;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 2);
+}
+
+/* ---------- Settings dialog ---------- */
+#settingsRoot,
+.settings-pane {
+    -fx-background-color: #1e1e30;
+}
+
+/* ---------- Text fields & combo boxes ---------- */
+.text-field,
+.combo-box {
+    -fx-background-color: #2a2a3e;
+    -fx-border-color: #44445a;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #e8e8f0;
+    -fx-prompt-text-fill: #666680;
+    -fx-font-size: 16pt;
+    -fx-padding: 6px 10px;
+}
+
+.text-field:focused,
+.combo-box:focused {
+    -fx-border-color: #6868a0;
+}
+
+.combo-box .list-view {
+    -fx-background-color: #2a2a3e;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #e8e8f0;
+    -fx-background-color: transparent;
+}
+
+.combo-box .list-cell:filled:hover {
+    -fx-background-color: #3a3a55;
+}
+
+/* ---------- Radio buttons ---------- */
+.radio-button {
+    -fx-text-fill: #c0c0d8;
+    -fx-font-size: 16pt;
+}
+
+.radio-button:selected {
+    -fx-text-fill: #a0a0e8;
+}
+
+/* ---------- End screen podium bars ---------- */
+#rectPlatz1 {
+    -fx-background-color: #c8a800;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+#rectPlatz2 {
+    -fx-background-color: #909090;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+#rectPlatz3 {
+    -fx-background-color: #a0622a;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+/* ---------- Answer option cards (QuestionView2025) ---------- */
+.button.vbox {
+    -fx-background-color: rgba(30, 30, 52, 0.88);
+    -fx-border-color: #44445a;
+    -fx-border-width: 2px;
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+}
