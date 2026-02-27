@@ -12,30 +12,31 @@ import javafx.scene.layout.AnchorPane;
 
 public class StartupViewController implements Initializable {
 
-    GameController gameController;
+    private GameController gameController;
     
-    @FXML Button btnPlay;
-    @FXML ImageView wissHome;
-    @FXML AnchorPane centerPane;
+    @FXML private Button btnPlay;
+    @FXML private ImageView wissHome;
+    @FXML private AnchorPane centerPane;
     
     @FXML
     public void btnLobbyPressed(ActionEvent event) {
         gameController.showLobbyView();
     }
     
-    @FXML public void btnSettingsPressed() {
+    @FXML 
+    public void btnSettingsPressed() {
         gameController.editSettings();
     }
     
     public void setMainController(GameController gameController) {
         this.gameController = gameController;
-        btnPlay.requestFocus();
+        if (btnPlay != null) btnPlay.requestFocus();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Dynamisches Resizing des Hintergrundbilds an das Fenster
         if (wissHome != null && centerPane != null) {
-            // Skaliert das BG Image passend zum Center
             wissHome.fitWidthProperty().bind(centerPane.widthProperty());
             wissHome.fitHeightProperty().bind(centerPane.heightProperty());
             wissHome.setPreserveRatio(true);
