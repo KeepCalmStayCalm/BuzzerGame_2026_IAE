@@ -19,7 +19,7 @@ public class LobbyViewController implements Initializable {
 
     private GameController gameController;
     
-    // Track which players are actually ready
+    // Track which players are ready (1, 2 or 3)
     private boolean player1Ready = false;
     private boolean player2Ready = false;
     private boolean player3Ready = false;
@@ -29,10 +29,13 @@ public class LobbyViewController implements Initializable {
     }
 
     /**
-     * Called when a player presses their buzzer in the lobby.
+     * Called when a player presses their buzzer.
      * Only marks them ready if they weren't already ready.
+     * playerNumber must be 1, 2 or 3
      */
     public void setReady(int playerNumber) {
+        if (playerNumber < 1 || playerNumber > 3) return;   // safety
+
         Platform.runLater(() -> {
             Label targetLabel = null;
             boolean alreadyReady = false;
@@ -58,7 +61,6 @@ public class LobbyViewController implements Initializable {
             if (targetLabel != null && !alreadyReady) {
                 targetLabel.setOpacity(1.0);
                 targetLabel.setText("✓  BEREIT");
-                // Green glow effect
                 targetLabel.setStyle("-fx-text-fill: #3fb950; " +
                                      "-fx-effect: dropshadow(gaussian, #3fb950, 20, 0.5, 0, 0); " +
                                      "-fx-font-weight: bold;");
@@ -67,7 +69,7 @@ public class LobbyViewController implements Initializable {
     }
     
     /**
-     * Reset all ready states - useful when returning to lobby
+     * Reset all ready states when entering the lobby
      */
     public void resetReadyStates() {
         player1Ready = false;
@@ -75,35 +77,31 @@ public class LobbyViewController implements Initializable {
         player3Ready = false;
         
         Platform.runLater(() -> {
-            if (lblReady1 != null) {
-                lblReady1.setOpacity(0.0);
-                lblReady1.setText("✓  BEREIT");
-            }
-            if (lblReady2 != null) {
-                lblReady2.setOpacity(0.0);
-                lblReady2.setText("✓  BEREIT");
-            }
-            if (lblReady3 != null) {
-                lblReady3.setOpacity(0.0);
-                lblReady3.setText("✓  BEREIT");
-            }
+            resetLabel(lblReady1);
+            resetLabel(lblReady2);
+            resetLabel(lblReady3);
         });
+    }
+    
+    private void resetLabel(Label label) {
+        if (label != null) {
+            label.setOpacity(0.0);
+            label.setText("✓  BEREIT");
+            label.setStyle("");
+        }
     }
 
     @FXML
     public void btnQuestionPressed(ActionEvent event) {
-        if (gameController != null && gameController.getSpielerliste().size() >= 1) {
+        if (gameController != null) {
             gameController.lobbyNotifyDone();
         }
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Ensure ready labels start hidden
-        if (lblReady1 != null) lblReady1.setOpacity(0.0);
-        if (lblReady2 != null) lblReady2.setOpacity(0.0);
-        if (lblReady3 != null) lblReady3.setOpacity(0.0);
-        
+        // Make sure ready labels start hidden
+        resetReadyStates();
         loadAvatars();
     }
 
@@ -129,7 +127,7 @@ public class LobbyViewController implements Initializable {
         }
     }
 
-    // Manual buttons (for dev purposes)
+    // === Manual dev buttons (only used in development) ===
     @FXML
     public void btnSpieler1Pressed() { 
         if (gameController != null) {
