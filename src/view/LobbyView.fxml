@@ -55,7 +55,7 @@
                preserveRatio="true"
                style="-fx-effect: dropshadow(gaussian, #00C8FF, 15, 0.5, 0, 0);">
                <image>
-                  <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
+                  <Image url="@../resources/images/IAE_Logo_S.png" />
                </image>
             </ImageView>
             <VBox spacing="4.0">
