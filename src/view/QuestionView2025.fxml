@@ -26,17 +26,15 @@
         <VBox spacing="0.0">
 
             <!-- Header strip -->
-            <HBox alignment="CENTER_LEFT" spacing="18.0"
-                  style="-fx-padding: 28 50 16 50; -fx-background-color: rgba(10,10,24,0.55);">
-                <children>
-                    <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
-                        <image>
-                            <Image url="@../resources/images/IAE_Logo_S.png" />
-                        </image>
-                    </ImageView>
-                    <Label id="lblBildenZukunft" text="#IAE_Future_Skills" />
-                </children>
-            </HBox>
+           <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 28 50 16 50;">
+        </HBox>
+    
+    <VBox alignment="CENTER" spacing="20">
+        <Label fx:id="lblFrage" text="Frage wird geladen..." wrapText="true" />
+        
+        <ImageView fx:id="image" fitHeight="300.0" preserveRatio="true" />
+    </VBox>
+</VBox>
 
             <Separator style="-fx-opacity: 0.20;" />
 
