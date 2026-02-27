@@ -20,7 +20,7 @@
                <children>
                   <ImageView fx:id="wissHome" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/IAE_bilden_zukunft.png" />
+                        <Image url="@../resources/images/IAE - BG - V3.png" />
                      </image>
                   </ImageView>
                   <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="bilden zukunft" />
