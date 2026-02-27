@@ -19,7 +19,12 @@
     /*-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); */
 }
 
-
+#wiss_pane, #wiss_pane_small {
+    -fx-background-image: url("../resources/images/IAE - BG - V3.png");
+    -fx-background-size: 1920 1080; /* Forces exact size */
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
 
 .button, .label {
 	-fx-text-fill: #212529;
@@ -141,4 +146,5 @@
 	-fx-border-width: 5pt;
 	-fx-border-radius: 10pt;
 	}
+
 */
