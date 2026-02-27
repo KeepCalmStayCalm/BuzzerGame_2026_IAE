@@ -14,163 +14,414 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.EditSettingsViewController">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  EditSettingsView  –  Game configuration dialog  (800 × 600)            ║
+  ║  File chooser, question count, time per question, random toggle,         ║
+  ║  GPIO/hardware buzzer assignment                                          ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+
+<BorderPane
+   prefHeight="640.0"
+   prefWidth="820.0"
+   style="-fx-background-color: #0E1525;"
+   xmlns="http://javafx.com/javafx/8.0.171"
+   xmlns:fx="http://javafx.com/fxml/1"
+   fx:controller="view.EditSettingsViewController">
+
+   <!-- ═══════════════════════  TOP TITLE  ═══════════════════════ -->
+   <top>
+      <VBox
+         style="-fx-background-color: linear-gradient(to bottom, #111830, #0E1525);">
+
+         <!-- Top accent bar -->
+         <Rectangle
+            height="4.0" width="820.0"
+            fill="linear-gradient(to right, #7B2FFF, #00C8FF, #7B2FFF)" />
+
+         <HBox alignment="CENTER" spacing="14.0">
+            <padding><Insets top="22.0" bottom="18.0" left="24.0" right="24.0" /></padding>
+            <Label
+               text="⚙"
+               style="-fx-font-size: 30px;
+                      -fx-text-fill: #00C8FF;
+                      -fx-effect: dropshadow(gaussian, #00C8FF, 10, 0.5, 0, 0);" />
+            <Label
+               text="EINSTELLUNGEN"
+               style="-fx-font-family: 'Courier New';
+                      -fx-font-size: 28px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: white;
+                      -fx-letter-spacing: 3px;
+                      -fx-effect: dropshadow(gaussian, rgba(0,200,255,0.3), 8, 0, 0, 0);" />
+         </HBox>
+
+         <!-- Divider -->
+         <Rectangle
+            height="1.5" width="820.0"
+            fill="linear-gradient(to right, transparent, rgba(0,200,255,0.4), transparent)" />
+      </VBox>
+   </top>
+
+   <!-- ═══════════════════════  CENTER  ═══════════════════════ -->
    <center>
-      <VBox BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </BorderPane.margin>
-         <children>
-            <GridPane hgap="10.0" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="365.0" minWidth="10.0" prefWidth="230.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="520.0" minWidth="10.0" prefWidth="520.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints fillHeight="false" minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints fillHeight="false" minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints fillHeight="false" minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints fillHeight="false" minHeight="10.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+      <VBox
+         spacing="0.0"
+         style="-fx-background-color: #0E1525;"
+         BorderPane.alignment="CENTER">
+         <padding><Insets top="20.0" bottom="10.0" left="24.0" right="24.0" /></padding>
+
+         <!-- ── Section: Game Config ── -->
+         <Label
+            text="SPIELKONFIGURATION"
+            style="-fx-font-family: 'Courier New';
+                   -fx-font-size: 13px;
+                   -fx-font-weight: bold;
+                   -fx-text-fill: #4A6A90;
+                   -fx-letter-spacing: 2px;
+                   -fx-padding: 0 0 10 4;" />
+
+         <VBox
+            spacing="2.0"
+            style="-fx-background-color: rgba(0,200,255,0.04);
+                   -fx-border-color: rgba(0,200,255,0.18);
+                   -fx-border-width: 1.5;
+                   -fx-border-radius: 14;
+                   -fx-background-radius: 14;">
+            <padding><Insets top="6.0" bottom="6.0" left="0.0" right="0.0" /></padding>
+
+            <GridPane hgap="16.0" vgap="0.0">
+               <padding><Insets top="8.0" bottom="8.0" left="20.0" right="20.0" /></padding>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="240.0" minWidth="10.0" prefWidth="220.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="530.0" minWidth="10.0" prefWidth="530.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints fillHeight="false" minHeight="52.0" vgrow="SOMETIMES" />
+                  <RowConstraints fillHeight="false" minHeight="52.0" vgrow="SOMETIMES" />
+                  <RowConstraints fillHeight="false" minHeight="52.0" vgrow="SOMETIMES" />
+                  <RowConstraints fillHeight="false" minHeight="52.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+
                <children>
-                  <Label text="Fragedatei" />
-                  <Label text="Anzahl Fragen je Runde" GridPane.rowIndex="1" />
-                  <Label text="Zeit je Frage" GridPane.rowIndex="2" />
-                  <Label text="Zufällige Fragen" GridPane.rowIndex="3" />
-                  <HBox GridPane.columnIndex="1">
-                     <children>
-                        <TextField fx:id="txtQuestionFile" />
-                        <Button mnemonicParsing="false" onAction="#openFileChooser" text="Auswählen" />
-                     </children>
+
+                  <!-- Row 0: Question file -->
+                  <Label
+                     text="Fragedatei"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-text-fill: #90B0D0;
+                            -fx-font-weight: bold;" />
+                  <HBox spacing="8.0" GridPane.columnIndex="1" alignment="CENTER_LEFT">
+                     <TextField
+                        fx:id="txtQuestionFile"
+                        prefHeight="38.0"
+                        HBox.hgrow="ALWAYS"
+                        style="-fx-background-color: rgba(0,40,80,0.6);
+                               -fx-border-color: rgba(0,200,255,0.35);
+                               -fx-border-width: 1.5;
+                               -fx-border-radius: 8;
+                               -fx-background-radius: 8;
+                               -fx-text-fill: white;
+                               -fx-font-family: 'Courier New';
+                               -fx-font-size: 14px;
+                               -fx-prompt-text-fill: #3A5A70;" />
+                     <Button
+                        mnemonicParsing="false"
+                        onAction="#openFileChooser"
+                        text="📂  Auswählen"
+                        prefHeight="38.0"
+                        style="-fx-background-radius: 8;
+                               -fx-border-radius: 8;
+                               -fx-border-color: rgba(0,200,255,0.4);
+                               -fx-border-width: 1.5;
+                               -fx-background-color: rgba(0,60,100,0.6);
+                               -fx-text-fill: #00C8FF;
+                               -fx-font-family: 'Courier New';
+                               -fx-font-size: 13px;
+                               -fx-cursor: hand;" />
                   </HBox>
-                  <HBox GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.valignment="CENTER">
-                     <children>
-                        <ComboBox fx:id="comboZeitFrage" prefHeight="26.0" prefWidth="260.0" />
-                        <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Sekunden" HBox.hgrow="ALWAYS">
-                           <padding>
-                              <Insets left="10.0" />
-                           </padding>
-                        </Label>
-                     </children>
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin>
+
+                  <!-- Row 1: Anzahl Fragen -->
+                  <Label
+                     text="Anzahl Fragen je Runde"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-text-fill: #90B0D0;
+                            -fx-font-weight: bold;"
+                     GridPane.rowIndex="1" />
+                  <ComboBox
+                     fx:id="comboAnzahlFragen"
+                     prefHeight="38.0"
+                     prefWidth="200.0"
+                     style="-fx-background-color: rgba(0,40,80,0.6);
+                            -fx-border-color: rgba(0,200,255,0.35);
+                            -fx-border-width: 1.5;
+                            -fx-border-radius: 8;
+                            -fx-background-radius: 8;
+                            -fx-text-fill: white;
+                            -fx-font-family: 'Courier New';"
+                     GridPane.columnIndex="1"
+                     GridPane.rowIndex="1" />
+
+                  <!-- Row 2: Zeit je Frage -->
+                  <Label
+                     text="Zeit je Frage"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-text-fill: #90B0D0;
+                            -fx-font-weight: bold;"
+                     GridPane.rowIndex="2" />
+                  <HBox
+                     GridPane.columnIndex="1"
+                     GridPane.rowIndex="2"
+                     GridPane.valignment="CENTER"
+                     alignment="CENTER_LEFT"
+                     spacing="12.0">
+                     <ComboBox
+                        fx:id="comboZeitFrage"
+                        prefHeight="38.0"
+                        prefWidth="200.0"
+                        style="-fx-background-color: rgba(0,40,80,0.6);
+                               -fx-border-color: rgba(0,200,255,0.35);
+                               -fx-border-width: 1.5;
+                               -fx-border-radius: 8;
+                               -fx-background-radius: 8;
+                               -fx-text-fill: white;
+                               -fx-font-family: 'Courier New';" />
+                     <Label
+                        text="Sekunden"
+                        style="-fx-font-family: 'Courier New';
+                               -fx-font-size: 15px;
+                               -fx-text-fill: #5A7A9A;" />
                   </HBox>
-                  <ComboBox fx:id="comboAnzahlFragen" prefHeight="26.0" prefWidth="259.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <children>
-                        <RadioButton fx:id="toggleRandomQuestionTrue" mnemonicParsing="false" selected="true" text="Ja">
-                           <toggleGroup>
-                              <ToggleGroup fx:id="randomQuestions" />
-                           </toggleGroup>
-                           <HBox.margin>
-                              <Insets right="30.0" />
-                           </HBox.margin>
-                        </RadioButton>
-                        <RadioButton fx:id="toggleRandomQuestionFalse" mnemonicParsing="false" text="Nein" toggleGroup="$randomQuestions">
-                           <HBox.margin>
-                              <Insets right="30.0" />
-                           </HBox.margin>
-                        </RadioButton>
-                     </children>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
+
+                  <!-- Row 3: Zufällige Fragen -->
+                  <Label
+                     text="Zufällige Fragen"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-text-fill: #90B0D0;
+                            -fx-font-weight: bold;"
+                     GridPane.rowIndex="3" />
+                  <HBox
+                     alignment="CENTER_LEFT"
+                     spacing="20.0"
+                     GridPane.columnIndex="1"
+                     GridPane.rowIndex="3">
+                     <RadioButton
+                        fx:id="toggleRandomQuestionTrue"
+                        mnemonicParsing="false"
+                        selected="true"
+                        text="Ja"
+                        style="-fx-font-family: 'Courier New';
+                               -fx-font-size: 16px;
+                               -fx-text-fill: #00C8FF;">
+                        <toggleGroup>
+                           <ToggleGroup fx:id="randomQuestions" />
+                        </toggleGroup>
+                     </RadioButton>
+                     <RadioButton
+                        fx:id="toggleRandomQuestionFalse"
+                        mnemonicParsing="false"
+                        text="Nein"
+                        toggleGroup="$randomQuestions"
+                        style="-fx-font-family: 'Courier New';
+                               -fx-font-size: 16px;
+                               -fx-text-fill: #90B0D0;" />
                   </HBox>
+
                </children>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
             </GridPane>
-            <BorderPane>
-               <center>
-                  <HBox prefHeight="100.0" prefWidth="200.0">
-                     <children>
-                        <VBox alignment="TOP_CENTER" spacing="10.0" HBox.hgrow="SOMETIMES">
-                           <children>
-                              <Label text="Buzzer 1">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
-                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                                 <children>
-                                    <RadioButton fx:id="gpio1A" mnemonicParsing="false" text="A" />
-                                    <RadioButton fx:id="gpio1B" mnemonicParsing="false" text="B" />
-                                    <RadioButton fx:id="gpio1C" mnemonicParsing="false" text="C" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                        <VBox alignment="TOP_CENTER" spacing="10.0" HBox.hgrow="SOMETIMES">
-                           <children>
-                              <Label text="Buzzer 2">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
-                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                                 <children>
-                                    <RadioButton fx:id="gpio2A" mnemonicParsing="false" text="A" />
-                                    <RadioButton fx:id="gpio2B" mnemonicParsing="false" text="B" />
-                                    <RadioButton fx:id="gpio2C" mnemonicParsing="false" text="C" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                        <VBox alignment="TOP_CENTER" spacing="10.0" HBox.hgrow="SOMETIMES">
-                           <children>
-                              <Label text="Buzzer 3">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
-                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                                 <children>
-                                    <RadioButton fx:id="gpio3A" mnemonicParsing="false" text="A" />
-                                    <RadioButton fx:id="gpio3B" mnemonicParsing="false" text="B" />
-                                    <RadioButton fx:id="gpio3C" mnemonicParsing="false" text="C" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                     </children>
+         </VBox>
+
+         <!-- ── Section: Hardware Test ── -->
+         <Label
+            text="HARDWARE  –  BUZZER TEST"
+            style="-fx-font-family: 'Courier New';
+                   -fx-font-size: 13px;
+                   -fx-font-weight: bold;
+                   -fx-text-fill: #4A6A90;
+                   -fx-letter-spacing: 2px;
+                   -fx-padding: 22 0 10 4;" />
+
+         <VBox
+            spacing="0.0"
+            style="-fx-background-color: rgba(123,47,255,0.05);
+                   -fx-border-color: rgba(123,47,255,0.25);
+                   -fx-border-width: 1.5;
+                   -fx-border-radius: 14;
+                   -fx-background-radius: 14;">
+            <padding><Insets top="18.0" bottom="18.0" left="20.0" right="20.0" /></padding>
+
+            <HBox prefWidth="772.0" spacing="10.0">
+
+               <!-- Buzzer 1 -->
+               <VBox
+                  alignment="TOP_CENTER"
+                  spacing="12.0"
+                  HBox.hgrow="SOMETIMES"
+                  style="-fx-background-color: rgba(0,200,255,0.06);
+                         -fx-border-color: rgba(0,200,255,0.20);
+                         -fx-border-width: 1;
+                         -fx-border-radius: 10;
+                         -fx-background-radius: 10;">
+                  <padding><Insets top="14.0" bottom="14.0" left="12.0" right="12.0" /></padding>
+                  <Label
+                     text="🎮  BUZZER 1"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #00C8FF;" />
+                  <HBox alignment="CENTER" spacing="14.0">
+                     <RadioButton
+                        fx:id="gpio1A"
+                        mnemonicParsing="false"
+                        text="A"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio1B"
+                        mnemonicParsing="false"
+                        text="B"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio1C"
+                        mnemonicParsing="false"
+                        text="C"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
                   </HBox>
-               </center>
-               <top>
-                  <Label text="Hardware - Test" BorderPane.alignment="CENTER">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <BorderPane.margin>
-                        <Insets top="10.0" />
-                     </BorderPane.margin>
-                  </Label>
-               </top>
-            </BorderPane>
-         </children>
+               </VBox>
+
+               <!-- Buzzer 2 -->
+               <VBox
+                  alignment="TOP_CENTER"
+                  spacing="12.0"
+                  HBox.hgrow="SOMETIMES"
+                  style="-fx-background-color: rgba(123,47,255,0.07);
+                         -fx-border-color: rgba(123,47,255,0.25);
+                         -fx-border-width: 1;
+                         -fx-border-radius: 10;
+                         -fx-background-radius: 10;">
+                  <padding><Insets top="14.0" bottom="14.0" left="12.0" right="12.0" /></padding>
+                  <Label
+                     text="🎮  BUZZER 2"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #9B5FFF;" />
+                  <HBox alignment="CENTER" spacing="14.0">
+                     <RadioButton
+                        fx:id="gpio2A"
+                        mnemonicParsing="false"
+                        text="A"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio2B"
+                        mnemonicParsing="false"
+                        text="B"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio2C"
+                        mnemonicParsing="false"
+                        text="C"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                  </HBox>
+               </VBox>
+
+               <!-- Buzzer 3 -->
+               <VBox
+                  alignment="TOP_CENTER"
+                  spacing="12.0"
+                  HBox.hgrow="SOMETIMES"
+                  style="-fx-background-color: rgba(0,200,120,0.06);
+                         -fx-border-color: rgba(0,200,120,0.20);
+                         -fx-border-width: 1;
+                         -fx-border-radius: 10;
+                         -fx-background-radius: 10;">
+                  <padding><Insets top="14.0" bottom="14.0" left="12.0" right="12.0" /></padding>
+                  <Label
+                     text="🎮  BUZZER 3"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 16px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #00C878;" />
+                  <HBox alignment="CENTER" spacing="14.0">
+                     <RadioButton
+                        fx:id="gpio3A"
+                        mnemonicParsing="false"
+                        text="A"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio3B"
+                        mnemonicParsing="false"
+                        text="B"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                     <RadioButton
+                        fx:id="gpio3C"
+                        mnemonicParsing="false"
+                        text="C"
+                        style="-fx-font-family: 'Courier New'; -fx-font-size: 16px; -fx-text-fill: #90B0D0;" />
+                  </HBox>
+               </VBox>
+
+            </HBox>
+         </VBox>
       </VBox>
    </center>
+
+   <!-- ═══════════════════════  BOTTOM – BUTTONS  ═══════════════════════ -->
    <bottom>
-      <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <buttons>
-          <Button mnemonicParsing="false" onAction="#cancel" text="Abbrechen" />
-            <Button mnemonicParsing="false" onAction="#save" text="Speichern" />
-        </buttons>
-         <BorderPane.margin>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </BorderPane.margin>
-      </ButtonBar>
+      <VBox
+         style="-fx-background-color: linear-gradient(to top, #0A0D18, #0E1525);">
+
+         <!-- Separator -->
+         <Rectangle
+            height="1.5" width="820.0"
+            fill="linear-gradient(to right, transparent, rgba(0,200,255,0.3), transparent)" />
+
+         <ButtonBar
+            prefHeight="70.0"
+            prefWidth="820.0"
+            BorderPane.alignment="CENTER">
+            <padding><Insets top="14.0" bottom="14.0" left="24.0" right="24.0" /></padding>
+            <buttons>
+               <Button
+                  mnemonicParsing="false"
+                  onAction="#cancel"
+                  text="✕  ABBRECHEN"
+                  prefHeight="44.0"
+                  style="-fx-background-radius: 10;
+                         -fx-border-radius: 10;
+                         -fx-border-color: rgba(255,80,80,0.4);
+                         -fx-border-width: 1.5;
+                         -fx-background-color: rgba(80,15,15,0.5);
+                         -fx-text-fill: #FF8080;
+                         -fx-font-family: 'Courier New';
+                         -fx-font-size: 15px;
+                         -fx-cursor: hand;" />
+               <Button
+                  mnemonicParsing="false"
+                  onAction="#save"
+                  text="✔  SPEICHERN"
+                  prefHeight="44.0"
+                  style="-fx-background-radius: 10;
+                         -fx-border-radius: 10;
+                         -fx-border-color: rgba(0,200,255,0.5);
+                         -fx-border-width: 1.5;
+                         -fx-background-color: rgba(0,60,100,0.7);
+                         -fx-text-fill: #00C8FF;
+                         -fx-font-family: 'Courier New';
+                         -fx-font-size: 15px;
+                         -fx-font-weight: bold;
+                         -fx-cursor: hand;
+                         -fx-effect: dropshadow(gaussian, rgba(0,200,255,0.25), 10, 0, 0, 0);" />
+            </buttons>
+         </ButtonBar>
+      </VBox>
    </bottom>
+
 </BorderPane>
