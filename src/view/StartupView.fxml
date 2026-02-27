@@ -57,7 +57,7 @@
             <!-- Subtitle / flavour text -->
             <Label
                 text="Quiz · Buzzer · 3 Spieler"
-                style="-fx-text-fill: #66667a; -fx-font-size: 24pt; -fx-font-weight: normal;" />
+                style="-fx-text-fill: #8b949e; -fx-font-size: 24pt; -fx-font-weight: normal;" />
 
             <!-- Centre image (controller-managed) -->
             <AnchorPane fx:id="centerPane" prefHeight="320.0" prefWidth="900.0">
