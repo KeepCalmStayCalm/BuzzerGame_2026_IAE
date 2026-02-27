@@ -23,8 +23,7 @@ public class StartupViewController implements Initializable {
         gameController.showLobbyView();
     }
     
-    @FXML 
-    public void btnSettingsPressed() {
+    @FXML public void btnSettingsPressed() {
         gameController.editSettings();
     }
     
@@ -35,7 +34,6 @@ public class StartupViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Dynamisches Resizing des Hintergrundbilds an das Fenster
         if (wissHome != null && centerPane != null) {
             wissHome.fitWidthProperty().bind(centerPane.widthProperty());
             wissHome.fitHeightProperty().bind(centerPane.heightProperty());
