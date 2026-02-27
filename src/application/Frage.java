@@ -4,92 +4,50 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Klasse Frage verwaltet eine Fragen und die dazugehörigen Antworten
- * @author jacmo
- * 
+ * Verwaltet eine Frage und die dazugehörigen Antworten.
  */
 public class Frage implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private String frage;
 	private List<Antwort> antworten;
 	private String imagePath;
 
-	public String getImagePath() {
-		return imagePath;
+	public Frage(String frage, List<Antwort> antworten) {
+		this.frage = frage;
+		this.antworten = antworten;
 	}
 
-	public void setImagePath(String imagePath) {
-		this.imagePath = imagePath;
-	}
-
-	/**
-	 * 
-	 * @param frage: Frage als String eingeben
-	 * @param a: ArrayListe mit Antworten
-	 */
-	public Frage(String frage, List<Antwort> a) {
-		this.setFrage(frage);
-		this.antworten = a;
-	}	
-
-	/**
-	 * 
-	 * @param a: eine Antwort
-	 * @return: gibt boolean zurück, ob Antwort korrekt ist
-	 */
+	/** @return true wenn die gegebene Antwort korrekt ist. */
 	public boolean pruefeAntwort(Antwort a) {
 		return a.isCorrect();
 	}
 
-
-
-	/**
-	 * Alle Antworten werden durchgeschleift und die richtige herausgesucht
-	 * @return: die richtige Antwort wird als String zurückgegeben
-	 */
+	/** @return den Text der richtigen Antwort, oder {@code null} falls keine gesetzt. */
 	public String korrekteAntwort() {
-		String korrekteAntwort = null;
-		for (int i = 0; i < antworten.size(); i++) {
-			if(antworten.get(i).isCorrect()) {
-				korrekteAntwort = antworten.get(i).getAntwort();
-			}
+		for (Antwort a : antworten) {
+			if (a.isCorrect()) return a.getAntwort();
 		}
-		return korrekteAntwort;		
+		return null;
 	}
 
-	/**
-	 * Ermittelt die Nr, die vom Buzzer gedrückt werden muss
-	 * @return gibt die AntwortNummer zurück
-	 */		
+	/** @return die 1-basierte Indexnummer der richtigen Antwort (0 = nicht gefunden). */
 	public int korrekteAntwortInt() {
-		int korrekteAntwort = 0;
 		for (int i = 0; i < antworten.size(); i++) {
-			if(antworten.get(i).isCorrect()) {
-				korrekteAntwort = i+1;
-			}
+			if (antworten.get(i).isCorrect()) return i + 1;
 		}
-		return korrekteAntwort;
+		return 0;
 	}
 
-	public String getFrage() {
-		return frage;
-	}
+	// ── Getters / Setters ────────────────────────────────────────
 
-	public void setFrage(String frage) {
-		this.frage = frage;
-	}
+	public String getFrage()                       { return frage; }
+	public void   setFrage(String frage)           { this.frage = frage; }
 
-	public List<Antwort> getAntworten() {
-		return antworten;
-	}
+	public List<Antwort> getAntworten()            { return antworten; }
+	public void setAntworten(List<Antwort> a)      { this.antworten = a; }
 
-	public void setAntworten(List<Antwort> antworten) {
-		this.antworten = antworten;
-	}
-
-	/*public void frageAnzeigen() {
-		System.out.println(frage);		
-	}*/
-
-
+	public String getImagePath()                   { return imagePath; }
+	public void   setImagePath(String imagePath)   { this.imagePath = imagePath; }
 }
