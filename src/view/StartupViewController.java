@@ -18,22 +18,41 @@ public class StartupViewController implements Initializable {
     @FXML private ImageView wissHome;
     @FXML private AnchorPane centerPane;
     
+    /**
+     * Navigate to lobby view
+     */
     @FXML
     public void btnLobbyPressed(ActionEvent event) {
-        gameController.showLobbyView();
+        if (gameController != null) {
+            gameController.showLobbyView();
+        }
     }
     
-    @FXML public void btnSettingsPressed() {
-        gameController.editSettings();
+    /**
+     * Open settings window
+     */
+    @FXML 
+    public void btnSettingsPressed() {
+        if (gameController != null) {
+            gameController.editSettings();
+        }
     }
     
+    /**
+     * Set the main game controller
+     */
     public void setMainController(GameController gameController) {
         this.gameController = gameController;
-        if (btnPlay != null) btnPlay.requestFocus();
+        
+        // Set focus to play button for keyboard navigation
+        if (btnPlay != null) {
+            btnPlay.requestFocus();
+        }
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Bind image to container size
         if (wissHome != null && centerPane != null) {
             wissHome.fitWidthProperty().bind(centerPane.widthProperty());
             wissHome.fitHeightProperty().bind(centerPane.heightProperty());
