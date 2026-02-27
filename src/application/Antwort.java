@@ -3,11 +3,11 @@ package application;
 import java.io.Serializable;
 
 /**
- * Erfasst eine Antwort.
+ * Erfasst eine Antwort
+ * @author jacmo
+ *
  */
-public class Antwort implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class Antwort implements Serializable{
 
 	private String antwort;
 	private boolean isCorrect;
@@ -17,7 +17,7 @@ public class Antwort implements Serializable {
 		this.isCorrect = isCorrect;
 	}
 
-	public boolean isCorrect() {
+	public boolean isCorrect() {		
 		return isCorrect;
 	}
 
@@ -28,4 +28,5 @@ public class Antwort implements Serializable {
 	public String getAntwort() {
 		return antwort;
 	}
+
 }
