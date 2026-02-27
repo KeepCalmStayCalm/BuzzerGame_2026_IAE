@@ -14,15 +14,6 @@
       <AnchorPane prefHeight="300.0" BorderPane.alignment="CENTER">
          <children>
             <Label id="lblTitle" alignment="CENTER" text="IAE - Wie fit bist du für die IT?" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="150.0" />
-            <HBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="40.0" spacing="20.0">
-               <children>
-                  <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
-                     </image>
-                  </ImageView>
-               </children>
-            </HBox>
          </children>
       </AnchorPane>
    </top>
@@ -42,9 +33,8 @@
       <HBox alignment="CENTER" prefHeight="250.0" spacing="60.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#btnSettingsPressed" prefHeight="110.0" prefWidth="480.0" style="-fx-background-radius: 50; -fx-font-size: 30px;" text="EINSTELLUNGEN" />
-            <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#btnLobbyPressed" prefHeight="130.0" prefWidth="550.0" style="-fx-background-radius: 50; -fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 40px; -fx-font-weight: bold; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 10);" text="JETZT STARTEN" />
+            <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#btnLobbyPressed" prefHeight="130.0" prefWidth="550.0" style="-fx-background-radius: 60; -fx-font-size: 40px; -fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;" text="SPIEL STARTEN" />
          </children>
-         <padding><Insets bottom="70.0" /></padding>
       </HBox>
    </bottom>
 </BorderPane>
