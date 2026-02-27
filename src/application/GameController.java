@@ -42,6 +42,10 @@ public class GameController extends Application {
     private Context pi4j;
     private String questionFile = "resources/fragenBuzzerGame.csv";
 
+    // Listeners (declared here, initialized later to avoid self-reference)
+    private ChangeListener<Number> showAnswerSceneListener;
+    private ChangeListener<Number> showNextQuestionListener;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -55,6 +59,22 @@ public class GameController extends Application {
         questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
     }
 
+    private void initListeners() {
+        showAnswerSceneListener = (o, a, newValue) -> {
+            if (newValue.intValue() <= 0) {
+                o.removeListener(showAnswerSceneListener);
+                Platform.runLater(this::showAnswerScene);
+            }
+        };
+
+        showNextQuestionListener = (o, a, newValue) -> {
+            if (newValue.intValue() <= 0) {
+                o.removeListener(showNextQuestionListener);
+                Platform.runLater(this::scoreNotifyDone);
+            }
+        };
+    }
+
     @Override
     public void stop() {
         if (pi4j != null) pi4j.shutdown();
@@ -63,6 +83,8 @@ public class GameController extends Application {
     @Override
     public void start(Stage primaryStage) {
         readPreferences();
+        initListeners();                     // ← FIXED: listeners initialized after methods exist
+
         style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
         eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
 
@@ -127,8 +149,7 @@ public class GameController extends Application {
                     alleSpieler.add(s);
                     lobbyController.setReady(playerNum);
                 } else {
-                    ChangeListener<Number> listener = setupBuzzerListener(name, b, lobbyController, playerNum);
-                    b.getAnswer().addListener(listener);
+                    b.getAnswer().addListener(setupBuzzerListener(name, b, lobbyController, playerNum));
                 }
             }
 
@@ -144,16 +165,13 @@ public class GameController extends Application {
     }
 
     private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer, LobbyViewController lobbyController, int playerNum) {
-        return new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> obs, Number old, Number newVal) {
-                if (newVal.intValue() > 0) {
-                    Spieler s = new Spieler(name, buzzer);
-                    alleSpieler.add(s);
-                    obs.removeListener(this);          // FIXED listener removal
-                    lobbyController.setReady(playerNum);
-                    System.out.println(name + " ist bereit");
-                }
+        return (obs, old, newVal) -> {
+            if (newVal.intValue() > 0) {
+                Spieler s = new Spieler(name, buzzer);
+                alleSpieler.add(s);
+                obs.removeListener(this);
+                lobbyController.setReady(playerNum);
+                System.out.println(name + " ist bereit");
             }
         };
     }
@@ -207,13 +225,6 @@ public class GameController extends Application {
         }
     }
 
-    private final ChangeListener<Number> showAnswerSceneListener = (obs, old, newVal) -> {
-        if (newVal.intValue() <= 0) {
-            obs.removeListener(showAnswerSceneListener);
-            Platform.runLater(this::showAnswerScene);
-        }
-    };
-
     public void showAnswerScene() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
@@ -230,13 +241,6 @@ public class GameController extends Application {
             e.printStackTrace();
         }
     }
-
-    private final ChangeListener<Number> showNextQuestionListener = (obs, old, newVal) -> {
-        if (newVal.intValue() <= 0) {
-            obs.removeListener(showNextQuestionListener);
-            Platform.runLater(this::scoreNotifyDone);
-        }
-    };
 
     public void scoreNotifyDone() {
         rundenCounter++;
