@@ -9,6 +9,7 @@
 }
 
 /* ── Background panes ──────────────────────────────────────── */
+/* FIX: Removed spaces from the filename. Ensure your file is named IAE_BG_V3.png */
 #wiss_pane, #wiss_pane_small {
     -fx-background-image: url("../resources/images/IAE_BG_V3.png");
     -fx-background-size: cover;
@@ -274,6 +275,7 @@
 }
 
 /* ── Settings dialog ───────────────────────────────────────── */
+/* FIX: Corrected the invalid hex code #7070888 (7 chars) to #707088 (6 chars) */
 .text-field, .combo-box {
     -fx-background-color: #222235;
     -fx-border-color: #3c3c5a;
@@ -306,4 +308,3 @@
     -fx-border-color: #2e2e50;
     -fx-border-width: 1px;
 }
-
