@@ -1,15 +1,13 @@
 /* =============================================================
-   BuzzerGame 2026 – Dark Matte Theme  (buzzerStyle2025.css)
+   BuzzerGame 2026 – Dark Matte Theme
    ============================================================= */
 
-/* ── Root ──────────────────────────────────────────────────── */
 .root {
     -fx-background-color: #12121e;
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ── Background panes ──────────────────────────────────────── */
-/* FIX: Removed spaces from the filename. Ensure your file is named IAE_BG_V3.png */
 #wiss_pane, #wiss_pane_small {
     -fx-background-image: url("../resources/images/IAE_BG_V3.png");
     -fx-background-size: cover;
@@ -37,13 +35,10 @@
     -fx-cursor: hand;
     -fx-padding: 10px 24px;
 }
+
 .button:hover {
     -fx-background-color: #333350;
     -fx-border-color: #6060a0;
-}
-.button:pressed {
-    -fx-background-color: #1e1e30;
-    -fx-border-color: #404080;
 }
 
 /* ── Primary CTA button ────────────────────────────────────── */
@@ -54,38 +49,7 @@
     -fx-font-weight: bold;
     -fx-background-radius: 14px;
     -fx-border-color: transparent;
-    -fx-cursor: hand;
     -fx-padding: 14px 48px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.40), 14, 0, 0, 6);
-}
-.btn-primary:hover {
-    -fx-background-color: #4466dd;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 22, 0, 0, 9);
-}
-.btn-primary:pressed {
-    -fx-background-color: #2244aa;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 2);
-}
-
-/* ── Secondary / muted button ──────────────────────────────── */
-.btn-secondary {
-    -fx-background-color: #20202e;
-    -fx-text-fill: #b0b4cc;
-    -fx-font-size: 22pt;
-    -fx-font-weight: bold;
-    -fx-background-radius: 10px;
-    -fx-border-color: #3c3c5a;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 10px;
-    -fx-cursor: hand;
-    -fx-padding: 10px 30px;
-}
-.btn-secondary:hover {
-    -fx-background-color: #2c2c3e;
-    -fx-border-color: #6868a0;
-}
-.btn-secondary:pressed {
-    -fx-background-color: #181824;
 }
 
 /* ── Answer option cards ───────────────────────────────────── */
@@ -97,11 +61,13 @@
     -fx-background-radius: 18px;
     -fx-padding: 22px;
 }
+
 .answer-card-letter {
     -fx-text-fill: #7070bb;
     -fx-font-size: 32pt;
     -fx-font-weight: bold;
 }
+
 .answer-card-text {
     -fx-text-fill: #eceeff;
     -fx-font-size: 30pt;
@@ -117,193 +83,34 @@
     -fx-background-radius: 20px;
 }
 
-/* ── Score table ───────────────────────────────────────────── */
-.score-header {
-    -fx-text-fill: #8080bb;
-    -fx-font-size: 20pt;
-    -fx-font-weight: bold;
-}
-.score-cell {
-    -fx-text-fill: #d0d4ee;
-    -fx-font-size: 26pt;
-    -fx-font-weight: bold;
-}
-.score-positive {
-    -fx-text-fill: #55cc80;
-    -fx-font-size: 26pt;
-    -fx-font-weight: bold;
-}
-.labelZwischenstand {
-    -fx-text-fill: #d0d4ee;
-    -fx-font-size: 26pt;
-    -fx-font-weight: bold;
-}
-
 /* ── Player colour chips ───────────────────────────────────── */
-.spieler1 {
-    -fx-background-color: #006f7e;
-    -fx-text-fill: #ffffff;
-    -fx-font-weight: bold;
-    -fx-font-size: 36pt;
-    -fx-padding: 14pt;
-    -fx-background-radius: 12px;
-}
-.spieler2 {
-    -fx-background-color: #9e8000;
-    -fx-text-fill: #ffffff;
-    -fx-font-weight: bold;
-    -fx-font-size: 36pt;
-    -fx-padding: 14pt;
-    -fx-background-radius: 12px;
-}
-.spieler3 {
-    -fx-background-color: #9a2600;
-    -fx-text-fill: #ffffff;
-    -fx-font-weight: bold;
-    -fx-font-size: 36pt;
-    -fx-padding: 14pt;
-    -fx-background-radius: 12px;
-}
+.spieler1 { -fx-background-color: #006f7e; -fx-text-fill: white; }
+.spieler2 { -fx-background-color: #9e8000; -fx-text-fill: white; }
+.spieler3 { -fx-background-color: #9a2600; -fx-text-fill: white; }
 
-/* ── Legacy vbox for answer/score cards ────────────────────── */
-.vbox {
-    -fx-text-fill: #dde1f0;
-    -fx-padding: 15pt;
-    -fx-border-color: #38386a;
-    -fx-border-width: 2pt;
-    -fx-border-radius: 14pt;
-    -fx-background-color: rgba(20, 20, 46, 0.86);
-    -fx-background-radius: 14pt;
-    -fx-font-weight: bold;
-    -fx-font-size: 28pt;
-}
-
-.zwischenstand .label {
-    -fx-padding: 8pt;
-    -fx-font-weight: bold;
-    -fx-font-size: 26pt;
-    -fx-text-fill: #dde1f0;
-}
-.label_bigger {
-    -fx-text-fill: #dde1f0;
-    -fx-font-weight: bold;
-    -fx-font-size: 32pt;
-}
-.btnStartScreen {
-    -fx-font-weight: bold;
-}
-
-/* ── Named IDs ─────────────────────────────────────────────── */
+/* ── Specific IDs ──────────────────────────────────────────── */
 #lblZeit {
     -fx-text-fill: #b8c0f0;
-    -fx-border-color: transparent;
     -fx-font-size: 86pt;
     -fx-font-weight: bold;
 }
-#lblTitle {
-    -fx-text-fill: #eef0ff;
-    -fx-border-color: transparent;
-    -fx-font-size: 68pt;
-    -fx-font-weight: bold;
-}
-#lblTitle2 {
-    -fx-text-fill: #eef0ff;
-    -fx-border-color: transparent;
-    -fx-font-size: 54pt;
-    -fx-font-weight: bold;
-}
+
 #lblFrage {
     -fx-text-fill: #eef0ff;
-    -fx-font-size: 40pt;
+    -fx-font-size: 36pt;
     -fx-font-weight: bold;
-    -fx-border-color: transparent;
-}
-#lblSpieler {
-    -fx-font-size: 26pt;
-    -fx-border-color: transparent;
-    -fx-font-weight: normal;
-    -fx-text-fill: #b8bcd4;
-}
-#lblZwischenstand, #lblEndstand {
-    -fx-border-color: transparent;
-    -fx-text-fill: #eef0ff;
-}
-#lblZwischenstandHeader {
-    -fx-text-fill: #7878b8;
-    -fx-font-size: 20pt;
-    -fx-font-weight: bold;
-}
-#endergebnis .label {
-    -fx-border-color: transparent;
-    -fx-text-fill: #eef0ff;
-}
-#hBoxZwischenstand, #hBoxEndstand {
-    -fx-border-color: #38386a;
-    -fx-border-width: 1.5pt;
-    -fx-border-radius: 12pt;
-}
-#lblReady {
-    -fx-text-fill: #44cc66;
-    -fx-border-color: transparent;
-    -fx-font-weight: bold;
-}
-#lblBildenZukunft {
-    -fx-border-color: transparent;
-    -fx-font-size: 22pt;
-    -fx-text-fill: #66667a;
-    -fx-font-weight: normal;
-}
-#lblAntwort {
-    -fx-text-fill: #66ddaa;
-    -fx-font-size: 30pt;
-    -fx-font-weight: bold;
-    -fx-border-color: transparent;
 }
 
-/* ── Podium bars ───────────────────────────────────────────── */
-#rectPlatz1 {
-    -fx-background-color: #b08800;
-    -fx-background-radius: 10px 10px 0 0;
-}
-#rectPlatz2 {
-    -fx-background-color: #707070;
-    -fx-background-radius: 10px 10px 0 0;
-}
-#rectPlatz3 {
-    -fx-background-color: #7a3e14;
-    -fx-background-radius: 10px 10px 0 0;
-}
-
-/* ── Settings dialog ───────────────────────────────────────── */
-/* FIX: Corrected the invalid hex code #7070888 (7 chars) to #707088 (6 chars) */
+/* ── Settings dialog (FIXED COLOR CODE HERE) ───────────────── */
 .text-field, .combo-box {
     -fx-background-color: #222235;
     -fx-border-color: #3c3c5a;
     -fx-border-width: 1.5px;
     -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-text-fill: #dde1f0;
-    -fx-prompt-text-fill: #55556a;
+    -fx-text-fill: #707088; /* Changed from #7070888 (invalid) to #707088 */
     -fx-font-size: 14pt;
-    -fx-padding: 6px 10px;
 }
-.text-field:focused, .combo-box:focused {
-    -fx-border-color: #6060a0;
-}
-.combo-box .list-cell {
-    -fx-text-fill: #dde1f0;
-    -fx-background-color: transparent;
-}
-.combo-box .list-cell:filled:hover {
-    -fx-background-color: #303050;
-}
-.radio-button {
-    -fx-text-fill: #a8acc4;
-    -fx-font-size: 15pt;
-}
-.radio-button:selected {
-    -fx-text-fill: #8888cc;
-}
+
 .separator *.line {
     -fx-border-color: #2e2e50;
     -fx-border-width: 1px;
