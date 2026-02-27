@@ -1,117 +1,160 @@
-/* =============================================================
-   BuzzerGame 2026 – Dark Matte Theme
-   ============================================================= */
-
 .root {
-    -fx-background-color: #12121e;
-    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	-fx-background-color: white;
 }
 
-/* ── Background panes ──────────────────────────────────────── */
-#wiss_pane, #wiss_pane_small {
-    -fx-background-image: url("../resources/images/IAE_BG_V3.png");
-    -fx-background-size: cover;
-    -fx-background-position: center;
-    -fx-background-repeat: no-repeat;
+#wiss_pane {
+    -fx-background-image: url("../res/LogoWISS.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: 300 81;
+    -fx-background-position: top right;
 }
 
-/* ── Base label ────────────────────────────────────────────── */
-.label {
-    -fx-text-fill: #dde1f0;
-    -fx-font-size: 22pt;
-    -fx-font-weight: bold;
+#wiss_pane_small {
+    -fx-background-image: url("../res/LogoWISS.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: 200 54;
+    -fx-background-position: top right;
 }
 
-/* ── Base button ───────────────────────────────────────────── */
+/* --- Interactive General Buttons --- */
+.button, .label {
+	-fx-text-fill: #212529;
+	-fx-font-weight: bold;
+	-fx-font-size: 24pt;
+}
+
 .button {
-    -fx-background-color: #252536;
-    -fx-text-fill: #dde1f0;
-    -fx-font-size: 20pt;
-    -fx-font-weight: bold;
-    -fx-background-radius: 10px;
-    -fx-border-color: #3c3c5a;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 10px;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
-    -fx-padding: 10px 24px;
+    -fx-transition-duration: 0.2s;
 }
 
 .button:hover {
-    -fx-background-color: #333350;
-    -fx-border-color: #6060a0;
+    -fx-background-color: #e0e0e0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);
 }
 
-/* ── Primary CTA button ────────────────────────────────────── */
-.btn-primary {
-    -fx-background-color: #3355cc;
-    -fx-text-fill: white;
-    -fx-font-size: 28pt;
-    -fx-font-weight: bold;
-    -fx-background-radius: 14px;
-    -fx-border-color: transparent;
-    -fx-padding: 14px 48px;
+.button:pressed {
+    -fx-background-color: #bdbdbd;
+    -fx-translate-y: 2px; /* Makes the button look pushed down */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
 }
 
-/* ── Answer option cards ───────────────────────────────────── */
-.answer-card {
-    -fx-background-color: rgba(20, 20, 46, 0.86);
-    -fx-border-color: #38386a;
-    -fx-border-width: 2px;
-    -fx-border-radius: 18px;
-    -fx-background-radius: 18px;
-    -fx-padding: 22px;
+/* --- Player/Buzzer Buttons --- */
+.spieler1 {
+	-fx-background-color: #00e9ff;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
+    -fx-background-radius: 15;
+}
+.spieler1:hover {
+    -fx-background-color: #00d4e8;
+    -fx-effect: dropshadow(three-pass-box, #00e9ff, 15, 0, 0, 0);
+}
+.spieler1:pressed {
+    -fx-background-color: #00b3c4;
+    -fx-translate-y: 4px;
 }
 
-.answer-card-letter {
-    -fx-text-fill: #7070bb;
-    -fx-font-size: 32pt;
-    -fx-font-weight: bold;
+.spieler2 {
+	-fx-background-color: #f7ff00;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
+    -fx-background-radius: 15;
+}
+.spieler2:hover {
+    -fx-background-color: #dee600;
+    -fx-effect: dropshadow(three-pass-box, #f7ff00, 15, 0, 0, 0);
+}
+.spieler2:pressed {
+    -fx-background-color: #bec500;
+    -fx-translate-y: 4px;
 }
 
-.answer-card-text {
-    -fx-text-fill: #eceeff;
-    -fx-font-size: 30pt;
-    -fx-font-weight: bold;
+.spieler3 {
+	-fx-background-color: #ff3c00;
+	-fx-font-weight: bold;
+	-fx-font-size: 40pt;
+	-fx-padding: 15pt;
+    -fx-background-radius: 15;
+}
+.spieler3:hover {
+    -fx-background-color: #e63600;
+    -fx-effect: dropshadow(three-pass-box, #ff3c00, 15, 0, 0, 0);
+}
+.spieler3:pressed {
+    -fx-background-color: #cc3000;
+    -fx-translate-y: 4px;
 }
 
-/* ── Player lobby cards ────────────────────────────────────── */
-.player-card {
-    -fx-background-color: rgba(18, 18, 42, 0.82);
-    -fx-border-color: #33335a;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 20px;
-    -fx-background-radius: 20px;
+/* --- Containers and Labels --- */
+.vbox {
+	-fx-text-fill: #212529;
+	-fx-padding: 15pt;
+	-fx-border-color: #a8a8a8;
+	-fx-border-width: 5pt;
+	-fx-border-radius: 20pt;
+	-fx-font-weight: bold;
+	-fx-font-size: 30pt;
 }
 
-/* ── Player colour chips ───────────────────────────────────── */
-.spieler1 { -fx-background-color: #006f7e; -fx-text-fill: white; }
-.spieler2 { -fx-background-color: #9e8000; -fx-text-fill: white; }
-.spieler3 { -fx-background-color: #9a2600; -fx-text-fill: white; }
+.label_bigger {
+	-fx-text-fill: #212529;
+	-fx-font-weight: bold;
+	-fx-font-size: 36pt;
+}
 
-/* ── Specific IDs ──────────────────────────────────────────── */
-#lblZeit {
-    -fx-text-fill: #b8c0f0;
-    -fx-font-size: 86pt;
-    -fx-font-weight: bold;
+.zwischenstand .label {
+	-fx-padding: 10pt;
+	-fx-font-weight: bold;
+	-fx-font-size: 30pt;
+}
+
+#lblZeit, #lblTitle {
+	-fx-text-fill: #212529;
+	-fx-border-color: none;
+	-fx-font-size: 90pt;
+}
+
+#lblTitle2 {
+	-fx-text-fill: #212529;
+	-fx-border-color: none;
+	-fx-font-size: 60pt;
 }
 
 #lblFrage {
-    -fx-text-fill: #eef0ff;
-    -fx-font-size: 36pt;
-    -fx-font-weight: bold;
+	-fx-text-fill: #212529;
+	-fx-font-size: 45pt;
 }
 
-/* ── Settings dialog (FIXED COLOR CODE HERE) ───────────────── */
-.text-field, .combo-box {
-    -fx-background-color: #222235;
-    -fx-border-color: #3c3c5a;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: #707088; /* Changed from #7070888 (invalid) to #707088 */
-    -fx-font-size: 14pt;
+#lblSpieler {
+	-fx-font-size: 30pt;
+	-fx-border-color: none;
+	-fx-font-weight: normal;
 }
 
-.separator *.line {
-    -fx-border-color: #2e2e50;
-    -fx-border-width: 1px;
+#hBoxZwischenstand, #hBoxEndstand {
+	-fx-border-width: 5pt;
+	-fx-border-radius: 10pt;
+	/* -fx-margin-top is not a standard JavaFX CSS property; 
+	   it's usually handled via -fx-padding or in FXML layout */
+}
+
+#lblReady {
+	-fx-text-fill: white;
+	-fx-border-color: none;
+}
+
+.btnStartScreen {
+	-fx-font-weight: bold;
+    -fx-background-color: #212529;
+    -fx-text-fill: white;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5;
+}
+
+.btnStartScreen:hover {
+    -fx-background-color: #343a40;
 }
