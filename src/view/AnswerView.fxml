@@ -11,58 +11,315 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 
-<BorderPane id="wiss_pane" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" styleClass="zwischenstand" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.AnswerViewController">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  AnswerView  –  Zwischenstand / Round Scores                             ║
+  ║  Shows correct answer + leaderboard for 3 players after each round       ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+
+<BorderPane
+   id="wiss_pane"
+   maxHeight="1080.0" maxWidth="1920.0"
+   minHeight="1080.0" minWidth="1920.0"
+   prefHeight="1080.0" prefWidth="1920.0"
+   styleClass="zwischenstand"
+   style="-fx-background-color: #0A0E1A;"
+   stylesheets="@../application/buzzerStyle2025.css"
+   xmlns="http://javafx.com/javafx/24.0.1"
+   xmlns:fx="http://javafx.com/fxml/1"
+   fx:controller="view.AnswerViewController">
+
+   <!-- ═══════════════════════  TOP  ═══════════════════════ -->
    <top>
-      <AnchorPane prefHeight="250.0">
-         <children>
-            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0">
-               <children>
-                  <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
-                     </image>
-                  </ImageView>
-                  <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
-               </children>
-            </HBox>
-            <Label id="lblTitle" alignment="CENTER" text="Zwischenstand" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="130.0" />
-         </children>
+      <AnchorPane
+         prefHeight="260.0"
+         style="-fx-background-color: linear-gradient(to bottom, #0D1220, #0A0E1A);">
+
+         <!-- Top accent bar -->
+         <Rectangle
+            height="4.0" width="1920.0"
+            layoutX="0.0" layoutY="0.0"
+            fill="linear-gradient(to right, #7B2FFF, #00C8FF, #7B2FFF)" />
+
+         <!-- Logo + Tag -->
+         <HBox
+            alignment="CENTER_LEFT"
+            layoutX="40.0" layoutY="30.0"
+            spacing="18.0">
+            <ImageView
+               fitWidth="110.0"
+               pickOnBounds="true"
+               preserveRatio="true"
+               style="-fx-effect: dropshadow(gaussian, #00C8FF, 12, 0.4, 0, 0);">
+               <image>
+                  <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
+               </image>
+            </ImageView>
+            <Label
+               id="lblBildenZukunft"
+               text="#IAE_Future_Skills"
+               style="-fx-font-family: 'Courier New';
+                      -fx-font-size: 20px;
+                      -fx-text-fill: #00C8FF;
+                      -fx-font-weight: bold;
+                      -fx-opacity: 0.75;" />
+         </HBox>
+
+         <!-- "Zwischenstand" title -->
+         <Label
+            id="lblTitle"
+            alignment="CENTER"
+            text="📊  ZWISCHENSTAND"
+            style="-fx-font-family: 'Courier New';
+                   -fx-font-size: 56px;
+                   -fx-font-weight: bold;
+                   -fx-text-fill: white;
+                   -fx-effect: dropshadow(gaussian, #00C8FF, 22, 0.5, 0, 0);"
+            AnchorPane.leftAnchor="150.0"
+            AnchorPane.rightAnchor="150.0"
+            AnchorPane.topAnchor="130.0" />
+
+         <!-- Divider -->
+         <Rectangle
+            height="2.0" width="700.0"
+            layoutX="610.0" layoutY="248.0"
+            fill="linear-gradient(to right, transparent, #00C8FF, transparent)"
+            opacity="0.5" />
       </AnchorPane>
    </top>
+
+   <!-- ═══════════════════════  CENTER  ═══════════════════════ -->
    <center>
-      <VBox alignment="CENTER" spacing="50.0" BorderPane.alignment="CENTER">
-         <children>
-            <GridPane alignment="CENTER" hgap="20.0" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+      <VBox
+         alignment="CENTER"
+         spacing="50.0"
+         style="-fx-background-color: #0A0E1A;"
+         BorderPane.alignment="CENTER">
+         <padding><Insets left="120.0" right="120.0" top="20.0" bottom="20.0" /></padding>
+
+         <!-- ── Leaderboard table ── -->
+         <VBox
+            spacing="0.0"
+            style="-fx-background-color: rgba(10,20,40,0.6);
+                   -fx-border-color: rgba(0,200,255,0.30);
+                   -fx-border-width: 2;
+                   -fx-border-radius: 20;
+                   -fx-background-radius: 20;
+                   -fx-effect: dropshadow(gaussian, rgba(0,200,255,0.15), 30, 0, 0, 0);">
+
+            <!-- Table header -->
+            <GridPane
+               hgap="20.0" vgap="0.0"
+               style="-fx-background-color: rgba(0,200,255,0.10);
+                      -fx-background-radius: 18 18 0 0;
+                      -fx-border-color: transparent transparent rgba(0,200,255,0.25) transparent;
+                      -fx-border-width: 0 0 2 0;">
+               <padding><Insets top="22.0" bottom="22.0" left="40.0" right="40.0" /></padding>
+               <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+               </rowConstraints>
                <children>
-                  <Label id="lblZwischenstandHeader" text="Spieler" />
-                  <Label id="lblZwischenstandHeader" text="Rundenpunkte" GridPane.columnIndex="1" />
-                  <Label id="lblZwischenstandHeader" text="Gesamtpunkte" GridPane.columnIndex="2" />
-                  <Label fx:id="lblS1Name" styleClass="labelZwischenstand" text="-" GridPane.rowIndex="1" />
-                  <Label fx:id="lblS1PunkteDazu" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label fx:id="lblS1PunkteGesamt" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <Label fx:id="lblS2Name" styleClass="labelZwischenstand" text="-" GridPane.rowIndex="2" />
-                  <Label fx:id="lblS2PunkteDazu" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label fx:id="lblS2PunkteGesamt" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <Label fx:id="lblS3Name" styleClass="labelZwischenstand" text="-" GridPane.rowIndex="3" />
-                  <Label fx:id="lblS3PunkteDazu" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label fx:id="lblS3PunkteGesamt" styleClass="labelZwischenstand" text="-" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <Label
+                     id="lblZwischenstandHeader"
+                     text="🎮  SPIELER"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 26px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #00C8FF;
+                            -fx-letter-spacing: 2px;" />
+                  <Label
+                     id="lblZwischenstandHeader"
+                     text="⚡ RUNDENPUNKTE"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 26px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #7B2FFF;
+                            -fx-letter-spacing: 1px;"
+                     GridPane.columnIndex="1" />
+                  <Label
+                     id="lblZwischenstandHeader"
+                     text="🏆 GESAMTPUNKTE"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 26px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #FFD700;
+                            -fx-letter-spacing: 1px;"
+                     GridPane.columnIndex="2" />
                </children>
             </GridPane>
-            <Label id="lblAntwort" fx:id="lblAntwort" text="Richtig war..." textAlignment="CENTER" wrapText="true" />
-         </children>
-         <padding><Insets left="150.0" right="150.0" /></padding>
+
+            <!-- Player rows -->
+            <GridPane
+               hgap="20.0" vgap="0.0"
+               style="-fx-background-color: rgba(0,30,60,0.40);
+                      -fx-background-radius: 0;
+                      -fx-border-color: transparent transparent rgba(0,200,255,0.12) transparent;
+                      -fx-border-width: 0 0 1 0;">
+               <padding><Insets top="18.0" bottom="18.0" left="40.0" right="40.0" /></padding>
+               <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="70.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label
+                     fx:id="lblS1Name"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: white;" />
+                  <Label
+                     fx:id="lblS1PunkteDazu"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-text-fill: #9B5FFF;"
+                     GridPane.columnIndex="1" />
+                  <Label
+                     fx:id="lblS1PunkteGesamt"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #FFD700;"
+                     GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+
+            <GridPane
+               hgap="20.0" vgap="0.0"
+               style="-fx-background-color: rgba(0,20,40,0.35);
+                      -fx-border-color: transparent transparent rgba(0,200,255,0.12) transparent;
+                      -fx-border-width: 0 0 1 0;">
+               <padding><Insets top="18.0" bottom="18.0" left="40.0" right="40.0" /></padding>
+               <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="70.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label
+                     fx:id="lblS2Name"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: white;" />
+                  <Label
+                     fx:id="lblS2PunkteDazu"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-text-fill: #9B5FFF;"
+                     GridPane.columnIndex="1" />
+                  <Label
+                     fx:id="lblS2PunkteGesamt"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #FFD700;"
+                     GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+
+            <GridPane
+               hgap="20.0" vgap="0.0"
+               style="-fx-background-color: rgba(0,30,60,0.40);
+                      -fx-background-radius: 0 0 18 18;">
+               <padding><Insets top="18.0" bottom="18.0" left="40.0" right="40.0" /></padding>
+               <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="70.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label
+                     fx:id="lblS3Name"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: white;" />
+                  <Label
+                     fx:id="lblS3PunkteDazu"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-text-fill: #9B5FFF;"
+                     GridPane.columnIndex="1" />
+                  <Label
+                     fx:id="lblS3PunkteGesamt"
+                     styleClass="labelZwischenstand"
+                     text="—"
+                     style="-fx-font-family: 'Courier New';
+                            -fx-font-size: 40px;
+                            -fx-font-weight: bold;
+                            -fx-text-fill: #FFD700;"
+                     GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+
+         </VBox>
+
+         <!-- ── Correct answer reveal banner ── -->
+         <VBox
+            alignment="CENTER"
+            style="-fx-background-color: linear-gradient(to right, rgba(0,200,80,0.12), rgba(0,200,80,0.18), rgba(0,200,80,0.12));
+                   -fx-border-color: rgba(0,200,80,0.55);
+                   -fx-border-width: 2.5;
+                   -fx-border-radius: 18;
+                   -fx-background-radius: 18;
+                   -fx-effect: dropshadow(gaussian, rgba(0,200,80,0.30), 30, 0, 0, 0);">
+            <padding><Insets top="28.0" bottom="28.0" left="50.0" right="50.0" /></padding>
+            <Label
+               text="✅  RICHTIGE ANTWORT"
+               style="-fx-font-family: 'Courier New';
+                      -fx-font-size: 22px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: #00FF80;
+                      -fx-letter-spacing: 3px;" />
+            <Label
+               id="lblAntwort"
+               fx:id="lblAntwort"
+               text="Richtig war..."
+               textAlignment="CENTER"
+               wrapText="true"
+               style="-fx-font-family: 'Courier New';
+                      -fx-font-size: 44px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: white;
+                      -fx-text-alignment: center;
+                      -fx-effect: dropshadow(gaussian, rgba(0,255,128,0.25), 10, 0, 0, 0);" />
+         </VBox>
+
       </VBox>
    </center>
+
 </BorderPane>
