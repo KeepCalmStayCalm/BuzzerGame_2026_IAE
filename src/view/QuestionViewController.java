@@ -31,13 +31,13 @@ public class QuestionViewController implements Initializable {
 
 	GameController gameController;
 	private Frage frage;
+	
 	@FXML private Label lblRestzeit;
 	@FXML private Label lblFrage;
 	@FXML private Label lblAntwort1;
 	@FXML private Label lblAntwort2;
 	@FXML private Label lblAntwort3;
-
-	@FXML BorderPane imageRoot;
+	@FXML private BorderPane imageRoot;
 	@FXML private ImageView image;
 	
 	private IntegerProperty restzeit;
@@ -58,27 +58,27 @@ public class QuestionViewController implements Initializable {
 	
 	public void initFrage(Frage frage, Set<Spieler> spielerliste, int maxZeit) {
 		this.frage = frage;
-		lblFrage.setText(frage.getFrage());
-		setAnswers(frage.getAntworten());
 		this.maxZeit = maxZeit;
 		this.timeStart = System.currentTimeMillis();
 
-		if (frage.getImagePath() != null) {
-			try {
-				InputStream is = new FileInputStream(frage.getImagePath());
-				image.setImage(new Image(is));
-			} catch (Exception e) {
-				System.out.println("Image not found: " + frage.getImagePath());
-			}
-		} else {
-			InputStream is = this.getClass().getResourceAsStream("/resources/images/wiss_home.jpg");
-			if (is != null) image.setImage(new Image(is));
-		}
+		// Texte setzen mit Null-Check
+		if (lblFrage != null) lblFrage.setText(frage.getFrage());
+		setAnswers(frage.getAntworten());
 
-		// Fix für den NullPointerException: Prüfen ob imageRoot in FXML geladen wurde
-		if (imageRoot != null && image.getImage() != null) {
-			image.fitWidthProperty().bind(imageRoot.widthProperty());
-			image.fitHeightProperty().bind(imageRoot.heightProperty());
+		// Bild laden
+		if (image != null) {
+			if (frage.getImagePath() != null) {
+				try (InputStream is = new FileInputStream(frage.getImagePath())) {
+					image.setImage(new Image(is));
+				} catch (Exception e) {
+					System.out.println("Bild konnte nicht geladen werden.");
+				}
+			}
+			
+			if (imageRoot != null && image.getImage() != null) {
+				image.fitWidthProperty().bind(imageRoot.widthProperty());
+				image.fitHeightProperty().bind(imageRoot.heightProperty());
+			}
 		}
 				
 		getRestzeit().setValue(maxZeit);		
@@ -88,32 +88,6 @@ public class QuestionViewController implements Initializable {
 	}
 	
 	private void initPlayers(Set<Spieler> spielerliste) {
-		if (GameController.IS_DEV_MODE) {
-			spielerliste.iterator().forEachRemaining(spieler -> {
-				if (spieler.getBuzzer() instanceof MouseBuzzer) {
-					spieler.getAntwortNr().addListener(new ChangeListener<Number>() {
-						@Override
-						public void changed(ObservableValue<? extends Number> arg0, Number alt, Number neu) {	
-							if((int)neu == frage.korrekteAntwortInt()) {
-								long pressedTime = System.currentTimeMillis();
-								int punkte = Math.max(0, (maxZeit*1000 - (int)(pressedTime - timeStart))/100);
-								spieler.addPunkte(punkte);
-								spieler.setRundenpunkte(punkte);
-							}
-							spieler.getAntwortNr().removeListener(this);
-							antworten++;
-							if (antworten >= spielerliste.size()) restzeit.set(0);
-						}
-					});
-
-					lblAntwort1.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(1));	
-					lblAntwort2.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(2));	
-					lblAntwort3.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(3));	
-				}
-			});
-			return;
-		}
-		
 		new HashSet<>(spielerliste).forEach(spieler -> {		
 			spieler.reset();
 			spieler.getAntwortNr().addListener(new ChangeListener<Number>() {
@@ -131,13 +105,20 @@ public class QuestionViewController implements Initializable {
 				}
 			});
 			spieler.setRundenpunkte(0);
+
+			// Click-Handler für DEV/Maus-Modus
+			if (GameController.IS_DEV_MODE && spieler.getBuzzer() instanceof MouseBuzzer) {
+				lblAntwort1.setOnMouseClicked(e -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(1));
+				lblAntwort2.setOnMouseClicked(e -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(2));
+				lblAntwort3.setOnMouseClicked(e -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(3));
+			}
 		});
 	}
 	
 	private void setAnswers(List<Antwort> antworten) {		
-		lblAntwort1.setText(antworten.get(0).getAntwort());
-		lblAntwort2.setText(antworten.get(1).getAntwort());
-		lblAntwort3.setText(antworten.get(2).getAntwort());
+		if(lblAntwort1 != null) lblAntwort1.setText(antworten.get(0).getAntwort());
+		if(lblAntwort2 != null) lblAntwort2.setText(antworten.get(1).getAntwort());
+		if(lblAntwort3 != null) lblAntwort3.setText(antworten.get(2).getAntwort());
 	}
 	
 	@Override
@@ -146,11 +127,14 @@ public class QuestionViewController implements Initializable {
 	TimerTask tTask = new TimerTask() {
 		@Override
 		public void run() {
-			getRestzeit().setValue(maxZeit - (int)(System.currentTimeMillis()-timeStart)/1000);
-			Platform.runLater(updateRestzeitLabel); 
-			if (getRestzeit().intValue()<=0) timer.cancel();
+			int current = maxZeit - (int)(System.currentTimeMillis()-timeStart)/1000;
+			getRestzeit().setValue(current);
+			Platform.runLater(() -> {
+				if (lblRestzeit != null) {
+					lblRestzeit.setText(String.valueOf(getRestzeit().get()));
+				}
+			}); 
+			if (current <= 0) timer.cancel();
 		}
 	};
-	
-	private Runnable updateRestzeitLabel = () -> lblRestzeit.setText(String.valueOf(getRestzeit().intValue()));
 }
