@@ -18,7 +18,7 @@
                <children>
                   <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/IAE Logo - S.png" />
+                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
                   <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
