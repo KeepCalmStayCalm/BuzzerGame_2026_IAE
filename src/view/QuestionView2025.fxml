@@ -17,45 +17,41 @@
     minHeight="1080.0" minWidth="1920.0"
     prefHeight="1080.0" prefWidth="1920.0"
     stylesheets="@../application/buzzerStyle2025.css"
-    xmlns="http://javafx.com/javafx/24.0.1"
+    xmlns="http://javafx.com/javafx/22"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="view.QuestionViewController">
 
     <top>
         <VBox spacing="0.0">
-            <HBox alignment="CENTER_LEFT" spacing="18.0"
-                  style="-fx-padding: 28 50 16 50; -fx-background-color: rgba(10,10,24,0.55);">
+            <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 28 50 16 50; -fx-background-color: rgba(10,10,24,0.55);">
                 <children>
                     <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                         <image>
                             <Image url="@../resources/images/IAE_Logo_S.png" />
                         </image>
                     </ImageView>
-                    <Label id="lblBildenZukunft" text="#IAE_Future_Skills" />
+                    <Label text="#IAE_Future_Skills" style="-fx-text-fill: #66667a; -fx-font-size: 22pt;" />
                     
-                    <ImageView fx:id="image" fitHeight="80.0" preserveRatio="true" />
+                    <ImageView fx:id="image" fitHeight="1.0" fitWidth="1.0" opacity="0.0" />
                 </children>
             </HBox>
 
             <Separator style="-fx-opacity: 0.20;" />
 
-            <AnchorPane prefHeight="240.0"
-                        style="-fx-background-color: rgba(8,8,20,0.45); -fx-padding: 24 80 24 80;">
+            <AnchorPane prefHeight="280.0" style="-fx-background-color: rgba(8,8,20,0.45); -fx-padding: 24 80 24 80;">
                 <children>
                     <Label
                         fx:id="lblFrage"
-                        id="lblFrage"
                         alignment="CENTER"
                         textAlignment="CENTER"
                         wrapText="true"
-                        text="Lädt Frage…"
+                        text="Warten auf Frage..."
                         AnchorPane.leftAnchor="0.0"
                         AnchorPane.rightAnchor="0.0"
-                        AnchorPane.topAnchor="18.0"
-                        AnchorPane.bottomAnchor="18.0" />
+                        AnchorPane.topAnchor="0.0"
+                        AnchorPane.bottomAnchor="0.0" />
                 </children>
             </AnchorPane>
-
             <Separator style="-fx-opacity: 0.20;" />
         </VBox>
     </top>
@@ -68,21 +64,21 @@
                     <children>
                         <Label styleClass="answer-card-letter" text="A" />
                         <Separator style="-fx-opacity: 0.25;" />
-                        <Label fx:id="lblAntwort1" styleClass="answer-card-text" text="Antwort A" textAlignment="CENTER" wrapText="true" />
+                        <Label fx:id="lblAntwort1" styleClass="answer-card-text" text="–" textAlignment="CENTER" wrapText="true" />
                     </children>
                 </VBox>
                 <VBox alignment="TOP_CENTER" spacing="16.0" styleClass="answer-card" HBox.hgrow="ALWAYS">
                     <children>
                         <Label styleClass="answer-card-letter" text="B" />
                         <Separator style="-fx-opacity: 0.25;" />
-                        <Label fx:id="lblAntwort2" styleClass="answer-card-text" text="Antwort B" textAlignment="CENTER" wrapText="true" />
+                        <Label fx:id="lblAntwort2" styleClass="answer-card-text" text="–" textAlignment="CENTER" wrapText="true" />
                     </children>
                 </VBox>
                 <VBox alignment="TOP_CENTER" spacing="16.0" styleClass="answer-card" HBox.hgrow="ALWAYS">
                     <children>
                         <Label styleClass="answer-card-letter" text="C" />
                         <Separator style="-fx-opacity: 0.25;" />
-                        <Label fx:id="lblAntwort3" styleClass="answer-card-text" text="Antwort C" textAlignment="CENTER" wrapText="true" />
+                        <Label fx:id="lblAntwort3" styleClass="answer-card-text" text="–" textAlignment="CENTER" wrapText="true" />
                     </children>
                 </VBox>
             </children>
@@ -90,20 +86,16 @@
     </center>
 
     <bottom>
-        <AnchorPane prefHeight="160.0"
-            style="-fx-background-color: rgba(8,8,20,0.50); -fx-border-color: transparent #0000 rgba(255,255,255,0.06) #0000; -fx-border-width: 1.5px;">
+        <AnchorPane prefHeight="160.0">
             <children>
                 <Label
                     fx:id="lblZeit"
-                    id="lblZeit"
                     alignment="CENTER"
                     text="20"
                     AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="20.0"
-                    AnchorPane.bottomAnchor="10.0">
-                    <font><Font name="System Bold" size="88.0" /></font>
-                </Label>
+                    AnchorPane.topAnchor="0.0"
+                    AnchorPane.bottomAnchor="0.0" />
             </children>
         </AnchorPane>
     </bottom>
