@@ -35,7 +35,7 @@ public class StartupViewController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (wissHome != null && centerPane != null) {
-            // Ensure the background stays within the center bounds
+            // Bindet das Bild an die Größe des Containers
             wissHome.fitWidthProperty().bind(centerPane.widthProperty());
             wissHome.fitHeightProperty().bind(centerPane.heightProperty());
             wissHome.setPreserveRatio(true);
