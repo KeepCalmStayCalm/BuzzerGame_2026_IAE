@@ -82,7 +82,7 @@ public class GameController extends Application {
     @Override
     public void start(Stage primaryStage) {
         readPreferences();
-        initListeners();   // important - listeners created after methods exist
+        initListeners();
 
         style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
         eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
@@ -98,30 +98,201 @@ public class GameController extends Application {
         primaryStage.setOnCloseRequest(e -> System.exit(0));
     }
 
-    // === ALL OTHER METHODS (unchanged except the one below) ===
+    public void showStartupView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            startupController = loader.getController();
+            startupController.setMainController(this);
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void showStartupView() { /* your original code - unchanged */ }
-    public void showLobbyView() { /* your original code - unchanged */ }
+    public void showLobbyView() {
+        alleSpieler.clear();
+        if (!IS_DEV_MODE) {
+            pi4j = Pi4J.newAutoContext();
+            buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
+            buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
+            buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
+        } else {
+            buzzer1 = new MouseBuzzer();
+            buzzer2 = new DummyBuzzer(2);
+            buzzer3 = new DummyBuzzer(3);
+        }
 
-    private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer, LobbyViewController lobbyController, int playerNum) {
-        ChangeListener<Number> listener = (obs, old, newVal) -> {
-            if (newVal.intValue() > 0) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
+            Scene lobbyScene = new Scene(loader.load(), 1920, 1080);
+            lobbyScene.getStylesheets().add(style);
+
+            LobbyViewController lobbyController = loader.getController();
+            lobbyController.setMainController(this);
+            lobbyController.resetReadyStates();
+
+            List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
+            String[] names = {"Spieler 1", "Spieler 2", "Spieler 3"};
+
+            for (int i = 0; i < 3; i++) {
+                final int playerNum = i + 1;
+                final IBuzzer b = buzzers.get(i);
+                final String name = names[i];
+
+                if (IS_DEV_MODE) {
+                    Spieler s = new Spieler(name, b);
+                    alleSpieler.add(s);
+                    lobbyController.setReady(playerNum);
+                } else {
+                    b.getAnswer().addListener(setupBuzzerListener(name, b, lobbyController, playerNum));
+                }
+            }
+
+            if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
+            spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
+
+            myStage.setScene(lobbyScene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer, 
+                                                       LobbyViewController lobbyController, int playerNum) {
+        // Array holder fixes the "variable might not have been initialized" error
+        final ChangeListener<Number>[] holder = new ChangeListener[1];
+
+        holder[0] = (obs, old, newVal) -> {
+            if (newVal != null && newVal.intValue() > 0) {
                 Spieler s = new Spieler(name, buzzer);
                 alleSpieler.add(s);
-                obs.removeListener(listener);   // ← FIXED: now correctly removes itself
+                obs.removeListener(holder[0]);
                 lobbyController.setReady(playerNum);
                 System.out.println(name + " ist bereit");
             }
         };
-        return listener;
+
+        return holder[0];
     }
 
-    public void createBuzzerView(String playername, double yPosition, double xPosition) { /* unchanged */ }
-    public void lobbyNotifyDone() { /* unchanged */ }
-    public void showQuestionView(Frage question) { /* unchanged */ }
-    public void showAnswerScene() { /* unchanged */ }
-    public void scoreNotifyDone() { /* unchanged */ }
-    public void showEndScene() { /* unchanged */ }
-    public void editSettings() { /* unchanged */ }
-    public Set<Spieler> getSpielerliste() { return alleSpieler; }
+    public void createBuzzerView(String playername, double yPosition, double xPosition) {
+        try {
+            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
+            Parent parent = root.load();
+            Stage stage = new Stage();
+            Scene scene = new Scene(parent);
+            stage.setTitle(playername);
+            FXBuzzerController controller = root.getController();
+            Spieler s = new Spieler(playername, controller);
+            alleSpieler.add(s);
+            stage.setScene(scene);
+            stage.setY(yPosition);
+            stage.setX(xPosition);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void lobbyNotifyDone() {
+        if (alleSpieler.size() >= 2) {
+            rundenCounter = 0;
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "Mindestens zwei Spieler benötigt!", ButtonType.OK).showAndWait();
+        }
+    }
+
+    public void showQuestionView(Frage question) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+
+            QuestionViewController qController = loader.getController();
+            qController.setMainController(this);
+            qController.initFrage(question, alleSpieler, MAX_ZEIT);
+
+            qController.getRestzeit().addListener(showAnswerSceneListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showAnswerScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            AnswerViewController controller = loader.getController();
+            controller.setInformation(aktuelleFrage, alleSpieler);
+            controller.getRestzeit().addListener(showNextQuestionListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void scoreNotifyDone() {
+        rundenCounter++;
+        if (rundenCounter < MAX_FRAGEN) {
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            showEndScene();
+        }
+    }
+
+    public void showEndScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            EndViewController controller = loader.getController();
+            controller.setMainController(this);
+            controller.setSpielerInformation(alleSpieler);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void editSettings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EditSettingsView.fxml"));
+            Scene scene = new Scene(loader.load());
+            EditSettingsViewController controller = loader.getController();
+            controller.setPreferences(prefs);
+            if (!IS_DEV_MODE) controller.setBuzzers(buzzer1, buzzer2, buzzer3);
+
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle("Einstellungen und Hardware-Test");
+            stage.showAndWait();
+            readPreferences();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Set<Spieler> getSpielerliste() {
+        return alleSpieler;
+    }
 }
