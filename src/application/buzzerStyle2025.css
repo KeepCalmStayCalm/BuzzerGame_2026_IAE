@@ -1,14 +1,15 @@
-/* --- Globales Design (IAE Dark Mode) --- */
+/* --- IAE Design 2025 --- */
 .root {
     -fx-background-color: #000000;
 }
 
-/* Logos entfernt, falls du Hintergründe brauchst, hier anpassen */
-#pane {
+/* Logos komplett entfernt */
+#wiss_pane, #wiss_pane_small {
+    -fx-background-image: none;
     -fx-background-color: #000000;
 }
 
-/* --- Die Antwort-Felder (Interaktive Labels) --- */
+/* --- Antwort-Labels (Buttons) --- */
 .answer-label {
     -fx-text-fill: #ffffff;
     -fx-font-size: 32pt;
@@ -26,8 +27,8 @@
 
 .answer-label:hover {
     -fx-background-color: #172a45;
-    -fx-border-color: #64ffda; /* Akzentfarbe beim Hover */
-    -fx-effect: dropshadow(three-pass-box, rgba(100, 255, 218, 0.4), 15, 0, 0, 0);
+    -fx-border-color: #64ffda; /* IAE Cyan Akzent */
+    -fx-effect: dropshadow(three-pass-box, rgba(100, 255, 218, 0.5), 15, 0, 0, 0);
 }
 
 .answer-label:pressed {
@@ -41,7 +42,7 @@
     -fx-font-weight: bold;
 }
 
-/* --- Texte & Timer --- */
+/* --- Texte --- */
 #lblFrage {
     -fx-text-fill: #ffffff;
     -fx-font-size: 40pt;
@@ -49,8 +50,8 @@
 }
 
 #lblZeit {
-    -fx-text-fill: #64ffda; /* Cyan-Ton für den Timer */
-    -fx-font-size: 80pt;
+    -fx-text-fill: #64ffda;
+    -fx-font-size: 85pt;
     -fx-font-weight: bold;
 }
 
