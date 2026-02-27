@@ -8,7 +8,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.AnchorPane;
 
 public class StartupViewController implements Initializable {
@@ -17,7 +16,7 @@ public class StartupViewController implements Initializable {
     
     @FXML Button btnPlay;
     @FXML ImageView wissHome;
-    @FXML BorderPane imageRoot;
+    @FXML AnchorPane centerPane;
     
     @FXML
     public void btnLobbyPressed(ActionEvent event) {
@@ -35,9 +34,10 @@ public class StartupViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (wissHome != null) {
-            // Bind the background image to fit the container width but maintain ratio
-            wissHome.fitWidthProperty().bind(((AnchorPane)wissHome.getParent()).widthProperty());
+        if (wissHome != null && centerPane != null) {
+            // Ensure the background stays within the center bounds
+            wissHome.fitWidthProperty().bind(centerPane.widthProperty());
+            wissHome.fitHeightProperty().bind(centerPane.heightProperty());
             wissHome.setPreserveRatio(true);
         }
     }
