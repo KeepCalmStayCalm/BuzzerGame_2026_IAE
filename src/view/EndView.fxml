@@ -18,40 +18,36 @@
                <children>
                   <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/WISS_bilden_zukunft.png" />
+                        <Image url="@../resources/images/IAE Logo - S.png" />
                      </image>
                   </ImageView>
-                  <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="#wir_bilden_die_zukunft" textFill="#8d8484">
-                     </Label>
+                  <Label id="lblBildenZukunft" stylesheets="@../application/buzzerStyle2025.css" text="#IAE_Future_Skills" textFill="#8d8484" />
                </children>
             </HBox>
-            <Label id="lblTitle2" alignment="CENTER" text="Herzlichen Glückwunsch!" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding></Label>
+            <Label id="lblTitle2" alignment="CENTER" text="Herzlichen Glückwunsch!" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
          </children>
       </AnchorPane>
    </top>
    <center>
-      <AnchorPane id="endergebnis" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox layoutX="412.0" layoutY="106.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+            <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
+                  <VBox alignment="BOTTOM_CENTER" prefWidth="300.0">
                      <children>
-                        <Label fx:id="lblS2Name" styleClass="label_bigger" text="lblS2Name">
+                        <Label fx:id="lblS2Name" text="Spieler 2">
                            <padding>
                               <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                            </padding>
                         </Label>
-                        <Label fx:id="lblS2PunkteGesamt" text="300">
+                        <Label fx:id="lblS2PunkteGesamt" text="100">
                            <padding>
                               <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                            </padding>
                         </Label>
-                        <AnchorPane fx:id="rectPlatz2" minHeight="300.0" prefHeight="300.0">
+                        <AnchorPane fx:id="rectPlatz2" minHeight="200.0" prefHeight="200.0">
                            <children>
-                              <Label alignment="CENTER" layoutX="98.0" layoutY="73.0" styleClass="label_bigger" text="Platz 2" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+                              <Label alignment="CENTER" styleClass="label_bigger" text="Platz 2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                  <padding>
                                     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </padding>
@@ -60,17 +56,14 @@
                         </AnchorPane>
                      </children>
                   </VBox>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
-                     <padding>
-                              <Insets bottom="0.0" left="15.0" right="15.0" top="0.0" />
-                           </padding>
+                  <VBox alignment="BOTTOM_CENTER" prefWidth="300.0">
                      <children>
-                        <Label fx:id="lblS1Name" styleClass="label_bigger" text="lblS1Name">
+                        <Label fx:id="lblS1Name" text="Spieler 1">
                            <padding>
                               <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                            </padding>
                         </Label>
-                        <Label fx:id="lblS1PunkteGesamt" text="200">
+                        <Label fx:id="lblS1PunkteGesamt" text="100">
                            <padding>
                               <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                            </padding>
@@ -86,9 +79,9 @@
                         </AnchorPane>
                      </children>
                   </VBox>
-                  <VBox alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
+                  <VBox alignment="BOTTOM_CENTER" prefWidth="300.0">
                      <children>
-                        <Label fx:id="lblS3Name" styleClass="label_bigger" text="lblS3Name">
+                        <Label fx:id="lblS3Name" text="Spieler 3">
                            <padding>
                               <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                            </padding>
