@@ -3,15 +3,20 @@ package application;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class DummyBuzzer implements IBuzzer{
-    private IntegerProperty answer = new SimpleIntegerProperty(0);
-    @Override
-    public IntegerProperty getAnswer() {
-        return answer;
-    }
+/**
+ * Buzzer-Stub für Unit-Tests und Demo-Betrieb ohne Hardware.
+ * Gibt beim Start einen festen Antwort-Index zurück.
+ */
+public class DummyBuzzer implements IBuzzer {
 
-    public DummyBuzzer(int i){
-        answer.setValue(i);
-    }
-    
+	private final IntegerProperty answer;
+
+	public DummyBuzzer(int answerIndex) {
+		this.answer = new SimpleIntegerProperty(answerIndex);
+	}
+
+	@Override
+	public IntegerProperty getAnswer() {
+		return answer;
+	}
 }
