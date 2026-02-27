@@ -23,14 +23,14 @@
 
     <top>
         <VBox spacing="0.0">
-            <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 28 50 16 50; -fx-background-color: rgba(10,10,24,0.55);">
+            <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 28 50 16 50; -fx-background-color: rgba(13,17,23,0.75);">
                 <children>
                     <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                         <image>
                             <Image url="@../resources/images/IAE_Logo_S.png" />
                         </image>
                     </ImageView>
-                    <Label text="#IAE_Future_Skills" style="-fx-text-fill: #66667a; -fx-font-size: 22pt;" />
+                    <Label text="#IAE_Future_Skills" style="-fx-text-fill: #8b949e; -fx-font-size: 22pt;" />
                     
                     <ImageView fx:id="image" fitHeight="1.0" fitWidth="1.0" opacity="0.0" />
                 </children>
@@ -38,7 +38,7 @@
 
             <Separator style="-fx-opacity: 0.20;" />
 
-            <AnchorPane prefHeight="280.0" style="-fx-background-color: rgba(8,8,20,0.45); -fx-padding: 24 80 24 80;">
+            <AnchorPane prefHeight="280.0" style="-fx-background-color: rgba(22,27,34,0.65); -fx-padding: 24 80 24 80;">
                 <children>
                     <Label
                         fx:id="lblFrage"
