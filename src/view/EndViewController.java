@@ -1,158 +1,123 @@
 package view;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import application.GameController;
-import application.Spieler;
+import application.IBuzzer;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 
-public class EndViewController {
+public class FXBuzzerController implements IBuzzer {
 
-    private GameController gameController;
+    @FXML
+    Label lblPunkte;
 
-    @FXML Label lblS1Name;
-    @FXML Label lblS2Name;
-    @FXML Label lblS3Name;
-    @FXML Label lblS1PunkteGesamt;
-    @FXML Label lblS2PunkteGesamt;
-    @FXML Label lblS3PunkteGesamt;
+    private IntegerProperty answer = new SimpleIntegerProperty();
 
-    @FXML AnchorPane rectPlatz1;
-    @FXML AnchorPane rectPlatz2;
-    @FXML AnchorPane rectPlatz3;
+    // IBuzzer state properties – indicate which button is currently pressed
+    // These are bound in EditSettingsViewController for hardware test display
+    public BooleanProperty btnAState = new SimpleBooleanProperty(false);
+    public BooleanProperty btnBState = new SimpleBooleanProperty(false);
+    public BooleanProperty btnCState = new SimpleBooleanProperty(false);
 
     /**
-     * Set the main game controller
-     */
-    public void setMainController(GameController mainController) {
-        this.gameController = mainController;
-    }
-
-    /**
-     * Return to startup screen after game ends
+     * Button A pressed - answer 1
      */
     @FXML
-    public void endGameRound() {
-        if (gameController != null) {
-            gameController.showStartupView();
-        }
-    }
-
-    /**
-     * Display final player rankings
-     */
-    public void setSpielerInformation(Set<Spieler> spielerSet) {
-        if (spielerSet == null || spielerSet.isEmpty()) {
-            System.err.println("No players to display!");
-            return;
-        }
-
-        // Sort players by final score (descending)
-        List<Spieler> spielerliste = spielerSet.stream()
-                                               .collect(Collectors.toList());
-        Collections.sort(spielerliste, new Comparator<Spieler>() {
-            @Override
-            public int compare(Spieler s1, Spieler s2) {
-                return s2.getPunktestand().get() - s1.getPunktestand().get();
-            }
-        });
-
-        // Display 1st place
-        if (spielerliste.size() >= 1) {
-            displayPlayer(1, spielerliste.get(0));
-        }
-
-        // Display 2nd place
-        if (spielerliste.size() >= 2) {
-            displayPlayer(2, spielerliste.get(1));
-        }
-
-        // Display 3rd place or hide if only 2 players
-        if (spielerliste.size() >= 3) {
-            displayPlayer(3, spielerliste.get(2));
-        } else {
-            hidePlayer(3);
-        }
-    }
-
-    /**
-     * Display a player on their podium position
-     */
-    private void displayPlayer(int position, Spieler spieler) {
-        Label lblName = getNameLabel(position);
-        Label lblPunkte = getPunkteLabel(position);
-        AnchorPane rect = getRectangle(position);
-
-        if (spieler == null) return;
-
-        // Set player name
-        if (lblName != null) {
-            String playerStyle = spieler.getName().toString()
-                                       .toLowerCase()
-                                       .replace(" ", "");
-            
-            // Add player color to podium
-            if (rect != null) {
-                rect.getStyleClass().add(playerStyle);
-            }
-            
-            lblName.setText(spieler.getName().toString());
-        }
-
-        // Set player score
-        if (lblPunkte != null) {
-            lblPunkte.setText(spieler.getPunktestand().getValue().toString() + " Punkte");
-        }
-    }
-
-    /**
-     * Hide a player position (for 2-player games)
-     */
-    private void hidePlayer(int position) {
-        Label lblName = getNameLabel(position);
-        Label lblPunkte = getPunkteLabel(position);
-
-        if (lblName != null) {
-            lblName.setText("");
-            lblName.setStyle("-fx-border-color: none;");
-        }
+    public void b1Pressed() {
+        getAnswer().setValue(1);
         
+        // Briefly light up the A state indicator
+        btnAState.set(true);
+        btnBState.set(false);
+        btnCState.set(false);
+        
+        System.out.println("Button A (1) pressed");
+        
+        // Reset button state after short delay (for visual feedback)
+        resetButtonStateAfterDelay();
+    }
+
+    /**
+     * Button B pressed - answer 2
+     */
+    @FXML
+    public void b2Pressed() {
+        getAnswer().setValue(2);
+        
+        btnAState.set(false);
+        btnBState.set(true);
+        btnCState.set(false);
+        
+        System.out.println("Button B (2) pressed");
+        
+        resetButtonStateAfterDelay();
+    }
+
+    /**
+     * Button C pressed - answer 3
+     */
+    @FXML
+    public void b3Pressed() {
+        getAnswer().setValue(3);
+        
+        btnAState.set(false);
+        btnBState.set(false);
+        btnCState.set(true);
+        
+        System.out.println("Button C (3) pressed");
+        
+        resetButtonStateAfterDelay();
+    }
+
+    /**
+     * Reset button states after a brief delay for visual feedback
+     */
+    private void resetButtonStateAfterDelay() {
+        PauseTransition pause = new PauseTransition(Duration.millis(500));
+        pause.setOnFinished(event -> {
+            btnAState.set(false);
+            btnBState.set(false);
+            btnCState.set(false);
+        });
+        pause.play();
+    }
+
+    /**
+     * Update the displayed score on this buzzer window.
+     */
+    public void setPunkte(int punkte) {
         if (lblPunkte != null) {
-            lblPunkte.setText("");
+            lblPunkte.setText("Punkte: " + punkte);
+        }
+    }
+    
+    /**
+     * Reset the score display
+     */
+    public void resetPunkte() {
+        if (lblPunkte != null) {
+            lblPunkte.setText("Punkte: –");
         }
     }
 
-    // Helper methods to get UI elements
-    private Label getNameLabel(int position) {
-        switch (position) {
-            case 1: return lblS1Name;
-            case 2: return lblS2Name;
-            case 3: return lblS3Name;
-            default: return null;
+    @Override
+    public IntegerProperty getAnswer() {
+        if (answer == null) {
+            answer = new SimpleIntegerProperty(0);
         }
+        return answer;
     }
-
-    private Label getPunkteLabel(int position) {
-        switch (position) {
-            case 1: return lblS1PunkteGesamt;
-            case 2: return lblS2PunkteGesamt;
-            case 3: return lblS3PunkteGesamt;
-            default: return null;
-        }
-    }
-
-    private AnchorPane getRectangle(int position) {
-        switch (position) {
-            case 1: return rectPlatz1;
-            case 2: return rectPlatz2;
-            case 3: return rectPlatz3;
-            default: return null;
+    
+    /**
+     * Reset answer property
+     */
+    public void resetAnswer() {
+        if (answer != null) {
+            answer.setValue(0);
         }
     }
 }
