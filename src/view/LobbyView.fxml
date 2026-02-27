@@ -18,15 +18,15 @@
    <top>
       <AnchorPane prefHeight="250.0" BorderPane.alignment="CENTER">
          <children>
-            <Label id="lblTitle" alignment="CENTER" text="Aktiviere deinen Buzzer" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="100.0" />
-            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" spacing="15.0">
+            <Label id="lblTitle" alignment="CENTER" text="Warte auf Spieler..." AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="120.0" />
+            <HBox alignment="CENTER_LEFT" layoutX="30.0" layoutY="30.0" spacing="15.0">
                <children>
                   <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
-                  <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#575555" />
+                  <Label text="#IAE_Future_Skills" textFill="#555555" style="-fx-font-size: 20px;" />
                </children>
             </HBox>
          </children>
@@ -43,35 +43,39 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="0">
+            <VBox alignment="CENTER" spacing="30.0" GridPane.columnIndex="0">
                <children>
-                  <ImageView fx:id="avatar1" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady1" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
+                  <ImageView fx:id="avatar1" fitHeight="380.0" fitWidth="380.0" pickOnBounds="true" preserveRatio="true">
+                     <image><Image url="@../../resources/images/avatars/Multiavatar-Kim.png" /></image>
+                  </ImageView>
+                  <Label fx:id="lblReady1" text="BEREIT" visible="false" style="-fx-text-fill: #28a745; -fx-font-size: 50px; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,0.8); -fx-padding: 10 30 10 30; -fx-background-radius: 20;" />
                </children>
             </VBox>
-            <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="1">
+            <VBox alignment="CENTER" spacing="30.0" GridPane.columnIndex="1">
                <children>
-                  <ImageView fx:id="avatar2" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady2" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
+                  <ImageView fx:id="avatar2" fitHeight="380.0" fitWidth="380.0" pickOnBounds="true" preserveRatio="true">
+                     <image><Image url="@../../resources/images/avatars/Multiavatar-Kim.png" /></image>
+                  </ImageView>
+                  <Label fx:id="lblReady2" text="BEREIT" visible="false" style="-fx-text-fill: #28a745; -fx-font-size: 50px; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,0.8); -fx-padding: 10 30 10 30; -fx-background-radius: 20;" />
                </children>
             </VBox>
-            <VBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="2">
+            <VBox alignment="CENTER" spacing="30.0" GridPane.columnIndex="2">
                <children>
-                  <ImageView fx:id="avatar3" fitHeight="350.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" />
-                  <Label fx:id="lblReady3" styleClass="label_bigger" text="READY" visible="false" style="-fx-text-fill: #00ff00; -fx-font-weight: bold; -fx-font-size: 40px;" />
+                  <ImageView fx:id="avatar3" fitHeight="380.0" fitWidth="380.0" pickOnBounds="true" preserveRatio="true">
+                     <image><Image url="@../../resources/images/avatars/Multiavatar-Kim.png" /></image>
+                  </ImageView>
+                  <Label fx:id="lblReady3" text="BEREIT" visible="false" style="-fx-text-fill: #28a745; -fx-font-size: 50px; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,0.8); -fx-padding: 10 30 10 30; -fx-background-radius: 20;" />
                </children>
             </VBox>
          </children>
       </GridPane>
    </center>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="150.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="180.0" BorderPane.alignment="CENTER">
          <children>
-            <Button onAction="#btnQuestionPressed" prefWidth="400.0" style="-fx-font-weight: bold;" text="Los geht's">
-               <font><Font size="36.0" /></font>
-            </Button>
+            <Button onAction="#btnQuestionPressed" prefHeight="100.0" prefWidth="450.0" style="-fx-background-radius: 50; -fx-font-size: 36px; -fx-font-weight: bold; -fx-base: #28a745;" text="LOS GEHT'S!" />
          </children>
-         <padding><Insets bottom="50.0" /></padding>
+         <padding><Insets bottom="60.0" /></padding>
       </HBox>
    </bottom>
 </BorderPane>
