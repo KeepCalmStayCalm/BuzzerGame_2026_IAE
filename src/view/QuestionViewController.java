@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-
 import application.Antwort;
 import application.Frage;
 import application.GameController;
@@ -33,24 +31,14 @@ public class QuestionViewController implements Initializable {
 
 	GameController gameController;
 	private Frage frage;
-	@FXML
-	private Label lblRestzeit;
-	@FXML
-	private Label lblFrage;
-	@FXML
-	private Label lblAntwort1;
-	@FXML
-	private Label lblAntwort2;
-	@FXML
-	private Label lblAntwort3;
+	@FXML private Label lblRestzeit;
+	@FXML private Label lblFrage;
+	@FXML private Label lblAntwort1;
+	@FXML private Label lblAntwort2;
+	@FXML private Label lblAntwort3;
 
-	@FXML
-	BorderPane imageRoot;
-
-	@FXML
-	private ImageView image;
-
-
+	@FXML BorderPane imageRoot;
+	@FXML private ImageView image;
 	
 	private IntegerProperty restzeit;
 	private Timer timer;
@@ -58,7 +46,6 @@ public class QuestionViewController implements Initializable {
 	int maxZeit;
 	int antworten = 0;
 
-	
 	public IntegerProperty getRestzeit() {
 		if (restzeit == null)
 			restzeit = new SimpleIntegerProperty(maxZeit);
@@ -83,147 +70,87 @@ public class QuestionViewController implements Initializable {
 			} catch (Exception e) {
 				System.out.println("Image not found: " + frage.getImagePath());
 			}
-				
 		} else {
 			InputStream is = this.getClass().getResourceAsStream("/resources/images/wiss_home.jpg");
-			System.out.println("LogoWISS: " + is);
-			if (is != null)
-				image.setImage(new Image(is));
+			if (is != null) image.setImage(new Image(is));
 		}
 
-		if (image.getImage() != null) {
+		// Fix für den NullPointerException: Prüfen ob imageRoot in FXML geladen wurde
+		if (imageRoot != null && image.getImage() != null) {
 			image.fitWidthProperty().bind(imageRoot.widthProperty());
-    		image.fitHeightProperty().bind(imageRoot.heightProperty());
+			image.fitHeightProperty().bind(imageRoot.heightProperty());
 		}
 				
 		getRestzeit().setValue(maxZeit);		
 		timer = new Timer();
-		timer.scheduleAtFixedRate(tTask, 0, 1000); //aktiviere zyklische Wiederholung
+		timer.scheduleAtFixedRate(tTask, 0, 1000);
 		initPlayers(spielerliste);
 	}
 	
 	private void initPlayers(Set<Spieler> spielerliste) {
 		if (GameController.IS_DEV_MODE) {
-			// try to mimik the MouseBuzzer
 			spielerliste.iterator().forEachRemaining(spieler -> {
 				if (spieler.getBuzzer() instanceof MouseBuzzer) {
-					System.out.println("initialize ClickHandler for MouseBuzzer: " + spieler.getName());
-
 					spieler.getAntwortNr().addListener(new ChangeListener<Number>() {
 						@Override
 						public void changed(ObservableValue<? extends Number> arg0, Number alt, Number neu) {	
-							
 							if((int)neu == frage.korrekteAntwortInt()) {
 								long pressedTime = System.currentTimeMillis();
 								int punkte = Math.max(0, (maxZeit*1000 - (int)(pressedTime - timeStart))/100);
-
 								spieler.addPunkte(punkte);
 								spieler.setRundenpunkte(punkte);
-
-								System.out.println("'Fragerunde: '" + spieler.getName() + " hat " + punkte + " Punkte");
-								
-							} else {
-								System.out.println("'Fragerunde: '" + spieler.getName() + " Antwort NOK");
 							}
 							spieler.getAntwortNr().removeListener(this);
 							antworten++;
-							if (antworten >= spielerliste.size()) {
-								restzeit.set(0);
-							}
+							if (antworten >= spielerliste.size()) restzeit.set(0);
 						}
 					});
 
-					lblAntwort1.setOnMouseClicked((val) -> {
-						System.out.println("clicked: " + 1);
-						((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(1);
-					});	
-					lblAntwort2.setOnMouseClicked((val) -> {
-						System.out.println("clicked: " + 2);
-						((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(2);
-					});	
-					lblAntwort3.setOnMouseClicked((val) -> {
-						System.out.println("clicked: " + 3);
-						((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(3);	
-					});	
+					lblAntwort1.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(1));	
+					lblAntwort2.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(2));	
+					lblAntwort3.setOnMouseClicked((val) -> ((MouseBuzzer)spieler.getBuzzer()).getAnswer().setValue(3));	
 				}
-				return;
 			});
-
 			return;
 		}
-		Set<Spieler> spielerlisteCopy = new HashSet<>(spielerliste);
-		spielerlisteCopy.forEach(spieler -> {		
+		
+		new HashSet<>(spielerliste).forEach(spieler -> {		
 			spieler.reset();
 			spieler.getAntwortNr().addListener(new ChangeListener<Number>() {
-
 				@Override
 				public void changed(ObservableValue<? extends Number> arg0, Number alt, Number neu) {	
-					
 					if((int)neu == frage.korrekteAntwortInt()) {
 						long pressedTime = System.currentTimeMillis();
 						int punkte = Math.max(0, (maxZeit*1000 - (int)(pressedTime - timeStart))/100);
-
 						spieler.addPunkte(punkte);
 						spieler.setRundenpunkte(punkte);
-
-						System.out.println("'Fragerunde: '" + spieler.getName() + " hat " + punkte + " Punkte");
-						
-					} else {
-						System.out.println("'Fragerunde: '" + spieler.getName() + " Antwort NOK");
 					}
 					spieler.getAntwortNr().removeListener(this);
 					antworten++;
-					if (antworten >= spielerliste.size()) {
-						restzeit.set(0);
-					}
+					if (antworten >= spielerliste.size()) restzeit.set(0);
 				}
-
 			});
-			System.out.println("'Fragerunde: '" + spieler.getName().toString() + " Listener added");
 			spieler.setRundenpunkte(0);
 		});
 	}
 	
 	private void setAnswers(List<Antwort> antworten) {		
-		//TODO: proper shuffling
 		lblAntwort1.setText(antworten.get(0).getAntwort());
 		lblAntwort2.setText(antworten.get(1).getAntwort());
 		lblAntwort3.setText(antworten.get(2).getAntwort());
-		
 	}
 	
-	
-	/**
-	 * initialize Scene and start countdown timer
-	 */
 	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-
-	}
+	public void initialize(URL location, ResourceBundle resources) {}
 	
-	/**
-	 * verantwortlich für das saubere Herunterzählen der Zeit
-	 */
 	TimerTask tTask = new TimerTask() {
 		@Override
 		public void run() {
 			getRestzeit().setValue(maxZeit - (int)(System.currentTimeMillis()-timeStart)/1000);
-			Platform.runLater(updateRestzeitLabel); // 
-			if (getRestzeit().intValue()<=0) {
-				timer.cancel();
-			}
+			Platform.runLater(updateRestzeitLabel); 
+			if (getRestzeit().intValue()<=0) timer.cancel();
 		}
 	};
 	
-	
-	private Runnable updateRestzeitLabel = new Runnable() {			
-		@Override
-		public void run() {
-			lblRestzeit.setText(String.valueOf(getRestzeit().intValue()));
-		}
-	};
-
-	
-	
+	private Runnable updateRestzeitLabel = () -> lblRestzeit.setText(String.valueOf(getRestzeit().intValue()));
 }
-	
