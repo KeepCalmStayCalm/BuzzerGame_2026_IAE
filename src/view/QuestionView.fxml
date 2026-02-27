@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #000000;" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.QuestionViewController">
+<BorderPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #0d1117;" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.QuestionViewController">
    <top>
       <AnchorPane prefHeight="200.0" BorderPane.alignment="CENTER">
          <children>
