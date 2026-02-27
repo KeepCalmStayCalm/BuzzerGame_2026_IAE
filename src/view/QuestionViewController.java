@@ -23,7 +23,7 @@ public class QuestionViewController implements Initializable {
     private GameController gameController;
     private Frage frage;
 
-    @FXML private Label lblZeit;          // FIXED: matches FXML
+    @FXML private Label lblZeit;          // must match QuestionView2025.fxml
     @FXML private Label lblFrage;
     @FXML private Label lblAntwort1;
     @FXML private Label lblAntwort2;
@@ -37,10 +37,11 @@ public class QuestionViewController implements Initializable {
     private long timeStart;
     private int maxZeit;
     private int answersReceived = 0;
-    private Set<ChangeListener<Number>> answerListeners = new HashSet<>();
 
     public IntegerProperty getRestzeit() {
-        if (restzeit == null) restzeit = new SimpleIntegerProperty(maxZeit);
+        if (restzeit == null) {
+            restzeit = new SimpleIntegerProperty(maxZeit);
+        }
         return restzeit;
     }
 
@@ -66,33 +67,42 @@ public class QuestionViewController implements Initializable {
 
     private void initPlayers(Set<Spieler> spielerliste) {
         Set<Spieler> copy = new HashSet<>(spielerliste);
-        copy.forEach(s -> {
-            s.reset();
-            s.setRundenpunkte(0);
+        copy.forEach(spieler -> {
+            spieler.reset();
+            spieler.setRundenpunkte(0);
 
-            ChangeListener<Number> listener = (obs, old, nv) -> {
-                handlePlayerAnswer(s, nv.intValue());
+            // Robust listener with direct reference
+            ChangeListener<Number> listener = (obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    handlePlayerAnswer(spieler, newVal.intValue());
+                }
             };
-            answerListeners.add(listener);
-            s.getAntwortNr().addListener(listener);
+            spieler.getAntwortNr().addListener(listener);
         });
     }
 
     private void handlePlayerAnswer(Spieler spieler, int answerNum) {
+        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName() + " with answer " + answerNum);
+
         if (answerNum <= 0 || gameController == null) return;
 
         if (answerNum == frage.korrekteAntwortInt()) {
-            int timeTaken = (int)(System.currentTimeMillis() - timeStart);
-            int punkte = Math.max(0, (maxZeit * 1000 - timeTaken) / 100);
+            long timeTaken = System.currentTimeMillis() - timeStart;
+            int punkte = Math.max(0, (maxZeit * 1000 - (int)timeTaken) / 100);
             spieler.addPunkte(punkte);
             spieler.setRundenpunkte(punkte);
+            System.out.println(spieler.getName() + " answered correctly! Points: " + punkte);
         } else {
             spieler.setRundenpunkte(0);
+            System.out.println(spieler.getName() + " answered incorrectly.");
         }
 
         answersReceived++;
+
+        // If all players answered → end immediately
         if (answersReceived >= gameController.getSpielerliste().size()) {
-            Platform.runLater(this::endQuestion);
+            System.out.println("All players answered - forcing end of question");
+            endQuestionImmediately();
         }
     }
 
@@ -102,32 +112,60 @@ public class QuestionViewController implements Initializable {
             public void run() {
                 long elapsed = System.currentTimeMillis() - timeStart;
                 int remaining = maxZeit - (int)(elapsed / 1000);
+
                 Platform.runLater(() -> {
                     getRestzeit().setValue(Math.max(0, remaining));
                     if (lblZeit != null) lblZeit.setText(String.valueOf(getRestzeit().get()));
-                    if (remaining <= 0) endQuestion();
+
+                    if (remaining <= 0) {
+                        endQuestionImmediately();
+                    }
                 });
             }
         };
+
         timer = new Timer(true);
         timer.scheduleAtFixedRate(timerTask, 0, 100);
     }
 
-    private void endQuestion() {
+    private void endQuestionImmediately() {
         cleanup();
-        // listener in GameController will switch to AnswerView
+        if (gameController != null) {
+            // Force the restzeit to 0 → this triggers showAnswerSceneListener in GameController
+            getRestzeit().setValue(0);
+        }
     }
 
     public void cleanup() {
-        if (timer != null) { timer.cancel(); timer = null; }
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
         if (timerTask != null) timerTask = null;
-        answerListeners.clear();
     }
 
-    // keep your original loadQuestionImage, setAnswers, setupMouseClickHandlers, initialize
-    private void loadQuestionImage(String path) { /* your original code */ }
-    private void setAnswers(List<Antwort> a) { /* your original code */ }
-    private void setupMouseClickHandlers(MouseBuzzer mb) { /* your original code */ }
+    private void loadQuestionImage(String imagePath) {
+        if (image != null && imagePath != null && !imagePath.isEmpty()) {
+            try (InputStream is = new FileInputStream(imagePath)) {
+                Image img = new Image(is);
+                image.setImage(img);
+                if (imageRoot != null) {
+                    image.fitWidthProperty().bind(imageRoot.widthProperty());
+                    image.fitHeightProperty().bind(imageRoot.heightProperty());
+                    image.setPreserveRatio(true);
+                }
+            } catch (Exception e) {
+                System.err.println("Bild konnte nicht geladen werden: " + e.getMessage());
+            }
+        }
+    }
+
+    private void setAnswers(List<Antwort> antworten) {
+        if (antworten == null || antworten.size() < 3) return;
+        if (lblAntwort1 != null) lblAntwort1.setText(antworten.get(0).getAntwort());
+        if (lblAntwort2 != null) lblAntwort2.setText(antworten.get(1).getAntwort());
+        if (lblAntwort3 != null) lblAntwort3.setText(antworten.get(2).getAntwort());
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {}
