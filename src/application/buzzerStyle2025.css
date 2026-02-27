@@ -1,12 +1,12 @@
-/* --- IAE Design 2025 --- */
+/* --- IAE Global Design 2025 --- */
 .root {
-    -fx-background-color: #000000;
+    -fx-background-color: #0d1117; /* Dunkles Hintergrund-Blau/Schwarz */
 }
 
-/* Logos komplett entfernt */
+/* WISS-Logos komplett entfernt */
 #wiss_pane, #wiss_pane_small {
     -fx-background-image: none;
-    -fx-background-color: #000000;
+    -fx-background-color: #0d1117;
 }
 
 /* --- Antwort-Labels (Buttons) --- */
@@ -14,52 +14,71 @@
     -fx-text-fill: #ffffff;
     -fx-font-size: 32pt;
     -fx-font-weight: bold;
-    -fx-background-color: #0a192f; /* IAE Dunkelblau */
+    -fx-background-color: #161b22;
     -fx-background-radius: 15;
-    -fx-border-color: #172a45;
+    -fx-border-color: #30363d;
     -fx-border-width: 3;
     -fx-border-radius: 15;
     -fx-padding: 20;
     -fx-cursor: hand;
     -fx-alignment: center;
-    -fx-text-alignment: center;
 }
 
 .answer-label:hover {
-    -fx-background-color: #172a45;
-    -fx-border-color: #64ffda; /* IAE Cyan Akzent */
-    -fx-effect: dropshadow(three-pass-box, rgba(100, 255, 218, 0.5), 15, 0, 0, 0);
+    -fx-background-color: #21262d;
+    -fx-border-color: #58a6ff; /* IAE Blau-Akzent */
+    -fx-effect: dropshadow(three-pass-box, rgba(88, 166, 255, 0.4), 15, 0, 0, 0);
 }
 
 .answer-label:pressed {
-    -fx-background-color: #020c1b;
+    -fx-background-color: #0d1117;
     -fx-translate-y: 4px;
 }
 
 .answer-letter {
-    -fx-text-fill: #64ffda;
+    -fx-text-fill: #58a6ff;
     -fx-font-size: 44pt;
     -fx-font-weight: bold;
 }
 
-/* --- Texte --- */
-#lblFrage {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 40pt;
-    -fx-font-weight: bold;
-}
-
+/* --- Timer & Texte --- */
 #lblZeit {
-    -fx-text-fill: #64ffda;
+    -fx-text-fill: #ff7b72;
     -fx-font-size: 85pt;
     -fx-font-weight: bold;
 }
 
+#lblFrage {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-size: 40pt;
+    -fx-font-weight: bold;
+}
+
+.label {
+    -fx-text-fill: #ffffff;
+}
+
 /* --- Spieler/Buzzer --- */
-.spieler1 { -fx-background-color: #00e9ff; -fx-text-fill: #000; -fx-background-radius: 15; }
-.spieler2 { -fx-background-color: #f7ff00; -fx-text-fill: #000; -fx-background-radius: 15; }
-.spieler3 { -fx-background-color: #ff3c00; -fx-text-fill: #fff; -fx-background-radius: 15; }
+.spieler1 { -fx-background-color: #00e9ff; -fx-text-fill: #000; -fx-background-radius: 15; -fx-padding: 15; -fx-font-size: 30pt; -fx-font-weight: bold;}
+.spieler2 { -fx-background-color: #f7ff00; -fx-text-fill: #000; -fx-background-radius: 15; -fx-padding: 15; -fx-font-size: 30pt; -fx-font-weight: bold;}
+.spieler3 { -fx-background-color: #ff3c00; -fx-text-fill: #fff; -fx-background-radius: 15; -fx-padding: 15; -fx-font-size: 30pt; -fx-font-weight: bold;}
 
 .spieler1:hover, .spieler2:hover, .spieler3:hover {
     -fx-effect: dropshadow(three-pass-box, white, 15, 0, 0, 0);
 }
+
+/* --- End-Screen Podest --- */
+.gold { -fx-background-color: #f2cc60; }
+.silver { -fx-background-color: #d1d5db; }
+.bronze { -fx-background-color: #9c6644; }
+
+.btnStartScreen, .button {
+    -fx-background-color: #238636;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 24pt;
+    -fx-background-radius: 10;
+    -fx-padding: 15 30 15 30;
+    -fx-cursor: hand;
+}
+.btnStartScreen:hover
