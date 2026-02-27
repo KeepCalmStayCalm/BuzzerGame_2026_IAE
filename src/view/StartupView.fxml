@@ -15,11 +15,11 @@
       <AnchorPane prefHeight="200.0" BorderPane.alignment="CENTER">
          <children>
             <Label id="lblTitle" alignment="CENTER" text="IAE - Wie fit bist du für die IT?" textAlignment="CENTER" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="80.0" />
-            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0">
+            <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" spacing="10.0">
                <children>
                   <ImageView fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../resources/images/IAE Logo - S.png" />
+                        <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
                   <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#8d8484" />
@@ -33,7 +33,7 @@
          <children>
             <ImageView fx:id="wissHome" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <image>
-                  <Image url="@../resources/images/IAE - BG - V3 (1).png" />
+                  <Image url="@../resources/images/IAE%20-%20BG%20-%20V3%20(1).png" />
                </image>
             </ImageView>
          </children>
@@ -46,14 +46,10 @@
       <HBox alignment="CENTER" prefHeight="150.0" spacing="40.0" BorderPane.alignment="CENTER">
          <children>
             <Button maxHeight="100.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnSettingsPressed" style="-fx-font-weight: bold;" text="Einstellungen bearbeiten" HBox.hgrow="ALWAYS">
-               <font>
-                  <Font name="DejaVu Sans Bold" size="24.0" />
-               </font>
+               <font><Font name="DejaVu Sans Bold" size="24.0" /></font>
             </Button>
             <Button fx:id="btnPlay" maxHeight="100.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnLobbyPressed" style="-fx-font-weight: bold;" text="Starte Spiel" HBox.hgrow="ALWAYS">
-               <font>
-                  <Font name="DejaVu Sans Bold" size="24.0" />
-               </font>
+               <font><Font name="DejaVu Sans Bold" size="24.0" /></font>
             </Button>
          </children>
          <BorderPane.margin>
