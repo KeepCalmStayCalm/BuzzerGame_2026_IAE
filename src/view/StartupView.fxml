@@ -8,13 +8,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane id="wiss_pane" fx:id="imageRoot" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../application/buzzerStyle2025.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.StartupViewController">
    <top>
-      <AnchorPane prefHeight="250.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="300.0" BorderPane.alignment="CENTER">
          <children>
+            <Label id="lblTitle" alignment="CENTER" text="IAE - Wie fit bist du für die IT?" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="150.0" />
             <HBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="40.0" spacing="20.0">
                <children>
                   <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
@@ -22,10 +21,8 @@
                         <Image url="@../resources/images/IAE%20Logo%20-%20S.png" />
                      </image>
                   </ImageView>
-                  <Label id="lblBildenZukunft" text="#IAE_Future_Skills" textFill="#666666" style="-fx-font-size: 24px;" />
                </children>
             </HBox>
-            <Label id="lblTitle" alignment="CENTER" text="IAE - Wie fit bist du für die IT?" textAlignment="CENTER" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="140.0" />
          </children>
       </AnchorPane>
    </top>
@@ -34,24 +31,20 @@
          <children>
             <ImageView fx:id="wissHome" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <image>
-                  <Image url="@../resources/images/IAE%20-%20BG%20-%20V3%20(1).png" />
+                  <Image url="@../resources/images/IAE_BG.png" />
                </image>
             </ImageView>
          </children>
-         <BorderPane.margin>
-            <Insets left="100.0" right="100.0" />
-         </BorderPane.margin>
+         <BorderPane.margin><Insets left="100.0" right="100.0" /></BorderPane.margin>
       </AnchorPane>
    </center>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="200.0" spacing="50.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="250.0" spacing="60.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#btnSettingsPressed" prefHeight="100.0" prefWidth="450.0" style="-fx-background-radius: 50; -fx-font-size: 28px;" text="EINSTELLUNGEN" />
-            <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#btnLobbyPressed" prefHeight="120.0" prefWidth="500.0" style="-fx-background-radius: 50; -fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="SPIEL STARTEN" />
+            <Button mnemonicParsing="false" onAction="#btnSettingsPressed" prefHeight="110.0" prefWidth="480.0" style="-fx-background-radius: 50; -fx-font-size: 30px;" text="EINSTELLUNGEN" />
+            <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#btnLobbyPressed" prefHeight="130.0" prefWidth="550.0" style="-fx-background-radius: 50; -fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 40px; -fx-font-weight: bold; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 15, 0, 0, 10);" text="JETZT STARTEN" />
          </children>
-         <padding>
-            <Insets bottom="50.0" />
-         </padding>
+         <padding><Insets bottom="70.0" /></padding>
       </HBox>
    </bottom>
 </BorderPane>
