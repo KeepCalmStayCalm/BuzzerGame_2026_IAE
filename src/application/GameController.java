@@ -1,166 +1,377 @@
-package view;
+package application;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ResourceBundle;
-import application.GameController;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.*;
+import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import java.util.prefs.Preferences;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
 
-public class LobbyViewController implements Initializable {
+import view.*;
 
-    @FXML private Label lblReady1, lblReady2, lblReady3;
-    @FXML private ImageView avatar1, avatar2, avatar3;
+public class GameController extends Application {
 
-    private GameController gameController;
-    
-    // Track which players are actually ready
-    private boolean player1Ready = false;
-    private boolean player2Ready = false;
-    private boolean player3Ready = false;
+    public static final boolean IS_DEV_MODE = false;
 
-    public void setMainController(GameController gameController) {
-        this.gameController = gameController;
+    private Stage myStage;
+    private StartupViewController startupController;
+    private int rundenCounter = 0;
+    private List<Frage> eingeleseneFragen;
+    private Spielrunde spielrunde;
+    private Set<Spieler> alleSpieler = new HashSet<>();
+    private IBuzzer buzzer1, buzzer2, buzzer3;
+
+    private int MAX_ZEIT = 20;
+    private int MAX_FRAGEN = 5;
+    private Frage aktuelleFrage;
+    private boolean shuffleQuestions = true;
+    private boolean fullScreen = true;
+
+    private Preferences prefs;
+    private String style;
+    private Context pi4j;
+    private String questionFile = "resources/fragenBuzzerGame.csv";
+
+    private ChangeListener<Number> showAnswerSceneListener;
+    private ChangeListener<Number> showNextQuestionListener;
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
-    /**
-     * Called when a player presses their buzzer in the lobby.
-     * Only marks them ready if they weren't already ready.
-     * @param playerNumber The player number (1, 2, or 3)
-     * @param playerName The player's name/username (optional, can be null)
-     */
-    public void setReady(int playerNumber, String playerName) {
-        Platform.runLater(() -> {
-            Label targetLabel = null;
-            boolean alreadyReady = false;
-            
-            switch (playerNumber) {
-                case 1: 
-                    targetLabel = lblReady1;
-                    alreadyReady = player1Ready;
-                    player1Ready = true;
-                    break;
-                case 2: 
-                    targetLabel = lblReady2;
-                    alreadyReady = player2Ready;
-                    player2Ready = true;
-                    break;
-                case 3: 
-                    targetLabel = lblReady3;
-                    alreadyReady = player3Ready;
-                    player3Ready = true;
-                    break;
-            }
-            
-            if (targetLabel != null && !alreadyReady) {
-                targetLabel.setOpacity(1.0);
-                // Show player name if provided, otherwise generic ready message
-                String readyText = (playerName != null && !playerName.isEmpty()) 
-                    ? "✓  " + playerName 
-                    : "✓  BEREIT";
-                targetLabel.setText(readyText);
-                // Green glow effect
-                targetLabel.setStyle("-fx-text-fill: #3fb950; " +
-                                     "-fx-effect: dropshadow(gaussian, #3fb950, 20, 0.5, 0, 0); " +
-                                     "-fx-font-weight: bold;");
-            }
-        });
-    }
-    
-    /**
-     * Overloaded method for backwards compatibility
-     */
-    public void setReady(int playerNumber) {
-        setReady(playerNumber, null);
-    }
-    
-    /**
-     * Reset all ready states - useful when returning to lobby
-     */
-    public void resetReadyStates() {
-        player1Ready = false;
-        player2Ready = false;
-        player3Ready = false;
-        
-        Platform.runLater(() -> {
-            if (lblReady1 != null) {
-                lblReady1.setOpacity(0.0);
-                lblReady1.setText("✓  BEREIT");
-            }
-            if (lblReady2 != null) {
-                lblReady2.setOpacity(0.0);
-                lblReady2.setText("✓  BEREIT");
-            }
-            if (lblReady3 != null) {
-                lblReady3.setOpacity(0.0);
-                lblReady3.setText("✓  BEREIT");
-            }
-        });
+    private void readPreferences() {
+        prefs = Preferences.userRoot().node(this.getClass().getName());
+        MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
+        MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "20"));
+        shuffleQuestions = prefs.getBoolean("shuffle_questions", true);
+        fullScreen = prefs.getBoolean("full_screen", true);
+        questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
     }
 
-    @FXML
-    public void btnQuestionPressed(ActionEvent event) {
-        if (gameController != null && gameController.getSpielerliste().size() >= 1) {
-            gameController.lobbyNotifyDone();
-        }
+    private void initListeners() {
+        showAnswerSceneListener = (o, a, newValue) -> {
+            if (newValue.intValue() <= 0) {
+                o.removeListener(showAnswerSceneListener);
+                Platform.runLater(this::showAnswerScene);
+            }
+        };
+
+        showNextQuestionListener = (o, a, newValue) -> {
+            if (newValue.intValue() <= 0) {
+                o.removeListener(showNextQuestionListener);
+                Platform.runLater(this::scoreNotifyDone);
+            }
+        };
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Ensure ready labels start hidden
-        if (lblReady1 != null) lblReady1.setOpacity(0.0);
-        if (lblReady2 != null) lblReady2.setOpacity(0.0);
-        if (lblReady3 != null) lblReady3.setOpacity(0.0);
-        
-        loadAvatars();
+    public void stop() {
+        if (pi4j != null) pi4j.shutdown();
     }
 
-    private void loadAvatars() {
+    @Override
+    public void start(Stage primaryStage) {
+        readPreferences();
+        initListeners();
+
+        style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
+        eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
+
+        myStage = primaryStage;
+        myStage.setTitle("IAE Buzzer Quiz");
+        if (fullScreen) {
+            myStage.setFullScreenExitHint("");
+            myStage.setFullScreen(true);
+        }
+        showStartupView();
+
+        primaryStage.setOnCloseRequest(e -> System.exit(0));
+    }
+
+    public void showStartupView() {
         try {
-            File folder = new File("resources/images/avatars");
-            if (folder.exists() && folder.isDirectory()) {
-                String[] files = folder.list((dir, name) -> name.toLowerCase().endsWith(".png"));
-                if (files != null && files.length >= 3) {
-                    if (avatar1 != null) {
-                        avatar1.setImage(new Image(new File(folder, files[0]).toURI().toString()));
-                    }
-                    if (avatar2 != null) {
-                        avatar2.setImage(new Image(new File(folder, files[1]).toURI().toString()));
-                    }
-                    if (avatar3 != null) {
-                        avatar3.setImage(new Image(new File(folder, files[2]).toURI().toString()));
-                    }
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            startupController = loader.getController();
+            startupController.setMainController(this);
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showLobbyView() {
+        alleSpieler.clear();
+        if (!IS_DEV_MODE) {
+            pi4j = Pi4J.newAutoContext();
+            buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
+            buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
+            buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
+        } else {
+            buzzer1 = new MouseBuzzer();
+            buzzer2 = new DummyBuzzer(2);
+            buzzer3 = new DummyBuzzer(3);
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
+            Scene lobbyScene = new Scene(loader.load(), 1920, 1080);
+            lobbyScene.getStylesheets().add(style);
+
+            LobbyViewController lobbyController = loader.getController();
+            lobbyController.setMainController(this);
+            lobbyController.resetReadyStates();
+
+            List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
+            String[] defaultNames = {"Spieler 1", "Spieler 2", "Spieler 3"};
+
+            for (int i = 0; i < 3; i++) {
+                final int playerNum = i + 1;
+                final IBuzzer b = buzzers.get(i);
+                final String defaultName = defaultNames[i];
+
+                if (IS_DEV_MODE) {
+                    Spieler s = new Spieler(defaultName, b);
+                    alleSpieler.add(s);
+                    lobbyController.setReady(playerNum, defaultName);
+                } else {
+                    b.getAnswer().addListener(setupBuzzerListener(defaultName, b, lobbyController, playerNum));
                 }
             }
+
+            if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
+            spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
+
+            myStage.setScene(lobbyScene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
         } catch (Exception e) {
-            System.err.println("Fehler beim Avatar-Laden: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // Manual buttons (for dev purposes)
-    @FXML
-    public void btnSpieler1Pressed() { 
-        if (gameController != null) {
-            gameController.createBuzzerView("Spieler 1", 800, 400);
+    private ChangeListener<Number> setupBuzzerListener(String defaultName, IBuzzer buzzer,
+                                                       LobbyViewController lobbyController, int playerNum) {
+        final ChangeListener<Number>[] holder = new ChangeListener[1];
+        holder[0] = (obs, old, newVal) -> {
+            if (newVal != null && newVal.intValue() > 0) {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Anmeldung – Spieler " + playerNum);
+                dialog.setHeaderText("Benutzername oder ID");
+                dialog.setContentText("Dein Username / ID:");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+
+                String input = dialog.showAndWait().orElse(null);
+                if (input == null || input.trim().isEmpty()) return;
+
+                String usernameOrId = input.trim();
+
+                if (!checkUserExists(usernameOrId)) {
+                    new Alert(Alert.AlertType.ERROR,
+                            "Benutzer '" + usernameOrId + "' nicht gefunden!").showAndWait();
+                    return;
+                }
+
+                if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
+                    new Alert(Alert.AlertType.WARNING,
+                            "Benutzer '" + usernameOrId + "' bereits angemeldet!").showAndWait();
+                    return;
+                }
+
+                Spieler s = new Spieler(usernameOrId, buzzer);
+                alleSpieler.add(s);
+                obs.removeListener(holder[0]);
+                lobbyController.setReady(playerNum, usernameOrId);
+                System.out.println(usernameOrId + " ist angemeldet");
+            }
+        };
+        return holder[0];
+    }
+
+    private boolean checkUserExists(String usernameOrId) {
+        String url = "http://192.168.100.141:8080/users/" + usernameOrId;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            System.err.println("User-Check Fehler: " + e.getMessage());
+            return false;
         }
     }
-    
-    @FXML
-    public void btnSpieler2Pressed() { 
-        if (gameController != null) {
-            gameController.createBuzzerView("Spieler 2", 800, 710);
+
+    public void createBuzzerView(String playername, double yPosition, double xPosition) {
+        try {
+            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
+            Parent parent = root.load();
+            Stage stage = new Stage();
+            Scene scene = new Scene(parent);
+            stage.setTitle(playername);
+            FXBuzzerController controller = root.getController();
+            Spieler s = new Spieler(playername, controller);
+            alleSpieler.add(s);
+            stage.setScene(scene);
+            stage.setY(yPosition);
+            stage.setX(xPosition);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-    
-    @FXML
-    public void btnSpieler3Pressed() { 
-        if (gameController != null) {
-            gameController.createBuzzerView("Spieler 3", 800, 1020);
+
+    public void lobbyNotifyDone() {
+        if (alleSpieler.size() >= 2) {
+            rundenCounter = 0;
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "Mindestens zwei Spieler benötigt!", ButtonType.OK).showAndWait();
         }
+    }
+
+    public void showQuestionView(Frage question) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+
+            QuestionViewController qController = loader.getController();
+            qController.setMainController(this);
+            qController.initFrage(question, alleSpieler, MAX_ZEIT);
+
+            qController.getRestzeit().addListener(showAnswerSceneListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showAnswerScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            AnswerViewController controller = loader.getController();
+            controller.setInformation(aktuelleFrage, alleSpieler);
+            controller.getRestzeit().addListener(showNextQuestionListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void scoreNotifyDone() {
+        rundenCounter++;
+        if (rundenCounter < MAX_FRAGEN) {
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            showEndScene();
+        }
+    }
+
+    public void showEndScene() {
+        sendFinalScoresToApi();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            EndViewController controller = loader.getController();
+            controller.setMainController(this);
+            controller.setSpielerInformation(alleSpieler);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendFinalScoresToApi() {
+        List<Map<String, Object>> players = new ArrayList<>();
+        for (Spieler s : alleSpieler) {
+            Map<String, Object> p = new HashMap<>();
+            p.put("username", s.getName());
+            p.put("score", s.getPunktestand().get());
+            players.add(p);
+        }
+
+        String jsonBody = String.format("""
+                {
+                    "teilnehmer": %d,
+                    "game_type": "ict",
+                    "players": %s
+                }
+                """, alleSpieler.size(), players);
+
+        String url = "http://192.168.100.141:8080/scores/";
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("API sent " + alleSpieler.size() + " users. Status: " + response.statusCode());
+        } catch (Exception e) {
+            System.err.println("API Error: " + e.getMessage());
+        }
+    }
+
+    public void editSettings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EditSettingsView.fxml"));
+            Scene scene = new Scene(loader.load());
+            EditSettingsViewController controller = loader.getController();
+            controller.setPreferences(prefs);
+            if (!IS_DEV_MODE) controller.setBuzzers(buzzer1, buzzer2, buzzer3);
+
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle("Einstellungen und Hardware-Test");
+            stage.showAndWait();
+            readPreferences();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Set<Spieler> getSpielerliste() {
+        return alleSpieler;
     }
 }
