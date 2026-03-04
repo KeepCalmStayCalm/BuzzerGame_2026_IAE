@@ -1,336 +1,172 @@
-package application;
+package view;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.*;
-import javafx.application.Application;
+import application.*;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import java.util.prefs.Preferences;
-import com.pi4j.Pi4J;
-import com.pi4j.context.Context;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 
-import view.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
-public class GameController extends Application {
+public class QuestionViewController implements Initializable {
 
-    public static final boolean IS_DEV_MODE = false;
+    private GameController gameController;
+    private Frage frage;
 
-    private Stage myStage;
-    private StartupViewController startupController;
-    private int rundenCounter = 0;
-    private List<Frage> eingeleseneFragen;
-    private Spielrunde spielrunde;
-    private Set<Spieler> alleSpieler = new HashSet<>();
-    private IBuzzer buzzer1, buzzer2, buzzer3;
+    @FXML private Label lblZeit;          // must match QuestionView2025.fxml
+    @FXML private Label lblFrage;
+    @FXML private Label lblAntwort1;
+    @FXML private Label lblAntwort2;
+    @FXML private Label lblAntwort3;
+    @FXML private BorderPane imageRoot;
+    @FXML private ImageView image;
 
-    private int MAX_ZEIT = 20;
-    private int MAX_FRAGEN = 5;
-    private Frage aktuelleFrage;
-    private boolean shuffleQuestions = true;
-    private boolean fullScreen = true;
+    private IntegerProperty restzeit;
+    private Timer timer;
+    private TimerTask timerTask;
+    private long timeStart;
+    private int maxZeit;
+    private int answersReceived = 0;
 
-    private Preferences prefs;
-    private String style;
-    private Context pi4j;
-    private String questionFile = "resources/fragenBuzzerGame.csv";
-
-    private ChangeListener<Number> showAnswerSceneListener;
-    private ChangeListener<Number> showNextQuestionListener;
-
-    public static void main(String[] args) {
-        launch(args);
+    public IntegerProperty getRestzeit() {
+        if (restzeit == null) {
+            restzeit = new SimpleIntegerProperty(maxZeit);
+        }
+        return restzeit;
     }
 
-    private void readPreferences() {
-        prefs = Preferences.userRoot().node(this.getClass().getName());
-        MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
-        MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "20"));
-        shuffleQuestions = prefs.getBoolean("shuffle_questions", true);
-        fullScreen = prefs.getBoolean("full_screen", true);
-        questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+    public void setMainController(GameController mainController) {
+        this.gameController = mainController;
     }
 
-    private void initListeners() {
-        showAnswerSceneListener = (o, a, newValue) -> {
-            if (newValue.intValue() <= 0) {
-                o.removeListener(showAnswerSceneListener);
-                Platform.runLater(this::showAnswerScene);
+    public void initFrage(Frage frage, Set<Spieler> spielerliste, int maxZeit) {
+        cleanup();
+        this.frage = frage;
+        this.maxZeit = maxZeit;
+        this.timeStart = System.currentTimeMillis();
+        this.answersReceived = 0;
+
+        if (lblFrage != null) lblFrage.setText(frage.getFrage());
+        setAnswers(frage.getAntworten());
+        loadQuestionImage(frage.getImagePath());
+
+        getRestzeit().setValue(maxZeit);
+        startTimer();
+        initPlayers(spielerliste);
+    }
+
+    private void initPlayers(Set<Spieler> spielerliste) {
+        Set<Spieler> copy = new HashSet<>(spielerliste);
+        copy.forEach(spieler -> {
+            spieler.reset();
+            spieler.setRundenpunkte(0);
+
+            // Robust listener with direct reference
+            ChangeListener<Number> listener = (obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    handlePlayerAnswer(spieler, newVal.intValue());
+                }
+            };
+            spieler.getAntwortNr().addListener(listener);
+        });
+    }
+
+    private void handlePlayerAnswer(Spieler spieler, int answerNum) {
+        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName() + " with answer " + answerNum);
+
+        if (answerNum <= 0 || gameController == null) return;
+
+        if (answerNum == frage.korrekteAntwortInt()) {
+            long timeTaken = System.currentTimeMillis() - timeStart;
+            int punkte = Math.max(0, (maxZeit * 1000 - (int)timeTaken) / 100);
+            spieler.addPunkte(punkte);
+            spieler.setRundenpunkte(punkte);
+            System.out.println(spieler.getName() + " answered correctly! Points: " + punkte);
+        } else {
+            spieler.setRundenpunkte(0);
+            System.out.println(spieler.getName() + " answered incorrectly.");
+        }
+
+        answersReceived++;
+
+        // If all players answered → end immediately
+        if (answersReceived >= gameController.getSpielerliste().size()) {
+            System.out.println("All players answered - forcing end of question");
+            endQuestionImmediately();
+        }
+    }
+
+    private void startTimer() {
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                long elapsed = System.currentTimeMillis() - timeStart;
+                int remaining = maxZeit - (int)(elapsed / 1000);
+
+                Platform.runLater(() -> {
+                    getRestzeit().setValue(Math.max(0, remaining));
+                    if (lblZeit != null) lblZeit.setText(String.valueOf(getRestzeit().get()));
+
+                    if (remaining <= 0) {
+                        endQuestionImmediately();
+                    }
+                });
             }
         };
 
-        showNextQuestionListener = (o, a, newValue) -> {
-            if (newValue.intValue() <= 0) {
-                o.removeListener(showNextQuestionListener);
-                Platform.runLater(this::scoreNotifyDone);
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(timerTask, 0, 100);
+    }
+
+    private void endQuestionImmediately() {
+        cleanup();
+        if (gameController != null) {
+            // Force the restzeit to 0 → this triggers showAnswerSceneListener in GameController
+            getRestzeit().setValue(0);
+        }
+    }
+
+    public void cleanup() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (timerTask != null) timerTask = null;
+    }
+
+    private void loadQuestionImage(String imagePath) {
+        if (image != null && imagePath != null && !imagePath.isEmpty()) {
+            try (InputStream is = new FileInputStream(imagePath)) {
+                Image img = new Image(is);
+                image.setImage(img);
+                if (imageRoot != null) {
+                    image.fitWidthProperty().bind(imageRoot.widthProperty());
+                    image.fitHeightProperty().bind(imageRoot.heightProperty());
+                    image.setPreserveRatio(true);
+                }
+            } catch (Exception e) {
+                System.err.println("Bild konnte nicht geladen werden: " + e.getMessage());
             }
-        };
+        }
+    }
+
+    private void setAnswers(List<Antwort> antworten) {
+        if (antworten == null || antworten.size() < 3) return;
+        if (lblAntwort1 != null) lblAntwort1.setText(antworten.get(0).getAntwort());
+        if (lblAntwort2 != null) lblAntwort2.setText(antworten.get(1).getAntwort());
+        if (lblAntwort3 != null) lblAntwort3.setText(antworten.get(2).getAntwort());
     }
 
     @Override
-    public void stop() {
-        if (pi4j != null) pi4j.shutdown();
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
-        readPreferences();
-        initListeners();
-
-        style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
-        eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
-
-        myStage = primaryStage;
-        myStage.setTitle("IAE Buzzer Quiz");
-        if (fullScreen) {
-            myStage.setFullScreenExitHint("");
-            myStage.setFullScreen(true);
-        }
-        showStartupView();
-
-        primaryStage.setOnCloseRequest(e -> System.exit(0));
-    }
-
-    public void showStartupView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            startupController = loader.getController();
-            startupController.setMainController(this);
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void showLobbyView() {
-        alleSpieler.clear();
-        if (!IS_DEV_MODE) {
-            pi4j = Pi4J.newAutoContext();
-            buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
-            buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
-            buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
-        } else {
-            buzzer1 = new MouseBuzzer();
-            buzzer2 = new DummyBuzzer(2);
-            buzzer3 = new DummyBuzzer(3);
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
-            Scene lobbyScene = new Scene(loader.load(), 1920, 1080);
-            lobbyScene.getStylesheets().add(style);
-
-            LobbyViewController lobbyController = loader.getController();
-            lobbyController.setMainController(this);
-            lobbyController.resetReadyStates();
-
-            List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
-            String[] names = {"Spieler 1", "Spieler 2", "Spieler 3"};
-
-            for (int i = 0; i < 3; i++) {
-                final int playerNum = i + 1;
-                final IBuzzer b = buzzers.get(i);
-                final String name = names[i];
-
-                if (IS_DEV_MODE) {
-                    Spieler s = new Spieler(name, b);
-                    alleSpieler.add(s);
-                    lobbyController.setReady(playerNum);
-                } else {
-                    b.getAnswer().addListener(setupBuzzerListener(name, b, lobbyController, playerNum));
-                }
-            }
-
-            if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
-            spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
-
-            myStage.setScene(lobbyScene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer, 
-                                                       LobbyViewController lobbyController, int playerNum) {
-        final ChangeListener<Number>[] holder = new ChangeListener[1];
-        holder[0] = (obs, old, newVal) -> {
-            if (newVal != null && newVal.intValue() > 0) {
-                Spieler s = new Spieler(name, buzzer);
-                alleSpieler.add(s);
-                obs.removeListener(holder[0]);
-                lobbyController.setReady(playerNum);
-                System.out.println(name + " ist bereit");
-            }
-        };
-        return holder[0];
-    }
-
-    public void createBuzzerView(String playername, double yPosition, double xPosition) {
-        try {
-            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
-            Parent parent = root.load();
-            Stage stage = new Stage();
-            Scene scene = new Scene(parent);
-            stage.setTitle(playername);
-            FXBuzzerController controller = root.getController();
-            Spieler s = new Spieler(playername, controller);
-            alleSpieler.add(s);
-            stage.setScene(scene);
-            stage.setY(yPosition);
-            stage.setX(xPosition);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void lobbyNotifyDone() {
-        if (alleSpieler.size() >= 2) {
-            rundenCounter = 0;
-            aktuelleFrage = spielrunde.naechsteFrage();
-            showQuestionView(aktuelleFrage);
-        } else {
-            new Alert(Alert.AlertType.WARNING, "Mindestens zwei Spieler benötigt!", ButtonType.OK).showAndWait();
-        }
-    }
-
-    public void showQuestionView(Frage question) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-
-            QuestionViewController qController = loader.getController();
-            qController.setMainController(this);
-            qController.initFrage(question, alleSpieler, MAX_ZEIT);
-
-            qController.getRestzeit().addListener(showAnswerSceneListener);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void showAnswerScene() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            AnswerViewController controller = loader.getController();
-            controller.setInformation(aktuelleFrage, alleSpieler);
-            controller.getRestzeit().addListener(showNextQuestionListener);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void scoreNotifyDone() {
-        rundenCounter++;
-        if (rundenCounter < MAX_FRAGEN) {
-            aktuelleFrage = spielrunde.naechsteFrage();
-            showQuestionView(aktuelleFrage);
-        } else {
-            showEndScene();
-        }
-    }
-
-    public void showEndScene() {
-        sendFinalScoresToApi();   // ← API is called here automatically
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            EndViewController controller = loader.getController();
-            controller.setMainController(this);
-            controller.setSpielerInformation(alleSpieler);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Sends the final scores to your backend API
-     */
-    private void sendFinalScoresToApi() {
-        int teilnehmer = alleSpieler.size();
-        int totalScore = alleSpieler.stream()
-                .mapToInt(s -> s.getPunktestand().get())
-                .sum();
-
-        String jsonBody = String.format("""
-                {
-                    "teilnehmer": %d,
-                    "score": %d,
-                    "game_type": "Quiz"
-                }
-                """, teilnehmer, totalScore);
-
-        String url = "http://192.168.100.141:8080/scores/";
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
-
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("✅ API Score sent! Status: " + response.statusCode());
-            System.out.println("Response: " + response.body());
-        } catch (Exception e) {
-            System.err.println("❌ API Error: " + e.getMessage());
-        }
-    }
-
-    public void editSettings() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EditSettingsView.fxml"));
-            Scene scene = new Scene(loader.load());
-            EditSettingsViewController controller = loader.getController();
-            controller.setPreferences(prefs);
-            if (!IS_DEV_MODE) controller.setBuzzers(buzzer1, buzzer2, buzzer3);
-
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.setTitle("Einstellungen und Hardware-Test");
-            stage.showAndWait();
-            readPreferences();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Set<Spieler> getSpielerliste() {
-        return alleSpieler;
-    }
+    public void initialize(URL url, ResourceBundle rb) {}
 }
