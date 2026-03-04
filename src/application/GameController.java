@@ -290,7 +290,7 @@ public class GameController extends Application {
                 {
                     "teilnehmer": %d,
                     "score": %d,
-                    "game_type": "ict"
+                    "game_type": "Quiz"
                 }
                 """, teilnehmer, totalScore);
 
