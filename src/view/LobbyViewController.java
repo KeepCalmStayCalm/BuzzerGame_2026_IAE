@@ -18,7 +18,7 @@ public class LobbyViewController implements Initializable {
     @FXML private ImageView avatar1, avatar2, avatar3;
 
     private GameController gameController;
-    
+
     // Track which players are ready (1, 2 or 3)
     private boolean player1Ready = false;
     private boolean player2Ready = false;
@@ -29,45 +29,59 @@ public class LobbyViewController implements Initializable {
     }
 
     /**
-     * Called when a player presses their buzzer.
-     * Only marks them ready if they weren't already ready.
+     * Called when a player has successfully logged in / verified.
+     * Marks them ready and shows their real name (username/ID).
      * playerNumber must be 1, 2 or 3
+     *
+     * @param playerNumber 1, 2 or 3
+     * @param realName     the verified username or ID (e.g. "DazzlingKoala")
      */
-    public void setReady(int playerNumber) {
-        if (playerNumber < 1 || playerNumber > 3) return;   // safety
+    public void setReady(int playerNumber, String realName) {
+        if (playerNumber < 1 || playerNumber > 3) return; // safety
 
         Platform.runLater(() -> {
             Label targetLabel = null;
             boolean alreadyReady = false;
-            
+
             switch (playerNumber) {
-                case 1: 
+                case 1:
                     targetLabel = lblReady1;
                     alreadyReady = player1Ready;
                     player1Ready = true;
                     break;
-                case 2: 
+                case 2:
                     targetLabel = lblReady2;
                     alreadyReady = player2Ready;
                     player2Ready = true;
                     break;
-                case 3: 
+                case 3:
                     targetLabel = lblReady3;
                     alreadyReady = player3Ready;
                     player3Ready = true;
                     break;
             }
-            
+
             if (targetLabel != null && !alreadyReady) {
                 targetLabel.setOpacity(1.0);
-                targetLabel.setText("✓  BEREIT");
+                // Show real name if provided, otherwise fallback
+                String displayText = (realName != null && !realName.trim().isEmpty())
+                        ? "✓  " + realName.trim()
+                        : "✓  BEREIT";
+                targetLabel.setText(displayText);
                 targetLabel.setStyle("-fx-text-fill: #3fb950; " +
                                      "-fx-effect: dropshadow(gaussian, #3fb950, 20, 0.5, 0, 0); " +
                                      "-fx-font-weight: bold;");
             }
         });
     }
-    
+
+    /**
+     * Overload for backward compatibility / dev mode (no real name)
+     */
+    public void setReady(int playerNumber) {
+        setReady(playerNumber, null); // uses fallback "✓ BEREIT"
+    }
+
     /**
      * Reset all ready states when entering the lobby
      */
@@ -75,18 +89,18 @@ public class LobbyViewController implements Initializable {
         player1Ready = false;
         player2Ready = false;
         player3Ready = false;
-        
+
         Platform.runLater(() -> {
             resetLabel(lblReady1);
             resetLabel(lblReady2);
             resetLabel(lblReady3);
         });
     }
-    
+
     private void resetLabel(Label label) {
         if (label != null) {
             label.setOpacity(0.0);
-            label.setText("✓  BEREIT");
+            label.setText("✓ BEREIT");
             label.setStyle("");
         }
     }
@@ -129,21 +143,21 @@ public class LobbyViewController implements Initializable {
 
     // === Manual dev buttons (only used in development) ===
     @FXML
-    public void btnSpieler1Pressed() { 
+    public void btnSpieler1Pressed() {
         if (gameController != null) {
             gameController.createBuzzerView("Spieler 1", 800, 400);
         }
     }
-    
+
     @FXML
-    public void btnSpieler2Pressed() { 
+    public void btnSpieler2Pressed() {
         if (gameController != null) {
             gameController.createBuzzerView("Spieler 2", 800, 710);
         }
     }
-    
+
     @FXML
-    public void btnSpieler3Pressed() { 
+    public void btnSpieler3Pressed() {
         if (gameController != null) {
             gameController.createBuzzerView("Spieler 3", 800, 1020);
         }
