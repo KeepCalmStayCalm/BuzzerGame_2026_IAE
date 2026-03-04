@@ -171,51 +171,67 @@ public class GameController extends Application {
     /**
      * Setup buzzer listener for player registration in lobby.
      * CRITICAL: Wraps UI operations in Platform.runLater() to avoid threading issues.
+     * The listener stays active until a player successfully registers (allows retry on cancel/error).
      */
     private ChangeListener<Number> setupBuzzerListener(String defaultName, IBuzzer buzzer,
                                                        LobbyViewController lobbyController, int playerNum) {
         final ChangeListener<Number>[] holder = new ChangeListener[1];
+        final boolean[] isProcessing = {false}; // Prevent multiple simultaneous dialogs
+        
         holder[0] = (obs, old, newVal) -> {
-            if (newVal != null && newVal.intValue() > 0) {
+            if (newVal != null && newVal.intValue() > 0 && !isProcessing[0]) {
+                isProcessing[0] = true; // Lock to prevent multiple dialogs
+                
                 // CRITICAL FIX: Pi4J calls this from a background thread
                 // ALL JavaFX UI operations MUST run on the FX Application Thread
                 Platform.runLater(() -> {
-                    TextInputDialog dialog = new TextInputDialog();
-                    dialog.setTitle("Anmeldung – Spieler " + playerNum);
-                    dialog.setHeaderText("Benutzername oder ID");
-                    dialog.setContentText("Dein Username / ID:");
-                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    try {
+                        TextInputDialog dialog = new TextInputDialog();
+                        dialog.setTitle("Anmeldung – Spieler " + playerNum);
+                        dialog.setHeaderText("Benutzername oder ID");
+                        dialog.setContentText("Dein Username / ID:");
+                        dialog.initModality(Modality.APPLICATION_MODAL);
 
-                    Optional<String> result = dialog.showAndWait();
-                    if (!result.isPresent() || result.get().trim().isEmpty()) {
-                        System.out.println("Player " + playerNum + " cancelled registration");
-                        return;
+                        Optional<String> result = dialog.showAndWait();
+                        
+                        // If cancelled, allow retry by not removing listener
+                        if (!result.isPresent() || result.get().trim().isEmpty()) {
+                            System.out.println("Player " + playerNum + " cancelled registration - can retry");
+                            return;
+                        }
+
+                        String usernameOrId = result.get().trim();
+
+                        // Check if user exists in database
+                        if (!checkUserExists(usernameOrId)) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR,
+                                    "Benutzer '" + usernameOrId + "' nicht in der Datenbank gefunden!\n" +
+                                    "Bitte erneut versuchen.");
+                            alert.showAndWait();
+                            // Don't remove listener - allow retry
+                            return;
+                        }
+
+                        // Check if user is already registered
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
+                            Alert alert = new Alert(Alert.AlertType.WARNING,
+                                    "Benutzer '" + usernameOrId + "' ist bereits angemeldet!\n" +
+                                    "Bitte einen anderen Benutzer wählen.");
+                            alert.showAndWait();
+                            // Don't remove listener - allow retry
+                            return;
+                        }
+
+                        // SUCCESS - Register player and remove listener
+                        Spieler s = new Spieler(usernameOrId, buzzer);
+                        alleSpieler.add(s);
+                        obs.removeListener(holder[0]); // Only remove on success
+                        lobbyController.setReady(playerNum, usernameOrId);
+                        System.out.println("✓ " + usernameOrId + " erfolgreich angemeldet (Spieler " + playerNum + ")");
+                        
+                    } finally {
+                        isProcessing[0] = false; // Always unlock
                     }
-
-                    String usernameOrId = result.get().trim();
-
-                    // Check if user exists in database
-                    if (!checkUserExists(usernameOrId)) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR,
-                                "Benutzer '" + usernameOrId + "' nicht gefunden!");
-                        alert.showAndWait();
-                        return;
-                    }
-
-                    // Check if user is already registered
-                    if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
-                        Alert alert = new Alert(Alert.AlertType.WARNING,
-                                "Benutzer '" + usernameOrId + "' bereits angemeldet!");
-                        alert.showAndWait();
-                        return;
-                    }
-
-                    // Register player
-                    Spieler s = new Spieler(usernameOrId, buzzer);
-                    alleSpieler.add(s);
-                    obs.removeListener(holder[0]);
-                    lobbyController.setReady(playerNum, usernameOrId);
-                    System.out.println(usernameOrId + " ist angemeldet (Spieler " + playerNum + ")");
                 });
             }
         };
@@ -224,9 +240,11 @@ public class GameController extends Application {
 
     /**
      * Check if a user exists in the database via API call
+     * API endpoint: GET /teilnehmer/?id={id}
      */
     private boolean checkUserExists(String usernameOrId) {
-        String url = "http://192.168.100.141:8080/users/" + usernameOrId;
+        // API expects: /teilnehmer/?id=1
+        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + usernameOrId;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -237,10 +255,16 @@ public class GameController extends Application {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             boolean exists = response.statusCode() == 200;
-            System.out.println("User check for '" + usernameOrId + "': " + (exists ? "FOUND" : "NOT FOUND"));
+            
+            if (exists) {
+                System.out.println("✓ User check for ID '" + usernameOrId + "': FOUND");
+            } else {
+                System.out.println("✗ User check for ID '" + usernameOrId + "': NOT FOUND (Status: " + response.statusCode() + ")");
+            }
+            
             return exists;
         } catch (Exception e) {
-            System.err.println("User-Check Fehler für '" + usernameOrId + "': " + e.getMessage());
+            System.err.println("✗ User-Check Fehler für ID '" + usernameOrId + "': " + e.getMessage());
             return false;
         }
     }
