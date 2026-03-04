@@ -181,27 +181,24 @@ public class GameController extends Application {
                 dialog.initModality(Modality.APPLICATION_MODAL);
 
                 String input = dialog.showAndWait().orElse(null);
-                if (input == null || input.trim().isEmpty()) {
-                    return;
-                }
+                if (input == null || input.trim().isEmpty()) return;
 
                 String usernameOrId = input.trim();
 
-                // Verify user exists on backend
+                // Verify with backend
                 if (!checkUserExists(usernameOrId)) {
                     new Alert(Alert.AlertType.ERROR,
-                            "Benutzer '" + usernameOrId + "' nicht gefunden!\nBitte erneut versuchen.").showAndWait();
+                            "Benutzer '" + usernameOrId + "' nicht gefunden!").showAndWait();
                     return;
                 }
 
-                // Prevent duplicate login
+                // Prevent duplicate
                 if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
                     new Alert(Alert.AlertType.WARNING,
-                            "Benutzer '" + usernameOrId + "' ist bereits angemeldet!").showAndWait();
+                            "Benutzer '" + usernameOrId + "' bereits angemeldet!").showAndWait();
                     return;
                 }
 
-                // Success
                 Spieler s = new Spieler(usernameOrId, buzzer);
                 alleSpieler.add(s);
                 obs.removeListener(holder[0]);
@@ -213,9 +210,7 @@ public class GameController extends Application {
     }
 
     private boolean checkUserExists(String usernameOrId) {
-        // ADAPT THIS to your real endpoint
-        // Example: GET /users/{usernameOrId} returns 200 if exists
-        String url = "http://192.168.100.141:8080/users/" + usernameOrId;
+        String url = "http://192.168.100.141:8080/users/" + usernameOrId; // ← adapt to your real endpoint
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -232,11 +227,106 @@ public class GameController extends Application {
         }
     }
 
+    public void createBuzzerView(String playername, double yPosition, double xPosition) {
+        try {
+            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
+            Parent parent = root.load();
+            Stage stage = new Stage();
+            Scene scene = new Scene(parent);
+            stage.setTitle(playername);
+            FXBuzzerController controller = root.getController();
+            Spieler s = new Spieler(playername, controller);
+            alleSpieler.add(s);
+            stage.setScene(scene);
+            stage.setY(yPosition);
+            stage.setX(xPosition);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void lobbyNotifyDone() {
+        if (alleSpieler.size() >= 2) {
+            rundenCounter = 0;
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "Mindestens zwei Spieler benötigt!", ButtonType.OK).showAndWait();
+        }
+    }
+
+    public void showQuestionView(Frage question) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+
+            QuestionViewController qController = loader.getController();
+            qController.setMainController(this);
+            qController.initFrage(question, alleSpieler, MAX_ZEIT);
+
+            qController.getRestzeit().addListener(showAnswerSceneListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showAnswerScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            AnswerViewController controller = loader.getController();
+            controller.setInformation(aktuelleFrage, alleSpieler);
+            controller.getRestzeit().addListener(showNextQuestionListener);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void scoreNotifyDone() {
+        rundenCounter++;
+        if (rundenCounter < MAX_FRAGEN) {
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            showEndScene();
+        }
+    }
+
+    public void showEndScene() {
+        sendFinalScoresToApi();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
+            Scene scene = new Scene(loader.load(), 1920, 1080);
+            scene.getStylesheets().add(style);
+            EndViewController controller = loader.getController();
+            controller.setMainController(this);
+            controller.setSpielerInformation(alleSpieler);
+
+            myStage.setScene(scene);
+            if (fullScreen) myStage.setFullScreen(true);
+            myStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendFinalScoresToApi() {
         List<Map<String, Object>> players = new ArrayList<>();
         for (Spieler s : alleSpieler) {
             Map<String, Object> p = new HashMap<>();
-            p.put("username", s.getName());           // or "id" if you prefer
+            p.put("username", s.getName());
             p.put("score", s.getPunktestand().get());
             players.add(p);
         }
@@ -261,34 +351,30 @@ public class GameController extends Application {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println("✅ API sent " + alleSpieler.size() + " real users! Status: " + response.statusCode());
-            System.out.println("Response: " + response.body());
         } catch (Exception e) {
             System.err.println("❌ API Error: " + e.getMessage());
         }
     }
 
-    // The rest of your methods (createBuzzerView, lobbyNotifyDone, showQuestionView, showAnswerScene,
-    // scoreNotifyDone, showEndScene, editSettings, getSpielerliste, etc.) remain unchanged.
-    // Just keep them as they were in your previous version.
-
-    // Example placeholder for showEndScene (call the API here)
-    public void showEndScene() {
-        sendFinalScoresToApi();
-
+    public void editSettings() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            EndViewController controller = loader.getController();
-            controller.setMainController(this);
-            controller.setSpielerInformation(alleSpieler);
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EditSettingsView.fxml"));
+            Scene scene = new Scene(loader.load());
+            EditSettingsViewController controller = loader.getController();
+            controller.setPreferences(prefs);
+            if (!IS_DEV_MODE) controller.setBuzzers(buzzer1, buzzer2, buzzer3);
+
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle("Einstellungen und Hardware-Test");
+            stage.showAndWait();
+            readPreferences();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // ... other unchanged methods ...
+    public Set<Spieler> getSpielerliste() {
+        return alleSpieler;
+    }
 }
