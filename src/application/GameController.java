@@ -1,6 +1,10 @@
 package application;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -165,9 +169,7 @@ public class GameController extends Application {
 
     private ChangeListener<Number> setupBuzzerListener(String name, IBuzzer buzzer, 
                                                        LobbyViewController lobbyController, int playerNum) {
-        // Array holder fixes the "variable might not have been initialized" error
         final ChangeListener<Number>[] holder = new ChangeListener[1];
-
         holder[0] = (obs, old, newVal) -> {
             if (newVal != null && newVal.intValue() > 0) {
                 Spieler s = new Spieler(name, buzzer);
@@ -177,7 +179,6 @@ public class GameController extends Application {
                 System.out.println(name + " ist bereit");
             }
         };
-
         return holder[0];
     }
 
@@ -258,6 +259,8 @@ public class GameController extends Application {
     }
 
     public void showEndScene() {
+        sendFinalScoresToApi();   // ← API is called here automatically
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
             Scene scene = new Scene(loader.load(), 1920, 1080);
@@ -271,6 +274,41 @@ public class GameController extends Application {
             myStage.show();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sends the final scores to your backend API
+     */
+    private void sendFinalScoresToApi() {
+        int teilnehmer = alleSpieler.size();
+        int totalScore = alleSpieler.stream()
+                .mapToInt(s -> s.getPunktestand().get())
+                .sum();
+
+        String jsonBody = String.format("""
+                {
+                    "teilnehmer": %d,
+                    "score": %d,
+                    "game_type": "ict"
+                }
+                """, teilnehmer, totalScore);
+
+        String url = "http://192.168.100.141:8080/scores/";
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("✅ API Score sent! Status: " + response.statusCode());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            System.err.println("❌ API Error: " + e.getMessage());
         }
     }
 
