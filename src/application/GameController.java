@@ -364,50 +364,62 @@ public class GameController extends Application {
         }
     }
 
+    /**
+     * Send final scores for ALL players to the API
+     * Sends INDIVIDUAL POST requests for each player (API expects separate records)
+     */
     private void sendFinalScoresToApi() {
-        List<Map<String, Object>> players = new ArrayList<>();
-        for (Spieler s : alleSpieler) {
-            Map<String, Object> p = new HashMap<>();
-            p.put("username", s.getName());
-            p.put("score", s.getPunktestand().get());
-            players.add(p);
-        }
-
-        // Build JSON manually to avoid external dependencies
-        StringBuilder playersJson = new StringBuilder("[");
-        int count = 0;
-        for (Map<String, Object> p : players) {
-            if (count > 0) playersJson.append(",");
-            playersJson.append(String.format(
-                "{\"username\":\"%s\",\"score\":%d}",
-                p.get("username"),
-                p.get("score")
-            ));
-            count++;
-        }
-        playersJson.append("]");
-
-        String jsonBody = String.format(
-            "{\"teilnehmer\":%d,\"game_type\":\"ict\",\"players\":%s}",
-            alleSpieler.size(),
-            playersJson.toString()
-        );
-
+        System.out.println("=== Sending Final Scores to API ===");
+        System.out.println("Total players: " + alleSpieler.size());
+        
         String url = "http://192.168.100.141:8080/scores/";
-
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
+        
+        int successCount = 0;
+        int failCount = 0;
+        
+        // Send individual POST for EACH player
+        for (Spieler spieler : alleSpieler) {
+            String playerName = spieler.getName();
+            int playerScore = spieler.getPunktestand().get();
+            
+            // Build JSON for this ONE player
+            String jsonBody = String.format(
+                "{\"teilnehmer\":%s,\"score\":%d,\"game_type\":\"ict\"}",
+                playerName,  // Player ID (e.g., "1", "2", "3")
+                playerScore  // Final score
+            );
+            
+            System.out.println("  → Sending score for player " + playerName + ": " + playerScore + " Punkte");
+            System.out.println("    JSON: " + jsonBody);
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
 
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("API sent " + alleSpieler.size() + " users. Status: " + response.statusCode());
-        } catch (Exception e) {
-            System.err.println("API Error: " + e.getMessage());
+            try {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                
+                if (response.statusCode() == 200 || response.statusCode() == 201) {
+                    System.out.println("    ✓ SUCCESS: Player " + playerName + " score saved!");
+                    successCount++;
+                } else {
+                    System.err.println("    ✗ FAILED: Status " + response.statusCode());
+                    System.err.println("    Response: " + response.body());
+                    failCount++;
+                }
+                
+            } catch (Exception e) {
+                System.err.println("    ✗ ERROR: " + e.getMessage());
+                failCount++;
+            }
         }
+        
+        System.out.println("=================================");
+        System.out.println("Summary: " + successCount + " succeeded, " + failCount + " failed");
+        System.out.println("=================================");
     }
 
     public void editSettings() {
