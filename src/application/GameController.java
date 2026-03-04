@@ -385,7 +385,7 @@ public class GameController extends Application {
             
             // Build JSON for this ONE player
             String jsonBody = String.format(
-                "{\"teilnehmer\":%s,\"score\":%d,\"game_type\":\"ict\"}",
+                "{\"teilnehmer\":%s,\"score\":%d,\"game_type\":\"quiz\"}",
                 playerName,  // Player ID (e.g., "1", "2", "3")
                 playerScore  // Final score
             );
