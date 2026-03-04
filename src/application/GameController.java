@@ -173,7 +173,6 @@ public class GameController extends Application {
         final ChangeListener<Number>[] holder = new ChangeListener[1];
         holder[0] = (obs, old, newVal) -> {
             if (newVal != null && newVal.intValue() > 0) {
-                // Login popup
                 TextInputDialog dialog = new TextInputDialog();
                 dialog.setTitle("Anmeldung – Spieler " + playerNum);
                 dialog.setHeaderText("Benutzername oder ID");
@@ -185,14 +184,12 @@ public class GameController extends Application {
 
                 String usernameOrId = input.trim();
 
-                // Verify with backend
                 if (!checkUserExists(usernameOrId)) {
                     new Alert(Alert.AlertType.ERROR,
                             "Benutzer '" + usernameOrId + "' nicht gefunden!").showAndWait();
                     return;
                 }
 
-                // Prevent duplicate
                 if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
                     new Alert(Alert.AlertType.WARNING,
                             "Benutzer '" + usernameOrId + "' bereits angemeldet!").showAndWait();
@@ -210,7 +207,7 @@ public class GameController extends Application {
     }
 
     private boolean checkUserExists(String usernameOrId) {
-        String url = "http://192.168.100.141:8080/users/" + usernameOrId; // ← adapt to your real endpoint
+        String url = "http://192.168.100.141:8080/users/" + usernameOrId;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -322,7 +319,7 @@ public class GameController extends Application {
         }
     }
 
-    public void sendFinalScoresToApi() {
+    private void sendFinalScoresToApi() {
         List<Map<String, Object>> players = new ArrayList<>();
         for (Spieler s : alleSpieler) {
             Map<String, Object> p = new HashMap<>();
@@ -350,9 +347,9 @@ public class GameController extends Application {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("✅ API sent " + alleSpieler.size() + " real users! Status: " + response.statusCode());
+            System.out.println("API sent " + alleSpieler.size() + " users. Status: " + response.statusCode());
         } catch (Exception e) {
-            System.err.println("❌ API Error: " + e.getMessage());
+            System.err.println("API Error: " + e.getMessage());
         }
     }
 
