@@ -168,44 +168,63 @@ public class GameController extends Application {
         }
     }
 
+    /**
+     * Setup buzzer listener for player registration in lobby.
+     * CRITICAL: Wraps UI operations in Platform.runLater() to avoid threading issues.
+     */
     private ChangeListener<Number> setupBuzzerListener(String defaultName, IBuzzer buzzer,
                                                        LobbyViewController lobbyController, int playerNum) {
         final ChangeListener<Number>[] holder = new ChangeListener[1];
         holder[0] = (obs, old, newVal) -> {
             if (newVal != null && newVal.intValue() > 0) {
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Anmeldung – Spieler " + playerNum);
-                dialog.setHeaderText("Benutzername oder ID");
-                dialog.setContentText("Dein Username / ID:");
-                dialog.initModality(Modality.APPLICATION_MODAL);
+                // CRITICAL FIX: Pi4J calls this from a background thread
+                // ALL JavaFX UI operations MUST run on the FX Application Thread
+                Platform.runLater(() -> {
+                    TextInputDialog dialog = new TextInputDialog();
+                    dialog.setTitle("Anmeldung – Spieler " + playerNum);
+                    dialog.setHeaderText("Benutzername oder ID");
+                    dialog.setContentText("Dein Username / ID:");
+                    dialog.initModality(Modality.APPLICATION_MODAL);
 
-                String input = dialog.showAndWait().orElse(null);
-                if (input == null || input.trim().isEmpty()) return;
+                    Optional<String> result = dialog.showAndWait();
+                    if (!result.isPresent() || result.get().trim().isEmpty()) {
+                        System.out.println("Player " + playerNum + " cancelled registration");
+                        return;
+                    }
 
-                String usernameOrId = input.trim();
+                    String usernameOrId = result.get().trim();
 
-                if (!checkUserExists(usernameOrId)) {
-                    new Alert(Alert.AlertType.ERROR,
-                            "Benutzer '" + usernameOrId + "' nicht gefunden!").showAndWait();
-                    return;
-                }
+                    // Check if user exists in database
+                    if (!checkUserExists(usernameOrId)) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR,
+                                "Benutzer '" + usernameOrId + "' nicht gefunden!");
+                        alert.showAndWait();
+                        return;
+                    }
 
-                if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
-                    new Alert(Alert.AlertType.WARNING,
-                            "Benutzer '" + usernameOrId + "' bereits angemeldet!").showAndWait();
-                    return;
-                }
+                    // Check if user is already registered
+                    if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING,
+                                "Benutzer '" + usernameOrId + "' bereits angemeldet!");
+                        alert.showAndWait();
+                        return;
+                    }
 
-                Spieler s = new Spieler(usernameOrId, buzzer);
-                alleSpieler.add(s);
-                obs.removeListener(holder[0]);
-                lobbyController.setReady(playerNum, usernameOrId);
-                System.out.println(usernameOrId + " ist angemeldet");
+                    // Register player
+                    Spieler s = new Spieler(usernameOrId, buzzer);
+                    alleSpieler.add(s);
+                    obs.removeListener(holder[0]);
+                    lobbyController.setReady(playerNum, usernameOrId);
+                    System.out.println(usernameOrId + " ist angemeldet (Spieler " + playerNum + ")");
+                });
             }
         };
         return holder[0];
     }
 
+    /**
+     * Check if a user exists in the database via API call
+     */
     private boolean checkUserExists(String usernameOrId) {
         String url = "http://192.168.100.141:8080/users/" + usernameOrId;
 
@@ -217,14 +236,16 @@ public class GameController extends Application {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+            boolean exists = response.statusCode() == 200;
+            System.out.println("User check for '" + usernameOrId + "': " + (exists ? "FOUND" : "NOT FOUND"));
+            return exists;
         } catch (Exception e) {
-            System.err.println("User-Check Fehler: " + e.getMessage());
+            System.err.println("User-Check Fehler für '" + usernameOrId + "': " + e.getMessage());
             return false;
         }
     }
 
-    public void createBuzzerView(String playername, double yPosition, double xPosition) {
+    public void createBuzzerView(String playername, double xPosition, double yPosition) {
         try {
             FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
             Parent parent = root.load();
@@ -235,8 +256,8 @@ public class GameController extends Application {
             Spieler s = new Spieler(playername, controller);
             alleSpieler.add(s);
             stage.setScene(scene);
-            stage.setY(yPosition);
             stage.setX(xPosition);
+            stage.setY(yPosition);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -328,13 +349,25 @@ public class GameController extends Application {
             players.add(p);
         }
 
-        String jsonBody = String.format("""
-                {
-                    "teilnehmer": %d,
-                    "game_type": "ict",
-                    "players": %s
-                }
-                """, alleSpieler.size(), players);
+        // Build JSON manually to avoid external dependencies
+        StringBuilder playersJson = new StringBuilder("[");
+        int count = 0;
+        for (Map<String, Object> p : players) {
+            if (count > 0) playersJson.append(",");
+            playersJson.append(String.format(
+                "{\"username\":\"%s\",\"score\":%d}",
+                p.get("username"),
+                p.get("score")
+            ));
+            count++;
+        }
+        playersJson.append("]");
+
+        String jsonBody = String.format(
+            "{\"teilnehmer\":%d,\"game_type\":\"ict\",\"players\":%s}",
+            alleSpieler.size(),
+            playersJson.toString()
+        );
 
         String url = "http://192.168.100.141:8080/scores/";
 
