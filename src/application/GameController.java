@@ -29,7 +29,20 @@ public class GameController extends Application {
     public static final boolean IS_DEV_MODE = false;
 
     private Stage myStage;
+    private Scene mainScene; // Reuse ONE scene for all views
+    
+    // Cached views and controllers
+    private Parent startupView;
     private StartupViewController startupController;
+    private Parent lobbyView;
+    private LobbyViewController lobbyController;
+    private Parent questionView;
+    private QuestionViewController questionController;
+    private Parent answerView;
+    private AnswerViewController answerController;
+    private Parent endView;
+    private EndViewController endController;
+    
     private int rundenCounter = 0;
     private List<Frage> eingeleseneFragen;
     private Spielrunde spielrunde;
@@ -94,32 +107,88 @@ public class GameController extends Application {
 
         myStage = primaryStage;
         myStage.setTitle("IAE Buzzer Quiz");
+        
+        // Set fullscreen properties ONCE at startup
         if (fullScreen) {
             myStage.setFullScreenExitHint("");
             myStage.setFullScreen(true);
         }
+        
+        // Create main scene ONCE (will reuse this)
+        mainScene = new Scene(new javafx.scene.layout.Pane(), 1920, 1080);
+        mainScene.getStylesheets().add(style);
+        myStage.setScene(mainScene);
+        
+        // Preload all views in background for instant switching
+        preloadViews();
+        
+        // Show startup view
         showStartupView();
-
-        primaryStage.setOnCloseRequest(e -> System.exit(0));
+        
+        myStage.setOnCloseRequest(e -> System.exit(0));
+        myStage.show();
     }
 
-    public void showStartupView() {
+    /**
+     * PERFORMANCE OPTIMIZATION: Preload all views at startup
+     * This eliminates loading delays when switching screens
+     */
+    private void preloadViews() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            startupController = loader.getController();
+            System.out.println("⏳ Preloading views for smooth transitions...");
+            
+            // Load Startup View
+            FXMLLoader loader1 = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
+            startupView = loader1.load();
+            startupController = loader1.getController();
             startupController.setMainController(this);
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
+            
+            // Load Lobby View
+            FXMLLoader loader2 = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
+            lobbyView = loader2.load();
+            lobbyController = loader2.getController();
+            lobbyController.setMainController(this);
+            
+            // Load Question View
+            FXMLLoader loader3 = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
+            questionView = loader3.load();
+            questionController = loader3.getController();
+            questionController.setMainController(this);
+            
+            // Load Answer View
+            FXMLLoader loader4 = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
+            answerView = loader4.load();
+            answerController = loader4.getController();
+            
+            // Load End View
+            FXMLLoader loader5 = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
+            endView = loader5.load();
+            endController = loader5.getController();
+            endController.setMainController(this);
+            
+            System.out.println("✓ All views preloaded successfully!");
+            
         } catch (Exception e) {
+            System.err.println("Error preloading views: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Switch to a different view smoothly (no loading, no flicker)
+     */
+    private void switchToView(Parent view) {
+        mainScene.setRoot(view);
+    }
+
+    public void showStartupView() {
+        switchToView(startupView);
+    }
+
     public void showLobbyView() {
         alleSpieler.clear();
+        
+        // Initialize buzzers
         if (!IS_DEV_MODE) {
             pi4j = Pi4J.newAutoContext();
             buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
@@ -131,59 +200,41 @@ public class GameController extends Application {
             buzzer3 = new DummyBuzzer(3);
         }
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
-            Scene lobbyScene = new Scene(loader.load(), 1920, 1080);
-            lobbyScene.getStylesheets().add(style);
+        // Reset lobby state
+        lobbyController.resetReadyStates();
 
-            LobbyViewController lobbyController = loader.getController();
-            lobbyController.setMainController(this);
-            lobbyController.resetReadyStates();
+        List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
+        String[] defaultNames = {"Spieler 1", "Spieler 2", "Spieler 3"};
 
-            List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
-            String[] defaultNames = {"Spieler 1", "Spieler 2", "Spieler 3"};
+        for (int i = 0; i < 3; i++) {
+            final int playerNum = i + 1;
+            final IBuzzer b = buzzers.get(i);
+            final String defaultName = defaultNames[i];
 
-            for (int i = 0; i < 3; i++) {
-                final int playerNum = i + 1;
-                final IBuzzer b = buzzers.get(i);
-                final String defaultName = defaultNames[i];
-
-                if (IS_DEV_MODE) {
-                    Spieler s = new Spieler(defaultName, b);
-                    alleSpieler.add(s);
-                    lobbyController.setReady(playerNum, defaultName);
-                } else {
-                    b.getAnswer().addListener(setupBuzzerListener(defaultName, b, lobbyController, playerNum));
-                }
+            if (IS_DEV_MODE) {
+                Spieler s = new Spieler(defaultName, b);
+                alleSpieler.add(s);
+                lobbyController.setReady(playerNum, defaultName);
+            } else {
+                b.getAnswer().addListener(setupBuzzerListener(defaultName, b, lobbyController, playerNum));
             }
-
-            if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
-            spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
-
-            myStage.setScene(lobbyScene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
+        if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
+        spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
+
+        switchToView(lobbyView);
     }
 
-    /**
-     * Setup buzzer listener for player registration in lobby.
-     * CRITICAL: Wraps UI operations in Platform.runLater() to avoid threading issues.
-     * The listener stays active until a player successfully registers (allows retry on cancel/error).
-     */
     private ChangeListener<Number> setupBuzzerListener(String defaultName, IBuzzer buzzer,
                                                        LobbyViewController lobbyController, int playerNum) {
         final ChangeListener<Number>[] holder = new ChangeListener[1];
-        final boolean[] isProcessing = {false}; // Prevent multiple simultaneous dialogs
+        final boolean[] isProcessing = {false};
         
         holder[0] = (obs, old, newVal) -> {
             if (newVal != null && newVal.intValue() > 0 && !isProcessing[0]) {
-                isProcessing[0] = true; // Lock to prevent multiple dialogs
+                isProcessing[0] = true;
                 
-                // CRITICAL FIX: Pi4J calls this from a background thread
-                // ALL JavaFX UI operations MUST run on the FX Application Thread
                 Platform.runLater(() -> {
                     try {
                         TextInputDialog dialog = new TextInputDialog();
@@ -194,7 +245,6 @@ public class GameController extends Application {
 
                         Optional<String> result = dialog.showAndWait();
                         
-                        // If cancelled, allow retry by not removing listener
                         if (!result.isPresent() || result.get().trim().isEmpty()) {
                             System.out.println("Player " + playerNum + " cancelled registration - can retry");
                             return;
@@ -202,35 +252,30 @@ public class GameController extends Application {
 
                         String usernameOrId = result.get().trim();
 
-                        // Check if user exists in database
                         if (!checkUserExists(usernameOrId)) {
                             Alert alert = new Alert(Alert.AlertType.ERROR,
                                     "Benutzer '" + usernameOrId + "' nicht in der Datenbank gefunden!\n" +
                                     "Bitte erneut versuchen.");
                             alert.showAndWait();
-                            // Don't remove listener - allow retry
                             return;
                         }
 
-                        // Check if user is already registered
                         if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
                             Alert alert = new Alert(Alert.AlertType.WARNING,
                                     "Benutzer '" + usernameOrId + "' ist bereits angemeldet!\n" +
                                     "Bitte einen anderen Benutzer wählen.");
                             alert.showAndWait();
-                            // Don't remove listener - allow retry
                             return;
                         }
 
-                        // SUCCESS - Register player and remove listener
                         Spieler s = new Spieler(usernameOrId, buzzer);
                         alleSpieler.add(s);
-                        obs.removeListener(holder[0]); // Only remove on success
+                        obs.removeListener(holder[0]);
                         lobbyController.setReady(playerNum, usernameOrId);
                         System.out.println("✓ " + usernameOrId + " erfolgreich angemeldet (Spieler " + playerNum + ")");
                         
                     } finally {
-                        isProcessing[0] = false; // Always unlock
+                        isProcessing[0] = false;
                     }
                 });
             }
@@ -238,12 +283,7 @@ public class GameController extends Application {
         return holder[0];
     }
 
-    /**
-     * Check if a user exists in the database via API call
-     * API endpoint: GET /teilnehmer/?id={id}
-     */
     private boolean checkUserExists(String usernameOrId) {
-        // API expects: /teilnehmer/?id=1
         String url = "http://192.168.100.141:8080/teilnehmer/?id=" + usernameOrId;
 
         HttpClient client = HttpClient.newHttpClient();
@@ -299,40 +339,15 @@ public class GameController extends Application {
     }
 
     public void showQuestionView(Frage question) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-
-            QuestionViewController qController = loader.getController();
-            qController.setMainController(this);
-            qController.initFrage(question, alleSpieler, MAX_ZEIT);
-
-            qController.getRestzeit().addListener(showAnswerSceneListener);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        questionController.initFrage(question, alleSpieler, MAX_ZEIT);
+        questionController.getRestzeit().addListener(showAnswerSceneListener);
+        switchToView(questionView);
     }
 
     public void showAnswerScene() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            AnswerViewController controller = loader.getController();
-            controller.setInformation(aktuelleFrage, alleSpieler);
-            controller.getRestzeit().addListener(showNextQuestionListener);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        answerController.setInformation(aktuelleFrage, alleSpieler);
+        answerController.getRestzeit().addListener(showNextQuestionListener);
+        switchToView(answerView);
     }
 
     public void scoreNotifyDone() {
@@ -347,27 +362,10 @@ public class GameController extends Application {
 
     public void showEndScene() {
         sendFinalScoresToApi();
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
-            Scene scene = new Scene(loader.load(), 1920, 1080);
-            scene.getStylesheets().add(style);
-            EndViewController controller = loader.getController();
-            controller.setMainController(this);
-            controller.setSpielerInformation(alleSpieler);
-
-            myStage.setScene(scene);
-            if (fullScreen) myStage.setFullScreen(true);
-            myStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        endController.setSpielerInformation(alleSpieler);
+        switchToView(endView);
     }
 
-    /**
-     * Send final scores for ALL players to the API
-     * Sends INDIVIDUAL POST requests for each player (API expects separate records)
-     */
     private void sendFinalScoresToApi() {
         System.out.println("=== Sending Final Scores to API ===");
         System.out.println("Total players: " + alleSpieler.size());
@@ -378,16 +376,14 @@ public class GameController extends Application {
         int successCount = 0;
         int failCount = 0;
         
-        // Send individual POST for EACH player
         for (Spieler spieler : alleSpieler) {
             String playerName = spieler.getName();
             int playerScore = spieler.getPunktestand().get();
             
-            // Build JSON for this ONE player
             String jsonBody = String.format(
                 "{\"teilnehmer\":%s,\"score\":%d,\"game_type\":\"quiz\"}",
-                playerName,  // Player ID (e.g., "1", "2", "3")
-                playerScore  // Final score
+                playerName,
+                playerScore
             );
             
             System.out.println("  → Sending score for player " + playerName + ": " + playerScore + " Punkte");
