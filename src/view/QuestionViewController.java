@@ -114,7 +114,7 @@ public class QuestionViewController implements Initializable {
     
     /**
      * Initialize players - reset scores and setup answer listeners
-     * CRITICAL: Ensure old listeners are removed and answer values reset
+     * CRITICAL: Ensure old listeners are removed properly
      */
     private void initPlayers(Set<Spieler> spielerliste) {
         System.out.println(">>> Initializing " + spielerliste.size() + " players for new question");
@@ -127,10 +127,10 @@ public class QuestionViewController implements Initializable {
             spieler.reset();
             spieler.setRundenpunkte(0);
             
-            // CRITICAL: Reset answer to 0 to prevent old values triggering
-            spieler.getAntwortNr().setValue(0);
+            // NOTE: Cannot reset spieler.getAntwortNr() directly - it's bound to buzzer!
+            // The buzzer handles its own reset
             
-            System.out.println("  → Player " + spieler.getName() + " ready (answer reset to 0)");
+            System.out.println("  → Player " + spieler.getName() + " ready");
             
             // Create and store answer listener
             ChangeListener<Number> answerListener = new ChangeListener<Number>() {
