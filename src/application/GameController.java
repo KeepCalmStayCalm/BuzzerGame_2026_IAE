@@ -252,13 +252,27 @@ public class GameController extends Application {
 
                         String usernameOrId = result.get().trim();
 
-                        if (!checkUserExists(usernameOrId)) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR,
-                                    "Benutzer '" + usernameOrId + "' nicht in der Datenbank gefunden!\n" +
-                                    "Bitte erneut versuchen.");
-                            alert.showAndWait();
-                            return;
+                        checkUserExistsAsync(usernameOrId).thenAccept(exists -> {
+    
+                        if (!exists) {
+                            // Platform.runLater zwingt JavaFX, das UI-Element sicher auf dem Haupt-Thread auszuführen
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.ERROR,
+                                        "Benutzer '" + usernameOrId + "' nicht in der Datenbank gefunden!\n" +
+                                        "Bitte erneut versuchen.");
+                                alert.showAndWait();
+                            });
+                        } else {
+                            // Platform.runLater auch hier nutzen, falls der folgende Code die UI verändert
+                            Platform.runLater(() -> {
+                                // HIER kommt jetzt der Code hin, der ursprünglich nach dem "return;" stand.
+                                // Also alles, was passieren soll, wenn der Login/Check erfolgreich war.
+                                // Zum Beispiel: wechsleSzene() oder zeigeHauptmenue()
+                                
+                                System.out.println("Benutzer erfolgreich verifiziert. Gehe zum nächsten Schritt.");
+                            });
                         }
+                    });
 
                         if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
                             Alert alert = new Alert(Alert.AlertType.WARNING,
@@ -283,30 +297,36 @@ public class GameController extends Application {
         return holder[0];
     }
 
-    private boolean checkUserExists(String usernameOrId) {
+    private CompletableFuture<Boolean> checkUserExistsAsync(String usernameOrId) {
         String url = "http://192.168.100.141:8080/teilnehmer/?id=" + usernameOrId;
-
+    
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
-
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            boolean exists = response.statusCode() == 200;
-            
-            if (exists) {
-                System.out.println("✓ User check for ID '" + usernameOrId + "': FOUND");
-            } else {
-                System.out.println("✗ User check for ID '" + usernameOrId + "': NOT FOUND (Status: " + response.statusCode() + ")");
-            }
-            
-            return exists;
-        } catch (Exception e) {
-            System.err.println("✗ User-Check Fehler für ID '" + usernameOrId + "': " + e.getMessage());
-            return false;
-        }
+    
+        // 1. sendAsync statt send verwenden
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+    
+                // 2. thenApply verarbeitet die Antwort, sobald sie erfolgreich ankommt
+                .thenApply(response -> {
+                    boolean exists = response.statusCode() == 200;
+    
+                    if (exists) {
+                        System.out.println("✓ User check for ID '" + usernameOrId + "': FOUND");
+                    } else {
+                        System.out.println("✗ User check for ID '" + usernameOrId + "': NOT FOUND (Status: " + response.statusCode() + ")");
+                    }
+    
+                    return exists; // Dieser Wert wird in das CompletableFuture gepackt
+                })
+    
+                // 3. exceptionally ersetzt deinen try-catch Block für asynchrone Fehler
+                .exceptionally(e -> {
+                    System.err.println("✗ User-Check Fehler für ID '" + usernameOrId + "': " + e.getMessage());
+                    return false; // Fallback-Wert im Fehlerfall
+                });
     }
 
     public void createBuzzerView(String playername, double xPosition, double yPosition) {
