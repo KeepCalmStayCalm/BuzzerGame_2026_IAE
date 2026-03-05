@@ -6,10 +6,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -29,9 +29,8 @@ public class GameController extends Application {
     public static final boolean IS_DEV_MODE = false;
 
     private Stage myStage;
-    private Scene mainScene; // Reuse ONE scene for all views
-    
-    // Cached views and controllers
+    private Scene mainScene;
+
     private Parent startupView;
     private StartupViewController startupController;
     private Parent lobbyView;
@@ -42,7 +41,7 @@ public class GameController extends Application {
     private AnswerViewController answerController;
     private Parent endView;
     private EndViewController endController;
-    
+
     private int rundenCounter = 0;
     private List<Frage> eingeleseneFragen;
     private Spielrunde spielrunde;
@@ -63,17 +62,20 @@ public class GameController extends Application {
     private ChangeListener<Number> showAnswerSceneListener;
     private ChangeListener<Number> showNextQuestionListener;
 
+    // BUG FIX: reuse one HttpClient instead of creating a new one per request
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+
     public static void main(String[] args) {
         launch(args);
     }
 
     private void readPreferences() {
         prefs = Preferences.userRoot().node(this.getClass().getName());
-        MAX_FRAGEN = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
-        MAX_ZEIT = Integer.parseInt(prefs.get("time_out", "20"));
+        MAX_FRAGEN      = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
+        MAX_ZEIT        = Integer.parseInt(prefs.get("time_out", "20"));
         shuffleQuestions = prefs.getBoolean("shuffle_questions", true);
-        fullScreen = prefs.getBoolean("full_screen", true);
-        questionFile = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+        fullScreen      = prefs.getBoolean("full_screen", true);
+        questionFile    = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
     }
 
     private void initListeners() {
@@ -83,7 +85,6 @@ public class GameController extends Application {
                 Platform.runLater(this::showAnswerScene);
             }
         };
-
         showNextQuestionListener = (o, a, newValue) -> {
             if (newValue.intValue() <= 0) {
                 o.removeListener(showNextQuestionListener);
@@ -107,90 +108,69 @@ public class GameController extends Application {
 
         myStage = primaryStage;
         myStage.setTitle("IAE Buzzer Quiz");
-        
-        // Set fullscreen properties ONCE at startup
         if (fullScreen) {
             myStage.setFullScreenExitHint("");
             myStage.setFullScreen(true);
         }
-        
-        // Create main scene ONCE (will reuse this)
+
         mainScene = new Scene(new javafx.scene.layout.Pane(), 1920, 1080);
         mainScene.getStylesheets().add(style);
         myStage.setScene(mainScene);
-        
-        // Preload all views in background for instant switching
+
         preloadViews();
-        
-        // Show startup view
         showStartupView();
-        
+
         myStage.setOnCloseRequest(e -> System.exit(0));
         myStage.show();
     }
 
-    /**
-     * PERFORMANCE OPTIMIZATION: Preload all views at startup
-     * This eliminates loading delays when switching screens
-     */
     private void preloadViews() {
         try {
             System.out.println("⏳ Preloading views for smooth transitions...");
-            
-            // Load Startup View
-            FXMLLoader loader1 = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
-            startupView = loader1.load();
-            startupController = loader1.getController();
+
+            FXMLLoader l1 = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
+            startupView = l1.load();
+            startupController = l1.getController();
             startupController.setMainController(this);
-            
-            // Load Lobby View
-            FXMLLoader loader2 = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
-            lobbyView = loader2.load();
-            lobbyController = loader2.getController();
+
+            FXMLLoader l2 = new FXMLLoader(getClass().getResource("/view/LobbyView.fxml"));
+            lobbyView = l2.load();
+            lobbyController = l2.getController();
             lobbyController.setMainController(this);
-            
-            // Load Question View
-            FXMLLoader loader3 = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
-            questionView = loader3.load();
-            questionController = loader3.getController();
+
+            FXMLLoader l3 = new FXMLLoader(getClass().getResource("/view/QuestionView2025.fxml"));
+            questionView = l3.load();
+            questionController = l3.getController();
             questionController.setMainController(this);
-            
-            // Load Answer View
-            FXMLLoader loader4 = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
-            answerView = loader4.load();
-            answerController = loader4.getController();
-            
-            // Load End View
-            FXMLLoader loader5 = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
-            endView = loader5.load();
-            endController = loader5.getController();
+
+            FXMLLoader l4 = new FXMLLoader(getClass().getResource("/view/AnswerView.fxml"));
+            answerView = l4.load();
+            answerController = l4.getController();
+
+            FXMLLoader l5 = new FXMLLoader(getClass().getResource("/view/EndView.fxml"));
+            endView = l5.load();
+            endController = l5.getController();
             endController.setMainController(this);
-            
+
             System.out.println("✓ All views preloaded successfully!");
-            
         } catch (Exception e) {
             System.err.println("Error preloading views: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Switch to a different view smoothly (no loading, no flicker)
-     */
     private void switchToView(Parent view) {
         mainScene.setRoot(view);
     }
 
-    public void showStartupView() {
-        switchToView(startupView);
-    }
+    public void showStartupView() { switchToView(startupView); }
 
     public void showLobbyView() {
         alleSpieler.clear();
-        
-        // Initialize buzzers
+
         if (!IS_DEV_MODE) {
-            pi4j = Pi4J.newAutoContext();
+            if (pi4j != null) pi4j.shutdown();
+            pi4j    = Pi4J.newAutoContext();
             buzzer1 = new RaspiBuzzer(pi4j, 16, 20, 21);
             buzzer2 = new RaspiBuzzer(pi4j, 22, 27, 17);
             buzzer3 = new RaspiBuzzer(pi4j, 13, 19, 26);
@@ -200,152 +180,176 @@ public class GameController extends Application {
             buzzer3 = new DummyBuzzer(3);
         }
 
-        // Reset lobby state
         lobbyController.resetReadyStates();
 
         List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
         String[] defaultNames = {"Spieler 1", "Spieler 2", "Spieler 3"};
 
         for (int i = 0; i < 3; i++) {
-            final int playerNum = i + 1;
-            final IBuzzer b = buzzers.get(i);
-            final String defaultName = defaultNames[i];
+            final IBuzzer b        = buzzers.get(i);
+            final String defName   = defaultNames[i];
+            final int    playerNum = i + 1;
 
             if (IS_DEV_MODE) {
-                Spieler s = new Spieler(defaultName, b);
+                Spieler s = new Spieler(defName, b);
                 alleSpieler.add(s);
-                lobbyController.setReady(playerNum, defaultName);
+                lobbyController.setReady(playerNum, defName);
             } else {
-                b.getAnswer().addListener(setupBuzzerListener(defaultName, b, lobbyController, playerNum));
+                b.getAnswer().addListener(
+                    setupBuzzerListener(defName, b, lobbyController, playerNum));
             }
         }
 
         if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
-        spielrunde = new Spielrunde(eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
+        spielrunde = new Spielrunde(
+            eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
 
         switchToView(lobbyView);
     }
 
     private ChangeListener<Number> setupBuzzerListener(String defaultName, IBuzzer buzzer,
-                                                       LobbyViewController lobbyController, int playerNum) {
+                                                        LobbyViewController lobby, int playerNum) {
         final ChangeListener<Number>[] holder = new ChangeListener[1];
         final boolean[] isProcessing = {false};
-        
+
         holder[0] = (obs, old, newVal) -> {
-            if (newVal != null && newVal.intValue() > 0 && !isProcessing[0]) {
-                isProcessing[0] = true;
-                
-                Platform.runLater(() -> {
+            if (newVal == null || newVal.intValue() <= 0 || isProcessing[0]) return;
+            isProcessing[0] = true;
+
+            Platform.runLater(() -> {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Anmeldung – Spieler " + playerNum);
+                dialog.setHeaderText("Benutzername oder ID");
+                dialog.setContentText("Dein Username / ID:");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+
+                Optional<String> result = dialog.showAndWait();
+
+                if (!result.isPresent() || result.get().trim().isEmpty()) {
+                    isProcessing[0] = false; // allow retry
+                    return;
+                }
+
+                String id = result.get().trim();
+
+                // BUG FIX: the original code called thenAccept() for the API check
+                // but then immediately continued executing the lines below it —
+                // thenAccept() only schedules a callback, it does NOT block.
+                // This meant the player was always registered BEFORE the HTTP reply
+                // arrived, so the API check had zero effect on registration.
+                //
+                // Fix: move ALL registration logic (duplicate check, new Spieler,
+                // setReady, removeListener) INSIDE thenAccept so it only runs after
+                // we have a confirmed answer from the server.
+                checkUserExistsAsync(id).thenAccept(exists -> Platform.runLater(() -> {
                     try {
-                        TextInputDialog dialog = new TextInputDialog();
-                        dialog.setTitle("Anmeldung – Spieler " + playerNum);
-                        dialog.setHeaderText("Benutzername oder ID");
-                        dialog.setContentText("Dein Username / ID:");
-                        dialog.initModality(Modality.APPLICATION_MODAL);
-
-                        Optional<String> result = dialog.showAndWait();
-                        
-                        if (!result.isPresent() || result.get().trim().isEmpty()) {
-                            System.out.println("Player " + playerNum + " cancelled registration - can retry");
-                            return;
-                        }
-
-                        String usernameOrId = result.get().trim();
-
-                        checkUserExistsAsync(usernameOrId).thenAccept(exists -> {
-    
                         if (!exists) {
-                            // Platform.runLater zwingt JavaFX, das UI-Element sicher auf dem Haupt-Thread auszuführen
-                            Platform.runLater(() -> {
-                                Alert alert = new Alert(Alert.AlertType.ERROR,
-                                        "Benutzer '" + usernameOrId + "' nicht in der Datenbank gefunden!\n" +
-                                        "Bitte erneut versuchen.");
-                                alert.showAndWait();
-                            });
-                        } else {
-                            // Platform.runLater auch hier nutzen, falls der folgende Code die UI verändert
-                            Platform.runLater(() -> {
-                                // HIER kommt jetzt der Code hin, der ursprünglich nach dem "return;" stand.
-                                // Also alles, was passieren soll, wenn der Login/Check erfolgreich war.
-                                // Zum Beispiel: wechsleSzene() oder zeigeHauptmenue()
-                                
-                                System.out.println("Benutzer erfolgreich verifiziert. Gehe zum nächsten Schritt.");
-                            });
-                        }
-                    });
-
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(usernameOrId))) {
-                            Alert alert = new Alert(Alert.AlertType.WARNING,
-                                    "Benutzer '" + usernameOrId + "' ist bereits angemeldet!\n" +
-                                    "Bitte einen anderen Benutzer wählen.");
-                            alert.showAndWait();
-                            return;
+                            new Alert(Alert.AlertType.ERROR,
+                                "Benutzer '" + id + "' nicht in der Datenbank gefunden!\n" +
+                                "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
+                            return; // don't register — isProcessing reset in finally
                         }
 
-                        Spieler s = new Spieler(usernameOrId, buzzer);
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(id))) {
+                            new Alert(Alert.AlertType.WARNING,
+                                "Benutzer '" + id + "' ist bereits angemeldet!\n" +
+                                "Bitte einen anderen Benutzer wählen.", ButtonType.OK).showAndWait();
+                            return; // don't register
+                        }
+
+                        // Only reaches here if: API says exists AND not a duplicate
+                        Spieler s = new Spieler(id, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
-                        lobbyController.setReady(playerNum, usernameOrId);
-                        System.out.println("✓ " + usernameOrId + " erfolgreich angemeldet (Spieler " + playerNum + ")");
-                        
+                        lobby.setReady(playerNum, id);
+                        System.out.println("✓ " + id + " erfolgreich angemeldet (Spieler " + playerNum + ")");
+
                     } finally {
                         isProcessing[0] = false;
                     }
-                });
-            }
+                }));
+                // NOTE: isProcessing stays true while the HTTP call is in flight,
+                // preventing a second buzzer press from opening a second dialog.
+            });
         };
         return holder[0];
     }
 
-    private CompletableFuture<Boolean> checkUserExistsAsync(String usernameOrId) {
-        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + usernameOrId;
-    
-        HttpClient client = HttpClient.newHttpClient();
+    private CompletableFuture<Boolean> checkUserExistsAsync(String id) {
+        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
-    
-        // 1. sendAsync statt send verwenden
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-    
-                // 2. thenApply verarbeitet die Antwort, sobald sie erfolgreich ankommt
+
+        // BUG FIX: reuse the shared httpClient instead of new HttpClient() per call
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     boolean exists = response.statusCode() == 200;
-    
-                    if (exists) {
-                        System.out.println("✓ User check for ID '" + usernameOrId + "': FOUND");
-                    } else {
-                        System.out.println("✗ User check for ID '" + usernameOrId + "': NOT FOUND (Status: " + response.statusCode() + ")");
-                    }
-    
-                    return exists; // Dieser Wert wird in das CompletableFuture gepackt
+                    System.out.println((exists ? "✓" : "✗") +
+                        " User check for ID '" + id + "': " +
+                        (exists ? "FOUND" : "NOT FOUND (Status: " + response.statusCode() + ")"));
+                    return exists;
                 })
-    
-                // 3. exceptionally ersetzt deinen try-catch Block für asynchrone Fehler
                 .exceptionally(e -> {
-                    System.err.println("✗ User-Check Fehler für ID '" + usernameOrId + "': " + e.getMessage());
-                    return false; // Fallback-Wert im Fehlerfall
+                    System.err.println("✗ User-Check Fehler für ID '" + id + "': " + e.getMessage());
+                    return false;
                 });
     }
 
-    public void createBuzzerView(String playername, double xPosition, double yPosition) {
-        try {
-            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
-            Parent parent = root.load();
-            Stage stage = new Stage();
-            Scene scene = new Scene(parent);
-            stage.setTitle(playername);
-            FXBuzzerController controller = root.getController();
-            Spieler s = new Spieler(playername, controller);
-            alleSpieler.add(s);
-            stage.setScene(scene);
-            stage.setX(xPosition);
-            stage.setY(yPosition);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+    // BUG FIX: original sendFinalScoresToApi() used client.send() — a BLOCKING call —
+    // on the JavaFX Application Thread inside showEndScene().  With 3 players and a
+    // slow or unreachable server, this froze the UI for up to 3 × network-timeout
+    // seconds (often 30 s each = 90 s of a completely frozen screen).
+    //
+    // Fix: fire all three POSTs concurrently with sendAsync() and let them complete
+    // in the background.  Also fixed the JSON: teilnehmer must be a quoted string,
+    // not a bare identifier (original had "teilnehmer":%s without quotes around %s).
+    private void sendFinalScoresToApiAsync() {
+        System.out.println("=== Sending Final Scores to API (async) ===");
+        String url = "http://192.168.100.141:8080/scores/";
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        for (Spieler spieler : alleSpieler) {
+            String name  = spieler.getName();
+            int    score = spieler.getPunktestand().get();
+
+            // BUG FIX: original JSON was "teilnehmer":%s — missing quotes around the
+            // string value, producing invalid JSON like "teilnehmer":Max instead of
+            // "teilnehmer":"Max". Fixed to use %s with surrounding quotes.
+            String json = String.format(
+                "{\"teilnehmer\":\"%s\",\"score\":%d,\"game_type\":\"quiz\"}",
+                name, score);
+
+            System.out.println("  → Queuing score for " + name + ": " + score);
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            futures.add(
+                httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201) {
+                            System.out.println("    ✓ Score saved for " + name);
+                        } else {
+                            System.err.println("    ✗ Failed for " + name +
+                                " – Status: " + response.statusCode() +
+                                " – " + response.body());
+                        }
+                    })
+                    .exceptionally(e -> {
+                        System.err.println("    ✗ Error for " + name + ": " + e.getMessage());
+                        return null;
+                    })
+            );
         }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> System.out.println("=== All scores submitted ==="));
     }
 
     public void lobbyNotifyDone() {
@@ -381,61 +385,9 @@ public class GameController extends Application {
     }
 
     public void showEndScene() {
-        sendFinalScoresToApi();
+        sendFinalScoresToApiAsync(); // non-blocking — UI switches immediately
         endController.setSpielerInformation(alleSpieler);
         switchToView(endView);
-    }
-
-    private void sendFinalScoresToApi() {
-        System.out.println("=== Sending Final Scores to API ===");
-        System.out.println("Total players: " + alleSpieler.size());
-        
-        String url = "http://192.168.100.141:8080/scores/";
-        HttpClient client = HttpClient.newHttpClient();
-        
-        int successCount = 0;
-        int failCount = 0;
-        
-        for (Spieler spieler : alleSpieler) {
-            String playerName = spieler.getName();
-            int playerScore = spieler.getPunktestand().get();
-            
-            String jsonBody = String.format(
-                "{\"teilnehmer\":%s,\"score\":%d,\"game_type\":\"quiz\"}",
-                playerName,
-                playerScore
-            );
-            
-            System.out.println("  → Sending score for player " + playerName + ": " + playerScore + " Punkte");
-            System.out.println("    JSON: " + jsonBody);
-            
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            try {
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                
-                if (response.statusCode() == 200 || response.statusCode() == 201) {
-                    System.out.println("    ✓ SUCCESS: Player " + playerName + " score saved!");
-                    successCount++;
-                } else {
-                    System.err.println("    ✗ FAILED: Status " + response.statusCode());
-                    System.err.println("    Response: " + response.body());
-                    failCount++;
-                }
-                
-            } catch (Exception e) {
-                System.err.println("    ✗ ERROR: " + e.getMessage());
-                failCount++;
-            }
-        }
-        
-        System.out.println("=================================");
-        System.out.println("Summary: " + successCount + " succeeded, " + failCount + " failed");
-        System.out.println("=================================");
     }
 
     public void editSettings() {
@@ -445,13 +397,32 @@ public class GameController extends Application {
             EditSettingsViewController controller = loader.getController();
             controller.setPreferences(prefs);
             if (!IS_DEV_MODE) controller.setBuzzers(buzzer1, buzzer2, buzzer3);
-
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.setTitle("Einstellungen und Hardware-Test");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(myStage);
             stage.showAndWait();
             readPreferences();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createBuzzerView(String playername, double x, double y) {
+        try {
+            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
+            Parent parent = root.load();
+            FXBuzzerController controller = root.getController();
+            Spieler s = new Spieler(playername, controller);
+            alleSpieler.add(s);
+            Stage stage = new Stage();
+            stage.setTitle(playername);
+            stage.setScene(new Scene(parent));
+            stage.setX(x);
+            stage.setY(y);
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
