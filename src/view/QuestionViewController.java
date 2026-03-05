@@ -35,14 +35,12 @@ import javafx.util.Duration;
  */
 public class QuestionViewController {
 
-    // ── FXML bindings ─────────────────────────────────────────────
     @FXML private Label lblFrage;
     @FXML private Label lblAntwort1;
     @FXML private Label lblAntwort2;
     @FXML private Label lblAntwort3;
     @FXML private Label lblZeit;
 
-    // ── State ─────────────────────────────────────────────────────
     private final IntegerProperty restzeit = new SimpleIntegerProperty(0);
     private Timeline countdown;
 
@@ -53,8 +51,6 @@ public class QuestionViewController {
 
     // Listeners we register so we can clean them up again
     private java.util.Map<Spieler, ChangeListener<Number>> playerListeners = new java.util.HashMap<>();
-
-    // ── Public API (called by GameController) ─────────────────────
 
     /**
      * Sets up the question, attaches per-player answer listeners, and starts
