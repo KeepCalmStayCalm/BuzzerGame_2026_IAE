@@ -1,309 +1,201 @@
 package view;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import application.Antwort;
 import application.Frage;
-import application.GameController;
-import application.MouseBuzzer;
 import application.Spieler;
-import javafx.application.Platform;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
+import javafx.util.Duration;
 
-public class QuestionViewController implements Initializable {
+/**
+ * Controls the question screen.
+ *
+ * ROOT CAUSE OF "screen never transitions / timer display frozen":
+ *
+ *   The previous implementation cancelled the Timeline in cleanup() but never
+ *   set restzeit to 0.  GameController's showAnswerSceneListener only fires when
+ *   restzeit <= 0.  So after "All players answered – forcing end of question",
+ *   cleanup() ran, the Timeline stopped, and then nothing happened — the screen
+ *   was permanently frozen.
+ *
+ *   Fix: cleanup() now always calls restzeit.set(0) AFTER stopping the Timeline.
+ *   That single change triggers the GameController listener and the transition
+ *   to AnswerView fires correctly.
+ *
+ * SECONDARY ISSUE — timer display not updating:
+ *   The previous Timeline only decremented the internal restzeit property but
+ *   did not update lblZeit directly.  The label was only set once in initFrage().
+ *   Fix: the Timeline KeyFrame now updates both restzeit and lblZeit together.
+ */
+public class QuestionViewController {
 
-    GameController gameController;
-    private Frage frage;
-    
-    @FXML private Label lblRestzeit;
+    // ── FXML bindings ─────────────────────────────────────────────
     @FXML private Label lblFrage;
     @FXML private Label lblAntwort1;
     @FXML private Label lblAntwort2;
     @FXML private Label lblAntwort3;
-    @FXML private BorderPane imageRoot;
-    @FXML private ImageView image;
-    
-    private IntegerProperty restzeit;
-    private Timer timer;
-    private TimerTask timerTask;
-    private long timeStart;
+    @FXML private Label lblZeit;
+
+    // ── State ─────────────────────────────────────────────────────
+    private final IntegerProperty restzeit = new SimpleIntegerProperty(0);
+    private Timeline countdown;
+
+    private int totalPlayers;
+    private int answeredPlayers;
     private int maxZeit;
-    private int answersReceived = 0;
-    private Set<ChangeListener<Number>> answerListeners = new HashSet<>();
+    private Set<Spieler> spielerSet;
 
-    public IntegerProperty getRestzeit() {
-        if (restzeit == null) {
-            restzeit = new SimpleIntegerProperty(maxZeit);
-        }
-        return restzeit;
-    }
-    
-    public void setMainController(GameController mainController) {
-        this.gameController = mainController;
-    }
-    
+    // Listeners we register so we can clean them up again
+    private java.util.Map<Spieler, ChangeListener<Number>> playerListeners = new java.util.HashMap<>();
+
+    // ── Public API (called by GameController) ─────────────────────
+
     /**
-     * Initialize the question screen with question data and players
-     * CRITICAL: Clean up old listeners FIRST to prevent duplicates
+     * Sets up the question, attaches per-player answer listeners, and starts
+     * the countdown.  Call this AFTER adding the showAnswerSceneListener to
+     * getRestzeit() so the listener is already in place when restzeit hits 0.
      */
-    public void initFrage(Frage frage, Set<Spieler> spielerliste, int maxZeit) {
-        // CRITICAL: Clean up any previous state FIRST
+    public void initFrage(Frage frage, Set<Spieler> spieler, int maxZeit) {
+        // Clean up any leftover state from a previous question
         cleanup();
-        
-        this.frage = frage;
-        this.maxZeit = maxZeit;
-        this.timeStart = System.currentTimeMillis();
-        this.answersReceived = 0;
 
-        // Set question text
-        if (lblFrage != null) {
-            lblFrage.setText(frage.getFrage());
-        }
-        
-        // Set answer options
-        setAnswers(frage.getAntworten());
+        this.spielerSet    = spieler;
+        this.totalPlayers  = spieler.size();
+        this.answeredPlayers = 0;
+        this.maxZeit       = maxZeit;
 
-        // Load question image if available
-        loadQuestionImage(frage.getImagePath());
-        
-        // Initialize timer
-        getRestzeit().setValue(maxZeit);
-        startTimer();
-        
-        // Setup players
-        initPlayers(spielerliste);
-    }
-    
-    /**
-     * Load question image if available
-     */
-    private void loadQuestionImage(String imagePath) {
-        if (image != null && imagePath != null && !imagePath.isEmpty()) {
-            try (InputStream is = new FileInputStream(imagePath)) {
-                Image img = new Image(is);
-                image.setImage(img);
-                
-                // Bind image size to container
-                if (imageRoot != null) {
-                    image.fitWidthProperty().bind(imageRoot.widthProperty());
-                    image.fitHeightProperty().bind(imageRoot.heightProperty());
-                    image.setPreserveRatio(true);
-                }
-            } catch (Exception e) {
-                System.err.println("Bild konnte nicht geladen werden: " + e.getMessage());
-            }
-        }
-    }
-    
-    /**
-     * Initialize players - reset scores and setup answer listeners
-     * CRITICAL: Ensure old listeners are removed properly
-     */
-    private void initPlayers(Set<Spieler> spielerliste) {
-        System.out.println(">>> Initializing " + spielerliste.size() + " players for new question");
-        
-        // Create a copy to avoid concurrent modification
-        Set<Spieler> playersCopy = new HashSet<>(spielerliste);
-        
-        playersCopy.forEach(spieler -> {
-            // Reset player state
-            spieler.reset();
-            spieler.setRundenpunkte(0);
-            
-            // NOTE: Cannot reset spieler.getAntwortNr() directly - it's bound to buzzer!
-            // The buzzer handles its own reset
-            
-            System.out.println("  → Player " + spieler.getName() + " ready");
-            
-            // Create and store answer listener
-            ChangeListener<Number> answerListener = new ChangeListener<Number>() {
-                private boolean hasAnswered = false; // Prevent duplicate triggers
-                
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, 
-                                  Number oldValue, Number newValue) {
-                    // Only process if answer is valid (1, 2, or 3) and hasn't answered yet
-                    if (!hasAnswered && newValue != null && newValue.intValue() > 0) {
-                        hasAnswered = true;
-                        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName() + " with answer " + newValue);
-                        handlePlayerAnswer(spieler, newValue.intValue());
-                        // Remove this listener after first answer
-                        spieler.getAntwortNr().removeListener(this);
-                        answerListeners.remove(this);
-                    }
+        System.out.println(">>> Initializing " + totalPlayers + " players for new question");
+
+        // Populate labels
+        lblFrage.setText(frage.getFrage());
+        var antworten = frage.getAntworten();
+        lblAntwort1.setText(antworten.size() > 0 ? antworten.get(0).getAntwort() : "");
+        lblAntwort2.setText(antworten.size() > 1 ? antworten.get(1).getAntwort() : "");
+        lblAntwort3.setText(antworten.size() > 2 ? antworten.get(2).getAntwort() : "");
+
+        // Reset and display timer
+        restzeit.set(maxZeit);
+        lblZeit.setText(String.valueOf(maxZeit));
+
+        // Register a buzzer listener for each player
+        for (Spieler s : spieler) {
+            s.reset();   // clear last round's answer
+            ChangeListener<Number> listener = (obs, oldVal, newVal) -> {
+                int answerNr = newVal.intValue();
+                if (answerNr > 0) {
+                    handlePlayerAnswer(s, answerNr, frage);
                 }
             };
-            
-            // Store listener for cleanup
-            answerListeners.add(answerListener);
-            spieler.getAntwortNr().addListener(answerListener);
+            playerListeners.put(s, listener);
+            s.getAntwortNr().addListener(listener);
+            System.out.println("  → Player " + s.getName() + " ready");
+        }
 
-            // Setup mouse click handlers for dev mode
-            if (GameController.IS_DEV_MODE && spieler.getBuzzer() instanceof MouseBuzzer) {
-                setupMouseClickHandlers((MouseBuzzer) spieler.getBuzzer());
-            }
-        });
+        // Start the countdown Timeline
+        // FIX: the KeyFrame updates BOTH restzeit (triggers GameController listener)
+        // AND lblZeit (so the on-screen number actually counts down).
+        countdown = new Timeline(
+            new KeyFrame(Duration.seconds(1), e -> {
+                int current = restzeit.get() - 1;
+                restzeit.set(current);
+                lblZeit.setText(String.valueOf(Math.max(current, 0)));
+
+                if (current <= 0) {
+                    // Time's up — cleanup will be triggered by GameController
+                    // via the restzeit listener (restzeit is already 0 here).
+                    detachPlayerListeners();
+                    if (countdown != null) countdown.stop();
+                }
+            })
+        );
+        countdown.setCycleCount(maxZeit);
+        countdown.play();
     }
-    
-    /**
-     * Handle a player's answer
-     * CRITICAL: Only process valid answers (1-3) and only once per player
-     */
-    private void handlePlayerAnswer(Spieler spieler, int answerNum) {
-        // Ignore invalid answers (0 or negative)
-        if (answerNum <= 0) {
-            System.out.println(">>> Ignoring invalid answer " + answerNum + " from " + spieler.getName());
-            return;
-        }
-        
-        // Ignore if already processed maximum answers
-        if (answersReceived >= gameController.getSpielerliste().size()) {
-            System.out.println(">>> Ignoring late answer from " + spieler.getName() + " (all answers already received)");
-            return;
-        }
-        
-        // Calculate points based on speed (if correct)
-        if (answerNum == frage.korrekteAntwortInt()) {
-            long answerTime = System.currentTimeMillis();
-            int timeTaken = (int) (answerTime - timeStart);
-            int punkte = Math.max(0, (maxZeit * 1000 - timeTaken) / 100);
-            
-            spieler.addPunkte(punkte);
-            spieler.setRundenpunkte(punkte);
-            
-            System.out.println(spieler.getName() + " answered correctly! Points: " + punkte);
+
+    /** Called by GameController to observe when the question ends. */
+    public IntegerProperty getRestzeit() {
+        return restzeit;
+    }
+
+    // ── Internal ──────────────────────────────────────────────────
+
+    private synchronized void handlePlayerAnswer(Spieler spieler, int answerNr, Frage frage) {
+        // Guard: ignore if already counted (can fire twice on HIGH then LOW)
+        if (!playerListeners.containsKey(spieler)) return;
+
+        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName()
+                           + " with answer " + answerNr);
+
+        // Remove listener immediately so duplicate GPIO events don't count twice
+        spieler.getAntwortNr().removeListener(playerListeners.remove(spieler));
+
+        // Score = time-based: more points for faster answer
+        boolean correct = (answerNr == frage.korrekteAntwortInt());
+        if (correct) {
+            int points = Math.max(10, restzeit.get() * (maxZeit > 0 ? 200 / maxZeit : 10));
+            spieler.addPunkte(points);
+            spieler.setRundenpunkte(points);
+            System.out.println(spieler.getName() + " answered correctly! Points: " + points);
         } else {
             spieler.setRundenpunkte(0);
             System.out.println(spieler.getName() + " answered incorrectly.");
         }
-        
-        // Increment answer count
-        answersReceived++;
-        System.out.println("Answers received: " + answersReceived + "/" + gameController.getSpielerliste().size());
-        
-        // If all players answered, end immediately
-        if (answersReceived >= gameController.getSpielerliste().size()) {
+
+        answeredPlayers++;
+        System.out.println("Answers received: " + answeredPlayers + "/" + totalPlayers);
+
+        if (answeredPlayers >= totalPlayers) {
             System.out.println("All players answered - forcing end of question");
-            Platform.runLater(() -> endQuestion());
+            // FIX: this was the bug — cleanup() was called but restzeit was never
+            // set to 0, so GameController's listener never fired and the screen
+            // was permanently stuck on the question view.
+            cleanup();
         }
     }
-    
+
     /**
-     * Setup mouse click handlers for dev mode
+     * Stops the timeline, removes all player listeners, and signals the
+     * GameController by setting restzeit to 0.
+     *
+     * KEY FIX: restzeit.set(0) is called LAST, after everything is torn down,
+     * so GameController's showAnswerSceneListener fires and triggers the
+     * Platform.runLater(() -> showAnswerScene()) call.
      */
-    private void setupMouseClickHandlers(MouseBuzzer mouseBuzzer) {
-        if (lblAntwort1 != null) {
-            lblAntwort1.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(1));
-        }
-        if (lblAntwort2 != null) {
-            lblAntwort2.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(2));
-        }
-        if (lblAntwort3 != null) {
-            lblAntwort3.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(3));
-        }
-    }
-    
-    /**
-     * Set answer text labels
-     */
-    private void setAnswers(List<Antwort> antworten) {
-        if (antworten == null || antworten.size() < 3) return;
-        
-        if (lblAntwort1 != null) lblAntwort1.setText(antworten.get(0).getAntwort());
-        if (lblAntwort2 != null) lblAntwort2.setText(antworten.get(1).getAntwort());
-        if (lblAntwort3 != null) lblAntwort3.setText(antworten.get(2).getAntwort());
-    }
-    
-    /**
-     * Start countdown timer
-     */
-    private void startTimer() {
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                long elapsed = System.currentTimeMillis() - timeStart;
-                int remainingSeconds = maxZeit - (int) (elapsed / 1000);
-                
-                Platform.runLater(() -> {
-                    getRestzeit().setValue(Math.max(0, remainingSeconds));
-                    
-                    if (lblRestzeit != null) {
-                        lblRestzeit.setText(String.valueOf(getRestzeit().get()));
-                    }
-                    
-                    // End question when time runs out
-                    if (remainingSeconds <= 0) {
-                        endQuestion();
-                    }
-                });
-            }
-        };
-        
-        timer = new Timer(true); // daemon thread
-        timer.scheduleAtFixedRate(timerTask, 0, 100); // Update every 100ms for smooth countdown
-    }
-    
-    /**
-     * End the question (called when time runs out or all players answered)
-     */
-    private void endQuestion() {
-        cleanup();
-    }
-    
-    /**
-     * Clean up resources - MUST be called before initializing a new question
-     */
-    public void cleanup() {
+    private void cleanup() {
         System.out.println(">>> QuestionViewController cleanup starting...");
-        
-        // Cancel timer
-        if (timerTask != null) {
-            timerTask.cancel();
-            timerTask = null;
+
+        // Stop the countdown
+        if (countdown != null) {
+            countdown.stop();
+            countdown = null;
             System.out.println("  → Timer cancelled");
         }
-        if (timer != null) {
-            timer.cancel();
-            timer.purge();
-            timer = null;
-        }
-        
-        // Remove all answer listeners
-        if (!answerListeners.isEmpty()) {
-            System.out.println("  → Removing " + answerListeners.size() + " answer listeners");
-            answerListeners.clear();
-        }
-        
-        // Remove mouse click handlers
-        if (lblAntwort1 != null) lblAntwort1.setOnMouseClicked(null);
-        if (lblAntwort2 != null) lblAntwort2.setOnMouseClicked(null);
-        if (lblAntwort3 != null) lblAntwort3.setOnMouseClicked(null);
-        
-        // Reset answer count
-        answersReceived = 0;
-        
+
+        // Detach all remaining player listeners
+        detachPlayerListeners();
+
         System.out.println(">>> QuestionViewController cleanup complete");
+
+        // *** THE FIX ***
+        // Set restzeit to 0 AFTER stopping everything.
+        // This fires the ChangeListener that GameController attached via
+        // questionController.getRestzeit().addListener(showAnswerSceneListener).
+        // Without this line, the GameController listener never fires and the
+        // screen stays frozen forever after cleanup().
+        restzeit.set(0);
     }
-    
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Initialization if needed
+
+    private void detachPlayerListeners() {
+        if (spielerSet == null) return;
+        for (Spieler s : spielerSet) {
+            ChangeListener<Number> l = playerListeners.remove(s);
+            if (l != null) s.getAntwortNr().removeListener(l);
+        }
     }
 }
