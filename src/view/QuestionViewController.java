@@ -1,6 +1,20 @@
 package view;
 
-import application.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import application.Antwort;
+import application.Frage;
+import application.GameController;
+import application.MouseBuzzer;
+import application.Spieler;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -13,30 +27,26 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
-
 public class QuestionViewController implements Initializable {
 
-    private GameController gameController;
+    GameController gameController;
     private Frage frage;
-
-    @FXML private Label lblZeit;          // must match QuestionView2025.fxml
+    
+    @FXML private Label lblRestzeit;
     @FXML private Label lblFrage;
     @FXML private Label lblAntwort1;
     @FXML private Label lblAntwort2;
     @FXML private Label lblAntwort3;
     @FXML private BorderPane imageRoot;
     @FXML private ImageView image;
-
+    
     private IntegerProperty restzeit;
     private Timer timer;
     private TimerTask timerTask;
     private long timeStart;
     private int maxZeit;
     private int answersReceived = 0;
+    private Set<ChangeListener<Number>> answerListeners = new HashSet<>();
 
     public IntegerProperty getRestzeit() {
         if (restzeit == null) {
@@ -44,111 +54,53 @@ public class QuestionViewController implements Initializable {
         }
         return restzeit;
     }
-
+    
     public void setMainController(GameController mainController) {
         this.gameController = mainController;
     }
-
+    
+    /**
+     * Initialize the question screen with question data and players
+     * CRITICAL: Clean up old listeners FIRST to prevent duplicates
+     */
     public void initFrage(Frage frage, Set<Spieler> spielerliste, int maxZeit) {
+        // CRITICAL: Clean up any previous state FIRST
         cleanup();
+        
         this.frage = frage;
         this.maxZeit = maxZeit;
         this.timeStart = System.currentTimeMillis();
         this.answersReceived = 0;
 
-        if (lblFrage != null) lblFrage.setText(frage.getFrage());
+        // Set question text
+        if (lblFrage != null) {
+            lblFrage.setText(frage.getFrage());
+        }
+        
+        // Set answer options
         setAnswers(frage.getAntworten());
-        loadQuestionImage(frage.getImagePath());
 
+        // Load question image if available
+        loadQuestionImage(frage.getImagePath());
+        
+        // Initialize timer
         getRestzeit().setValue(maxZeit);
         startTimer();
+        
+        // Setup players
         initPlayers(spielerliste);
     }
-
-    private void initPlayers(Set<Spieler> spielerliste) {
-        Set<Spieler> copy = new HashSet<>(spielerliste);
-        copy.forEach(spieler -> {
-            spieler.reset();
-            spieler.setRundenpunkte(0);
-
-            // Robust listener with direct reference
-            ChangeListener<Number> listener = (obs, oldVal, newVal) -> {
-                if (newVal != null) {
-                    handlePlayerAnswer(spieler, newVal.intValue());
-                }
-            };
-            spieler.getAntwortNr().addListener(listener);
-        });
-    }
-
-    private void handlePlayerAnswer(Spieler spieler, int answerNum) {
-        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName() + " with answer " + answerNum);
-
-        if (answerNum <= 0 || gameController == null) return;
-
-        if (answerNum == frage.korrekteAntwortInt()) {
-            long timeTaken = System.currentTimeMillis() - timeStart;
-            int punkte = Math.max(0, (maxZeit * 1000 - (int)timeTaken) / 100);
-            spieler.addPunkte(punkte);
-            spieler.setRundenpunkte(punkte);
-            System.out.println(spieler.getName() + " answered correctly! Points: " + punkte);
-        } else {
-            spieler.setRundenpunkte(0);
-            System.out.println(spieler.getName() + " answered incorrectly.");
-        }
-
-        answersReceived++;
-
-        // If all players answered → end immediately
-        if (answersReceived >= gameController.getSpielerliste().size()) {
-            System.out.println("All players answered - forcing end of question");
-            endQuestionImmediately();
-        }
-    }
-
-    private void startTimer() {
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                long elapsed = System.currentTimeMillis() - timeStart;
-                int remaining = maxZeit - (int)(elapsed / 1000);
-
-                Platform.runLater(() -> {
-                    getRestzeit().setValue(Math.max(0, remaining));
-                    if (lblZeit != null) lblZeit.setText(String.valueOf(getRestzeit().get()));
-
-                    if (remaining <= 0) {
-                        endQuestionImmediately();
-                    }
-                });
-            }
-        };
-
-        timer = new Timer(true);
-        timer.scheduleAtFixedRate(timerTask, 0, 100);
-    }
-
-    private void endQuestionImmediately() {
-        cleanup();
-        if (gameController != null) {
-            // Force the restzeit to 0 → this triggers showAnswerSceneListener in GameController
-            getRestzeit().setValue(0);
-        }
-    }
-
-    public void cleanup() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-        if (timerTask != null) timerTask = null;
-    }
-
+    
+    /**
+     * Load question image if available
+     */
     private void loadQuestionImage(String imagePath) {
         if (image != null && imagePath != null && !imagePath.isEmpty()) {
             try (InputStream is = new FileInputStream(imagePath)) {
                 Image img = new Image(is);
                 image.setImage(img);
+                
+                // Bind image size to container
                 if (imageRoot != null) {
                     image.fitWidthProperty().bind(imageRoot.widthProperty());
                     image.fitHeightProperty().bind(imageRoot.heightProperty());
@@ -159,14 +111,199 @@ public class QuestionViewController implements Initializable {
             }
         }
     }
+    
+    /**
+     * Initialize players - reset scores and setup answer listeners
+     * CRITICAL: Ensure old listeners are removed and answer values reset
+     */
+    private void initPlayers(Set<Spieler> spielerliste) {
+        System.out.println(">>> Initializing " + spielerliste.size() + " players for new question");
+        
+        // Create a copy to avoid concurrent modification
+        Set<Spieler> playersCopy = new HashSet<>(spielerliste);
+        
+        playersCopy.forEach(spieler -> {
+            // Reset player state
+            spieler.reset();
+            spieler.setRundenpunkte(0);
+            
+            // CRITICAL: Reset answer to 0 to prevent old values triggering
+            spieler.getAntwortNr().setValue(0);
+            
+            System.out.println("  → Player " + spieler.getName() + " ready (answer reset to 0)");
+            
+            // Create and store answer listener
+            ChangeListener<Number> answerListener = new ChangeListener<Number>() {
+                private boolean hasAnswered = false; // Prevent duplicate triggers
+                
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, 
+                                  Number oldValue, Number newValue) {
+                    // Only process if answer is valid (1, 2, or 3) and hasn't answered yet
+                    if (!hasAnswered && newValue != null && newValue.intValue() > 0) {
+                        hasAnswered = true;
+                        System.out.println(">>> handlePlayerAnswer called for " + spieler.getName() + " with answer " + newValue);
+                        handlePlayerAnswer(spieler, newValue.intValue());
+                        // Remove this listener after first answer
+                        spieler.getAntwortNr().removeListener(this);
+                        answerListeners.remove(this);
+                    }
+                }
+            };
+            
+            // Store listener for cleanup
+            answerListeners.add(answerListener);
+            spieler.getAntwortNr().addListener(answerListener);
 
+            // Setup mouse click handlers for dev mode
+            if (GameController.IS_DEV_MODE && spieler.getBuzzer() instanceof MouseBuzzer) {
+                setupMouseClickHandlers((MouseBuzzer) spieler.getBuzzer());
+            }
+        });
+    }
+    
+    /**
+     * Handle a player's answer
+     * CRITICAL: Only process valid answers (1-3) and only once per player
+     */
+    private void handlePlayerAnswer(Spieler spieler, int answerNum) {
+        // Ignore invalid answers (0 or negative)
+        if (answerNum <= 0) {
+            System.out.println(">>> Ignoring invalid answer " + answerNum + " from " + spieler.getName());
+            return;
+        }
+        
+        // Ignore if already processed maximum answers
+        if (answersReceived >= gameController.getSpielerliste().size()) {
+            System.out.println(">>> Ignoring late answer from " + spieler.getName() + " (all answers already received)");
+            return;
+        }
+        
+        // Calculate points based on speed (if correct)
+        if (answerNum == frage.korrekteAntwortInt()) {
+            long answerTime = System.currentTimeMillis();
+            int timeTaken = (int) (answerTime - timeStart);
+            int punkte = Math.max(0, (maxZeit * 1000 - timeTaken) / 100);
+            
+            spieler.addPunkte(punkte);
+            spieler.setRundenpunkte(punkte);
+            
+            System.out.println(spieler.getName() + " answered correctly! Points: " + punkte);
+        } else {
+            spieler.setRundenpunkte(0);
+            System.out.println(spieler.getName() + " answered incorrectly.");
+        }
+        
+        // Increment answer count
+        answersReceived++;
+        System.out.println("Answers received: " + answersReceived + "/" + gameController.getSpielerliste().size());
+        
+        // If all players answered, end immediately
+        if (answersReceived >= gameController.getSpielerliste().size()) {
+            System.out.println("All players answered - forcing end of question");
+            Platform.runLater(() -> endQuestion());
+        }
+    }
+    
+    /**
+     * Setup mouse click handlers for dev mode
+     */
+    private void setupMouseClickHandlers(MouseBuzzer mouseBuzzer) {
+        if (lblAntwort1 != null) {
+            lblAntwort1.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(1));
+        }
+        if (lblAntwort2 != null) {
+            lblAntwort2.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(2));
+        }
+        if (lblAntwort3 != null) {
+            lblAntwort3.setOnMouseClicked(e -> mouseBuzzer.getAnswer().setValue(3));
+        }
+    }
+    
+    /**
+     * Set answer text labels
+     */
     private void setAnswers(List<Antwort> antworten) {
         if (antworten == null || antworten.size() < 3) return;
+        
         if (lblAntwort1 != null) lblAntwort1.setText(antworten.get(0).getAntwort());
         if (lblAntwort2 != null) lblAntwort2.setText(antworten.get(1).getAntwort());
         if (lblAntwort3 != null) lblAntwort3.setText(antworten.get(2).getAntwort());
     }
-
+    
+    /**
+     * Start countdown timer
+     */
+    private void startTimer() {
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                long elapsed = System.currentTimeMillis() - timeStart;
+                int remainingSeconds = maxZeit - (int) (elapsed / 1000);
+                
+                Platform.runLater(() -> {
+                    getRestzeit().setValue(Math.max(0, remainingSeconds));
+                    
+                    if (lblRestzeit != null) {
+                        lblRestzeit.setText(String.valueOf(getRestzeit().get()));
+                    }
+                    
+                    // End question when time runs out
+                    if (remainingSeconds <= 0) {
+                        endQuestion();
+                    }
+                });
+            }
+        };
+        
+        timer = new Timer(true); // daemon thread
+        timer.scheduleAtFixedRate(timerTask, 0, 100); // Update every 100ms for smooth countdown
+    }
+    
+    /**
+     * End the question (called when time runs out or all players answered)
+     */
+    private void endQuestion() {
+        cleanup();
+    }
+    
+    /**
+     * Clean up resources - MUST be called before initializing a new question
+     */
+    public void cleanup() {
+        System.out.println(">>> QuestionViewController cleanup starting...");
+        
+        // Cancel timer
+        if (timerTask != null) {
+            timerTask.cancel();
+            timerTask = null;
+            System.out.println("  → Timer cancelled");
+        }
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
+        
+        // Remove all answer listeners
+        if (!answerListeners.isEmpty()) {
+            System.out.println("  → Removing " + answerListeners.size() + " answer listeners");
+            answerListeners.clear();
+        }
+        
+        // Remove mouse click handlers
+        if (lblAntwort1 != null) lblAntwort1.setOnMouseClicked(null);
+        if (lblAntwort2 != null) lblAntwort2.setOnMouseClicked(null);
+        if (lblAntwort3 != null) lblAntwort3.setOnMouseClicked(null);
+        
+        // Reset answer count
+        answersReceived = 0;
+        
+        System.out.println(">>> QuestionViewController cleanup complete");
+    }
+    
     @Override
-    public void initialize(URL url, ResourceBundle rb) {}
+    public void initialize(URL location, ResourceBundle resources) {
+        // Initialization if needed
+    }
 }
