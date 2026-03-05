@@ -3,6 +3,7 @@ package view;
 import java.util.Set;
 
 import application.Frage;
+import application.GameController;
 import application.Spieler;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -35,12 +36,22 @@ import javafx.util.Duration;
  */
 public class QuestionViewController {
 
+    // ── FXML bindings ─────────────────────────────────────────────
     @FXML private Label lblFrage;
     @FXML private Label lblAntwort1;
     @FXML private Label lblAntwort2;
     @FXML private Label lblAntwort3;
     @FXML private Label lblZeit;
 
+    // ── Back-reference to GameController (injected by preloadViews) ──
+    private application.GameController mainController;
+
+    /** Called by GameController.preloadViews() — stores back-reference. */
+    public void setMainController(application.GameController mc) {
+        this.mainController = mc;
+    }
+
+    // ── State ─────────────────────────────────────────────────────
     private final IntegerProperty restzeit = new SimpleIntegerProperty(0);
     private Timeline countdown;
 
@@ -51,6 +62,8 @@ public class QuestionViewController {
 
     // Listeners we register so we can clean them up again
     private java.util.Map<Spieler, ChangeListener<Number>> playerListeners = new java.util.HashMap<>();
+
+    // ── Public API (called by GameController) ─────────────────────
 
     /**
      * Sets up the question, attaches per-player answer listeners, and starts
