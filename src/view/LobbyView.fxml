@@ -76,6 +76,7 @@
                     <padding><Insets bottom="36.0" left="20.0" right="20.0" top="36.0" /></padding>
                     <children>
                         <Label
+                            fx:id="lblPlayer1Name"
                             text="SPIELER 1"
                             style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
@@ -101,6 +102,7 @@
                     <padding><Insets bottom="36.0" left="20.0" right="20.0" top="36.0" /></padding>
                     <children>
                         <Label
+                            fx:id="lblPlayer2Name"
                             text="SPIELER 2"
                             style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
@@ -126,6 +128,7 @@
                     <padding><Insets bottom="36.0" left="20.0" right="20.0" top="36.0" /></padding>
                     <children>
                         <Label
+                            fx:id="lblPlayer3Name"
                             text="SPIELER 3"
                             style="-fx-text-fill: #8b949e; -fx-font-size: 18pt; -fx-font-weight: bold; -fx-letter-spacing: 2;" />
                         <ImageView
