@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 public class LobbyViewController implements Initializable {
 
     @FXML private Label lblReady1, lblReady2, lblReady3;
+    @FXML private Label lblPlayer1Name, lblPlayer2Name, lblPlayer3Name;
     @FXML private ImageView avatar1, avatar2, avatar3;
 
     private GameController gameController;
@@ -30,44 +31,55 @@ public class LobbyViewController implements Initializable {
 
     /**
      * Called when a player presses their buzzer in the lobby.
-     * Only marks them ready if they weren't already ready.
+     * Updates both the ready status AND the player name label.
      * @param playerNumber The player number (1, 2, or 3)
-     * @param playerName The player's name/username (optional, can be null)
+     * @param playerName The player's nickname from database
      */
     public void setReady(int playerNumber, String playerName) {
         Platform.runLater(() -> {
-            Label targetLabel = null;
+            Label readyLabel = null;
+            Label nameLabel = null;
             boolean alreadyReady = false;
             
             switch (playerNumber) {
                 case 1: 
-                    targetLabel = lblReady1;
+                    readyLabel = lblReady1;
+                    nameLabel = lblPlayer1Name;
                     alreadyReady = player1Ready;
                     player1Ready = true;
                     break;
                 case 2: 
-                    targetLabel = lblReady2;
+                    readyLabel = lblReady2;
+                    nameLabel = lblPlayer2Name;
                     alreadyReady = player2Ready;
                     player2Ready = true;
                     break;
                 case 3: 
-                    targetLabel = lblReady3;
+                    readyLabel = lblReady3;
+                    nameLabel = lblPlayer3Name;
                     alreadyReady = player3Ready;
                     player3Ready = true;
                     break;
             }
             
-            if (targetLabel != null && !alreadyReady) {
-                targetLabel.setOpacity(1.0);
-                // Show player name if provided, otherwise generic ready message
+            if (readyLabel != null && !alreadyReady) {
+                // Update the ready status label (bottom)
+                readyLabel.setOpacity(1.0);
                 String readyText = (playerName != null && !playerName.isEmpty()) 
                     ? "✓  " + playerName 
                     : "✓  BEREIT";
-                targetLabel.setText(readyText);
-                // Green glow effect
-                targetLabel.setStyle("-fx-text-fill: #3fb950; " +
+                readyLabel.setText(readyText);
+                readyLabel.setStyle("-fx-text-fill: #3fb950; " +
                                      "-fx-effect: dropshadow(gaussian, #3fb950, 20, 0.5, 0, 0); " +
                                      "-fx-font-weight: bold;");
+                
+                // Update the player name label (top)
+                if (nameLabel != null && playerName != null && !playerName.isEmpty()) {
+                    nameLabel.setText(playerName);
+                    // Highlight the name label with accent color
+                    nameLabel.setStyle("-fx-text-fill: #58a6ff; -fx-font-size: 18pt; " +
+                                      "-fx-font-weight: bold; -fx-letter-spacing: 2;");
+                }
             }
         });
     }
@@ -81,6 +93,7 @@ public class LobbyViewController implements Initializable {
     
     /**
      * Reset all ready states - useful when returning to lobby
+     * Also resets player name labels back to default
      */
     public void resetReadyStates() {
         player1Ready = false;
@@ -88,6 +101,7 @@ public class LobbyViewController implements Initializable {
         player3Ready = false;
         
         Platform.runLater(() -> {
+            // Reset ready labels
             if (lblReady1 != null) {
                 lblReady1.setOpacity(0.0);
                 lblReady1.setText("✓  BEREIT");
@@ -99,6 +113,23 @@ public class LobbyViewController implements Initializable {
             if (lblReady3 != null) {
                 lblReady3.setOpacity(0.0);
                 lblReady3.setText("✓  BEREIT");
+            }
+            
+            // Reset player name labels back to default
+            if (lblPlayer1Name != null) {
+                lblPlayer1Name.setText("SPIELER 1");
+                lblPlayer1Name.setStyle("-fx-text-fill: #8b949e; -fx-font-size: 18pt; " +
+                                       "-fx-font-weight: bold; -fx-letter-spacing: 2;");
+            }
+            if (lblPlayer2Name != null) {
+                lblPlayer2Name.setText("SPIELER 2");
+                lblPlayer2Name.setStyle("-fx-text-fill: #8b949e; -fx-font-size: 18pt; " +
+                                       "-fx-font-weight: bold; -fx-letter-spacing: 2;");
+            }
+            if (lblPlayer3Name != null) {
+                lblPlayer3Name.setText("SPIELER 3");
+                lblPlayer3Name.setStyle("-fx-text-fill: #8b949e; -fx-font-size: 18pt; " +
+                                       "-fx-font-weight: bold; -fx-letter-spacing: 2;");
             }
         });
     }
