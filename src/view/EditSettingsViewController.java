@@ -49,7 +49,7 @@ public class EditSettingsViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         
         // Set initial directory
-        File initialFile = new File("resources/fragenBuzzerGame.csv");
+        File initialFile = new File("resources");
         if (initialFile.getParentFile() != null && initialFile.getParentFile().exists()) {
             fileChooser.setInitialDirectory(initialFile.getParentFile());
         }
