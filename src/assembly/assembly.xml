@@ -1,38 +1,16 @@
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0
-                              http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+	<id>bin</id>
+	<formats>
+		<format>zip</format>
+	</formats>
 
-    <id>dist</id>
-    <formats>
-        <format>zip</format>
-    </formats>
-    <includeBaseDirectory>true</includeBaseDirectory>
-
-    <files>
-        <file>
-            <source>${project.build.directory}/distribution/${project.artifactId}-${project.version}.jar</source>
-            <outputDirectory>/</outputDirectory>
-        </file>
-        <file>
-            <source>startmeup.sh</source>
-            <outputDirectory>/</outputDirectory>
-            <fileMode>0755</fileMode>
-        </file>
-    </files>
-
-    <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/distribution/lib</directory>
-            <outputDirectory>/lib</outputDirectory>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>resources</directory>
-            <outputDirectory>/resources</outputDirectory>
-        </fileSet>
-    </fileSets>
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/distribution</directory>
+			<outputDirectory/>
+			<filtered>false</filtered>
+		</fileSet>
+	</fileSets>
 
 </assembly>
