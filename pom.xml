@@ -9,7 +9,7 @@
     <artifactId>IAE_BuzzerGame</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>IAE - BuzzerGame</name>
+    <n>IAE - BuzzerGame</n>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
@@ -63,6 +63,7 @@
             <version>${pi4j.version}</version>
         </dependency>
 
+        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -75,7 +76,7 @@
         </dependency>
 
     </dependencies>
-         
+
     <build>
         <sourceDirectory>src</sourceDirectory>
 
@@ -158,6 +159,10 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.0</version>
 
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
+
                 <executions>
 
                     <execution>
@@ -190,11 +195,6 @@
                     </execution>
 
                 </executions>
-
-                <configuration>
-                    <mainClass>${main.class}</mainClass>
-                </configuration>
-
             </plugin>
 
         </plugins>
