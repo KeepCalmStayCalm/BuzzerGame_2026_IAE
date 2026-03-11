@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>IAE</groupId>
   <artifactId>IAE_BuzzerGame</artifactId>
@@ -15,7 +12,7 @@
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <slf4j.version>1.7.32</slf4j.version>
     <pi4j.version>2.8.0</pi4j.version>
-    <javafx.version>22</javafx.version>   <!-- ← ONLY updated this -->
+    <javafx.version>22</javafx.version> <!-- UPDATED -->
     <gson.version>2.10.1</gson.version>
     <exec-maven-plugin.version>3.6.0</exec-maven-plugin.version>
   </properties>
@@ -56,7 +53,7 @@
       <artifactId>javafx-fxml</artifactId>
       <version>${javafx.version}</version>
     </dependency>
-    <!-- ONLY added this line (needed for JavaFX 22) -->
+    <!-- ADDED THIS SO JAVA FX GRAPHICS WORKS -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-graphics</artifactId>
@@ -105,7 +102,6 @@
         </configuration>
       </plugin>
 
-      <!-- ONLY FIXED THIS PART (added mainClass + corrected argument) -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -118,12 +114,11 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>application.RaspiBuzzer</mainClass> <!-- ← FIXED (this was missing) -->
               <arguments>
                 <argument>--module-path</argument>
                 <argument>${project.build.directory}/distribution</argument>
                 <argument>--module</argument>
-                <argument>buzzer.app/application.RaspiBuzzer</argument> <!-- ← FIXED (was wrong before) -->
+                <argument>application.GameController</argument>
               </arguments>
             </configuration>
           </execution>
