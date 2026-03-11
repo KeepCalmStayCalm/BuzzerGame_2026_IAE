@@ -16,16 +16,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>15.0.1</javafx.version>
         <pi4j.version>2.8.0</pi4j.version>
-        <!-- Full qualified main class — used by exec:exec, javafx:run, and jar manifest -->
         <main.class>application.GameController</main.class>
     </properties>
 
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!--  Dependencies                                              -->
-    <!-- ══════════════════════════════════════════════════════════ -->
     <dependencies>
 
-        <!-- JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -47,7 +42,6 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Pi4J -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
@@ -69,7 +63,6 @@
             <version>${pi4j.version}</version>
         </dependency>
 
-        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -82,14 +75,10 @@
         </dependency>
 
     </dependencies>
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!--  Build plugins                                             -->
-    <!-- ══════════════════════════════════════════════════════════ -->
+         
     <build>
         <sourceDirectory>src</sourceDirectory>
 
-        <!-- Copy all resources (FXML, CSS, images) into the output -->
         <resources>
             <resource>
                 <directory>src</directory>
@@ -105,7 +94,6 @@
 
         <plugins>
 
-            <!-- ── 1. Compiler ─────────────────────────────────── -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -116,7 +104,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ── 2. Copy all deps to target/distribution/lib ─── -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -137,7 +124,6 @@
                 </executions>
             </plugin>
 
-            <!-- ── 3. Package the application JAR ──────────────── -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -154,13 +140,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ── 4. JavaFX Maven Plugin ──────────────────────── -->
-            <!--                                                     -->
-            <!--   Use:  mvn javafx:run                              -->
-            <!--   For development on the Pi WITHOUT root.           -->
-            <!--   For production (needs GPIO) run startmeup.sh      -->
-            <!--   or:  sudo mvn javafx:run                          -->
-            <!-- ──────────────────────────────────────────────────── -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -168,27 +147,12 @@
                 <configuration>
                     <mainClass>${main.class}</mainClass>
                     <options>
-                        <!-- Allow Pi4J to access internal JVM APIs -->
                         <option>--add-opens=java.base/java.lang=ALL-UNNAMED</option>
                         <option>--add-opens=java.base/java.util=ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>
 
-            <!-- ── 5. exec-maven-plugin ────────────────────────── -->
-            <!--                                                     -->
-            <!--   FIX: was using exec:java goal (runs inside        -->
-            <!--   Maven's JVM) but passing --module-path /          -->
-            <!--   --module flags which are JVM launch arguments,    -->
-            <!--   not valid for exec:java. exec:java also requires  -->
-            <!--   a <mainClass> which was missing → the error.      -->
-            <!--                                                     -->
-            <!--   Fix: switched to exec:exec which spawns a real    -->
-            <!--   separate java process, so --module-path and       -->
-            <!--   --module work correctly. Also added the           -->
-            <!--   buzzergame-test execution that previously used    -->
-            <!--   exec:java for RaspiBuzzer standalone test.        -->
-            <!-- ──────────────────────────────────────────────────── -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -196,7 +160,6 @@
 
                 <executions>
 
-                    <!-- mvn exec:exec  →  runs the full game -->
                     <execution>
                         <id>run</id>
                         <goals>
@@ -216,21 +179,18 @@
                         </configuration>
                     </execution>
 
-                    <!-- mvn exec:java -Dexec.mainClass=application.RaspiBuzzer  →  GPIO pin test -->
                     <execution>
                         <id>test-buzzer</id>
                         <goals>
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <!-- exec:java REQUIRES mainClass — this was the root cause of the error -->
                             <mainClass>application.RaspiBuzzer</mainClass>
                         </configuration>
                     </execution>
 
                 </executions>
 
-                <!-- Default config used when running  mvn exec:java  without -Dexec.mainClass -->
                 <configuration>
                     <mainClass>${main.class}</mainClass>
                 </configuration>
