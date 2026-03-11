@@ -43,22 +43,15 @@ public class EditSettingsViewController implements Initializable {
 
     /**
      * Open file chooser for question file selection
-     * FIXED: Now correctly opens the resources directory
      */
     @FXML
     public void openFileChooser(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         
-        // FIXED: Point directly to resources folder, not its parent
-        File resourcesDir = new File("resources");
-        
-        if (resourcesDir.exists() && resourcesDir.isDirectory()) {
-            fileChooser.setInitialDirectory(resourcesDir);
-            System.out.println("✓ Opening file chooser in: " + resourcesDir.getAbsolutePath());
-        } else {
-            // Fallback to current directory if resources doesn't exist
-            fileChooser.setInitialDirectory(new File("."));
-            System.out.println("⚠ Resources folder not found, using current directory");
+        // Set initial directory
+        File initialFile = new File("resources/fragenBuzzerGame.csv");
+        if (initialFile.getParentFile() != null && initialFile.getParentFile().exists()) {
+            fileChooser.setInitialDirectory(initialFile.getParentFile());
         }
         
         fileChooser.setTitle("Frage-Datei auswählen");
@@ -72,7 +65,6 @@ public class EditSettingsViewController implements Initializable {
         
         if (chosenFile != null) {
             txtQuestionFile.setText(chosenFile.getAbsolutePath());
-            System.out.println("✓ Selected file: " + chosenFile.getAbsolutePath());
         }
     }
 
