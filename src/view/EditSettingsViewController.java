@@ -79,7 +79,7 @@ public class EditSettingsViewController implements Initializable {
         // Load question file path
         if (txtQuestionFile != null) {
             txtQuestionFile.setText(
-                prefs.get("questions_file", "resources/fragenBuzzerGame.csv")
+                prefs.get("questions_file", "resources")
             );
         }
         
