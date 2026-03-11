@@ -1,101 +1,95 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>IAE</groupId>
   <artifactId>IAE_BuzzerGame</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>IAE - BuzzerGame</name>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>17</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <slf4j.version>1.7.32</slf4j.version>
+    <pi4j.version>2.8.0</pi4j.version>
+    <javafx.version>22</javafx.version> <!-- UPDATED -->
+    <gson.version>2.10.1</gson.version>
+    <exec-maven-plugin.version>3.6.0</exec-maven-plugin.version>
+  </properties>
 
-        <java.version>17</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <slf4j.version>1.7.32</slf4j.version>
-        <pi4j.version>2.8.0</pi4j.version>
-        <javafx.version>15.0.1</javafx.version>
-
-        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-
-    </properties>
-
-<dependencies>
- <dependency>
+  <dependencies>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
-  </dependency>
-  <dependency>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
-  </dependency>
-  <dependency>
+    </dependency>
+    <dependency>
       <groupId>com.pi4j</groupId>
       <artifactId>pi4j-core</artifactId>
       <version>${pi4j.version}</version>
-  </dependency>
-
-  <dependency>
+    </dependency>
+    <dependency>
       <groupId>com.pi4j</groupId>
       <artifactId>pi4j-plugin-raspberrypi</artifactId>
       <version>${pi4j.version}</version>
-  </dependency>
-  <dependency>
+    </dependency>
+    <dependency>
       <groupId>com.pi4j</groupId>
       <artifactId>pi4j-plugin-pigpio</artifactId>
       <version>${pi4j.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-controls</artifactId>
-    <version>${javafx.version}</version>
-  </dependency>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <!-- ADDED THIS SO JAVA FX GRAPHICS WORKS -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
+    </dependency>
+  </dependencies>
 
-  <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-fxml</artifactId>
-    <version>${javafx.version}</version>
-</dependency>
-
-  <!-- NEW: Gson for JSON parsing -->
-  <dependency>
-    <groupId>com.google.code.gson</groupId>
-    <artifactId>gson</artifactId>
-    <version>2.10.1</version>
-  </dependency>
-
-</dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
+    <testSourceDirectory>src</testSourceDirectory>
     <plugins>
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-          <configuration>
-              <release>${java.version}</release>
-              <showDeprecation>true</showDeprecation>
-              <showWarnings>true</showWarnings>
-              <verbose>false</verbose>
-          </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <compilerArgs>
+            <arg>--add-modules</arg>
+            <arg>javafx.controls,javafx.fxml</arg>
+          </compilerArgs>
+        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-            <mainClass>application.RaspiBuzzer</mainClass>
+          <mainClass>application.RaspiBuzzer</mainClass>
         </configuration>
       </plugin>
 
@@ -109,115 +103,93 @@
       </plugin>
 
       <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>${exec-maven-plugin.version}</version>
-          <executions>
-              <execution>
-                  <goals>
-                      <goal>java</goal>
-                  </goals>
-              </execution>
-          </executions>
-          <configuration>
-              <executable>java</executable>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>run</id>
+            <phase>package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
               <arguments>
-                  <argument>--module-path</argument>
-                  <argument>${project.build.directory}/distribution</argument>
-                  <argument>--module</argument>
-                  <argument>application.GameController</argument>
+                <argument>--module-path</argument>
+                <argument>${project.build.directory}/distribution</argument>
+                <argument>--module</argument>
+                <argument>application.GameController</argument>
               </arguments>
-          </configuration>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy todir="${project.build.directory}/distribution/lib">
+                  <fileset dir="${project.build.directory}/dependency">
+                    <include name="**/*.jar"/>
+                  </fileset>
+                </copy>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <echo message="Running OpenJFX download script..."/>
-                                <exec executable="/bin/bash" osfamily="unix">
-                                    <arg line="${project.basedir}/download_openjfx.sh"/>
-                                </exec>
-                                <exec executable="cmd" osfamily="windows">
-                                    <arg line="/c ${project.basedir}\download_openjfx.bat"/>
-                                </exec>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+              <silent>true</silent>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-                                <echo message="Copying distribution files..."/>
-                                <copy todir="${project.build.directory}/distribution" overwrite="true" flatten="true">
-                                    <fileset dir="assets" includes="*.sh"/>
-                                </copy>
-                                <copy todir="${project.build.directory}/distribution/resources" overwrite="true" flatten="false">
-                                    <fileset dir="resources" includes="**/*"/>
-                                </copy>
-                                
-                                <copy todir="${project.build.directory}/distribution/openjfx" overwrite="true">
-                                    <fileset dir="download/openjfx/extracted_files/openjfx"/>
-                                </copy>
-                                <chmod dir="${project.build.directory}/distribution" perm="ugo+rx" includes="**/*.sh"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant</artifactId>
-                        <version>1.10.11</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/distribution/lib</outputDirectory>
-                            <includeScope>runtime</includeScope>
-                            <excludeTransitive>false</excludeTransitive>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <excludeClassifiers>linux,win,mac</excludeClassifiers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-       
-  </plugins>
-    
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <descriptor>src/assembly/assembly.xml</descriptor>
+          <finalName>all</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
