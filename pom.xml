@@ -1,195 +1,243 @@
-<project>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>IAE</groupId>
-  <artifactId>IAE_BuzzerGame</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>IAE - BuzzerGame</name>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>17</java.version>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <pi4j.version>2.8.0</pi4j.version>
-    <javafx.version>22</javafx.version> <!-- UPDATED -->
-    <gson.version>2.10.1</gson.version>
-    <exec-maven-plugin.version>3.6.0</exec-maven-plugin.version>
-  </properties>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-core</artifactId>
-      <version>${pi4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-plugin-raspberrypi</artifactId>
-      <version>${pi4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.pi4j</groupId>
-      <artifactId>pi4j-plugin-pigpio</artifactId>
-      <version>${pi4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
-    <!-- ADDED THIS SO JAVA FX GRAPHICS WORKS -->
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-graphics</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>${gson.version}</version>
-    </dependency>
-  </dependencies>
+    <groupId>IAE</groupId>
+    <artifactId>IAE_BuzzerGame</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>IAE - BuzzerGame</name>
 
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>src</testSourceDirectory>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <compilerArgs>
-            <arg>--add-modules</arg>
-            <arg>javafx.controls,javafx.fxml</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>15.0.1</javafx.version>
+        <pi4j.version>2.8.0</pi4j.version>
+        <!-- Full qualified main class — used by exec:exec, javafx:run, and jar manifest -->
+        <main.class>application.GameController</main.class>
+    </properties>
 
-      <plugin>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-maven-plugin</artifactId>
-        <version>0.0.8</version>
-        <configuration>
-          <mainClass>application.RaspiBuzzer</mainClass>
-        </configuration>
-      </plugin>
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  Dependencies                                              -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <dependencies>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
-        <configuration>
-          <outputDirectory>${project.build.directory}/distribution</outputDirectory>
-        </configuration>
-      </plugin>
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>run</id>
-            <phase>package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <arguments>
-                <argument>--module-path</argument>
-                <argument>${project.build.directory}/distribution</argument>
-                <argument>--module</argument>
-                <argument>application.GameController</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        <!-- Pi4J -->
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-raspberrypi</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-pigpio</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-library-pigpio</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy todir="${project.build.directory}/distribution/lib">
-                  <fileset dir="${project.build.directory}/dependency">
-                    <include name="**/*.jar"/>
-                  </fileset>
-                </copy>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version>
+        </dependency>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.8.1</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/dependency</outputDirectory>
-              <silent>true</silent>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>false</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+    </dependencies>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.6.0</version>
-        <configuration>
-          <descriptor>src/assembly/assembly.xml</descriptor>
-          <finalName>all</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  Build plugins                                             -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+
+        <!-- Copy all resources (FXML, CSS, images) into the output -->
+        <resources>
+            <resource>
+                <directory>src</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>resources</directory>
+                <targetPath>resources</targetPath>
+            </resource>
+        </resources>
+
+        <plugins>
+
+            <!-- ── 1. Compiler ─────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>17</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- ── 2. Copy all deps to target/distribution/lib ─── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.7.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/distribution/lib
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ── 3. Package the application JAR ──────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main.class}</mainClass>
+                        </manifest>
+                    </archive>
+                    <outputDirectory>
+                        ${project.build.directory}/distribution
+                    </outputDirectory>
+                </configuration>
+            </plugin>
+
+            <!-- ── 4. JavaFX Maven Plugin ──────────────────────── -->
+            <!--                                                     -->
+            <!--   Use:  mvn javafx:run                              -->
+            <!--   For development on the Pi WITHOUT root.           -->
+            <!--   For production (needs GPIO) run startmeup.sh      -->
+            <!--   or:  sudo mvn javafx:run                          -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                    <options>
+                        <!-- Allow Pi4J to access internal JVM APIs -->
+                        <option>--add-opens=java.base/java.lang=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.util=ALL-UNNAMED</option>
+                    </options>
+                </configuration>
+            </plugin>
+
+            <!-- ── 5. exec-maven-plugin ────────────────────────── -->
+            <!--                                                     -->
+            <!--   FIX: was using exec:java goal (runs inside        -->
+            <!--   Maven's JVM) but passing --module-path /          -->
+            <!--   --module flags which are JVM launch arguments,    -->
+            <!--   not valid for exec:java. exec:java also requires  -->
+            <!--   a <mainClass> which was missing → the error.      -->
+            <!--                                                     -->
+            <!--   Fix: switched to exec:exec which spawns a real    -->
+            <!--   separate java process, so --module-path and       -->
+            <!--   --module work correctly. Also added the           -->
+            <!--   buzzergame-test execution that previously used    -->
+            <!--   exec:java for RaspiBuzzer standalone test.        -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.0</version>
+
+                <executions>
+
+                    <!-- mvn exec:exec  →  runs the full game -->
+                    <execution>
+                        <id>run</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>--module-path</argument>
+                                <argument>${project.build.directory}/distribution/lib</argument>
+                                <argument>--add-opens=java.base/java.lang=ALL-UNNAMED</argument>
+                                <argument>--add-opens=java.base/java.util=ALL-UNNAMED</argument>
+                                <argument>-cp</argument>
+                                <argument>${project.build.directory}/distribution/${project.artifactId}-${project.version}.jar</argument>
+                                <argument>${main.class}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- mvn exec:java -Dexec.mainClass=application.RaspiBuzzer  →  GPIO pin test -->
+                    <execution>
+                        <id>test-buzzer</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <!-- exec:java REQUIRES mainClass — this was the root cause of the error -->
+                            <mainClass>application.RaspiBuzzer</mainClass>
+                        </configuration>
+                    </execution>
+
+                </executions>
+
+                <!-- Default config used when running  mvn exec:java  without -Dexec.mainClass -->
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
+
+            </plugin>
+
+        </plugins>
+    </build>
+
 </project>
