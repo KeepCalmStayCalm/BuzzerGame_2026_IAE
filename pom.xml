@@ -9,7 +9,7 @@
     <artifactId>IAE_BuzzerGame</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <n>IAE - BuzzerGame</n>
+    <name>IAE - BuzzerGame</name>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
@@ -63,7 +63,6 @@
             <version>${pi4j.version}</version>
         </dependency>
 
-        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -117,9 +116,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>
-                                ${project.build.directory}/distribution/lib
-                            </outputDirectory>
+                            <outputDirectory>${project.build.directory}/distribution/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -135,9 +132,7 @@
                             <mainClass>${main.class}</mainClass>
                         </manifest>
                     </archive>
-                    <outputDirectory>
-                        ${project.build.directory}/distribution
-                    </outputDirectory>
+                    <outputDirectory>${project.build.directory}/distribution</outputDirectory>
                 </configuration>
             </plugin>
 
@@ -158,13 +153,10 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.0</version>
-
                 <configuration>
                     <mainClass>${main.class}</mainClass>
                 </configuration>
-
                 <executions>
-
                     <execution>
                         <id>run</id>
                         <goals>
@@ -183,7 +175,6 @@
                             </arguments>
                         </configuration>
                     </execution>
-
                     <execution>
                         <id>test-buzzer</id>
                         <goals>
@@ -193,7 +184,6 @@
                             <mainClass>application.RaspiBuzzer</mainClass>
                         </configuration>
                     </execution>
-
                 </executions>
             </plugin>
 
