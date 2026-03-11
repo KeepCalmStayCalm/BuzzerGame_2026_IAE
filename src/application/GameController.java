@@ -241,33 +241,28 @@ public class GameController extends Application {
                 // Fix: move ALL registration logic (duplicate check, new Spieler,
                 // setReady, removeListener) INSIDE thenAccept so it only runs after
                 // we have a confirmed answer from the server.
-                // Fetch nickname from API — all registration logic lives inside thenAccept
-                // so it only runs after the server has responded.
-                fetchNicknameAsync(id).thenAccept(nicknameOpt -> Platform.runLater(() -> {
+                checkUserExistsAsync(id).thenAccept(exists -> Platform.runLater(() -> {
                     try {
-                        if (!nicknameOpt.isPresent()) {
+                        if (!exists) {
                             new Alert(Alert.AlertType.ERROR,
-                                "ID / Benutzer '" + id + "' nicht in der Datenbank gefunden!\n" +
+                                "Benutzer '" + id + "' nicht in der Datenbank gefunden!\n" +
                                 "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
-                            return;
+                            return; // don't register — isProcessing reset in finally
                         }
 
-                        String nickname = nicknameOpt.get();
-
-                        // Duplicate check uses the resolved nickname
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(nickname))) {
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(id))) {
                             new Alert(Alert.AlertType.WARNING,
-                                "Spieler '" + nickname + "' ist bereits angemeldet!\n" +
+                                "Benutzer '" + id + "' ist bereits angemeldet!\n" +
                                 "Bitte einen anderen Benutzer wählen.", ButtonType.OK).showAndWait();
-                            return;
+                            return; // don't register
                         }
 
-                        // Register with the real nickname from the API
-                        Spieler s = new Spieler(nickname, buzzer);
+                        // Only reaches here if: API says exists AND not a duplicate
+                        Spieler s = new Spieler(id, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
-                        lobby.setReady(playerNum, nickname);
-                        System.out.println("✓ " + nickname + " (ID: " + id + ") angemeldet als Spieler " + playerNum);
+                        lobby.setReady(playerNum, id);
+                        System.out.println("✓ " + id + " erfolgreich angemeldet (Spieler " + playerNum + ")");
 
                     } finally {
                         isProcessing[0] = false;
@@ -280,58 +275,26 @@ public class GameController extends Application {
         return holder[0];
     }
 
-    /**
-     * Looks up a participant by ID or nickname and returns their nickname.
-     * Returns Optional.empty() if not found or on error.
-     *
-     * The API response format is:
-     *   {"count": 1, "results": [{"id": 1, "nickname": "HAPPY_DOLPHIN", ...}]}
-     * We check count > 0 and extract the nickname from results[0].
-     */
-    private CompletableFuture<Optional<String>> fetchNicknameAsync(String id) {
+    private CompletableFuture<Boolean> checkUserExistsAsync(String id) {
         String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
 
+        // BUG FIX: reuse the shared httpClient instead of new HttpClient() per call
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    if (response.statusCode() != 200) {
-                        System.out.println("✗ User check for ID '" + id + "': NOT FOUND (Status: " + response.statusCode() + ")");
-                        return Optional.<String>empty();
-                    }
-                    // Parse nickname from JSON: {"count":N,"results":[{"nickname":"VALUE",...}]}
-                    String body = response.body();
-                    String nickname = parseNickname(body);
-                    if (nickname == null) {
-                        System.out.println("✗ User check for ID '" + id + "': count=0 or nickname missing");
-                        return Optional.<String>empty();
-                    }
-                    System.out.println("✓ User check for ID '" + id + "': FOUND → nickname='" + nickname + "'");
-                    return Optional.of(nickname);
+                    boolean exists = response.statusCode() == 200;
+                    System.out.println((exists ? "✓" : "✗") +
+                        " User check for ID '" + id + "': " +
+                        (exists ? "FOUND" : "NOT FOUND (Status: " + response.statusCode() + ")"));
+                    return exists;
                 })
                 .exceptionally(e -> {
                     System.err.println("✗ User-Check Fehler für ID '" + id + "': " + e.getMessage());
-                    return Optional.empty();
+                    return false;
                 });
-    }
-
-    /**
-     * Extracts the nickname from the API JSON response.
-     * Looks for "count" > 0 and then "nickname":"VALUE" in the results array.
-     * Uses simple string parsing — no external JSON library needed.
-     */
-    private static String parseNickname(String json) {
-        // Check count is not 0
-        java.util.regex.Matcher countMatcher =
-            java.util.regex.Pattern.compile("\"count\"\s*:\s*(\\d+)").matcher(json);
-        if (!countMatcher.find() || Integer.parseInt(countMatcher.group(1)) == 0) return null;
-
-        // Extract first "nickname":"VALUE"
-        java.util.regex.Matcher nickMatcher =
-            java.util.regex.Pattern.compile("\"nickname\"\s*:\s*\"([^\"]+)\"").matcher(json);
-        return nickMatcher.find() ? nickMatcher.group(1) : null;
     }
 
     // BUG FIX: original sendFinalScoresToApi() used client.send() — a BLOCKING call —
