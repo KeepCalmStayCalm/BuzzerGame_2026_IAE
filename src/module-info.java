@@ -1,23 +1,25 @@
 module buzzer.app {
+    // JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires javafx.base;
     
-    // Pi4J 2.x uses automatic modules - use JAR names as module names
+    // Pi4J modules
     requires com.pi4j;
     requires com.pi4j.plugin.raspberrypi;
     requires com.pi4j.plugin.pigpio;
-    requires com.pi4j.library.pigpio;
     
-    // Java standard modules
-    requires java.net.http;
-    requires java.prefs;
-    
-    // SLF4J logging
+    // Logging
     requires org.slf4j;
     
-    exports application;
-    opens application to javafx.fxml;
+    // JSON parsing - REQUIRED FOR API NICKNAME FETCHING
+    requires com.google.gson;
+    
+    // Open packages for JavaFX reflection
     opens view to javafx.fxml;
+    opens application to javafx.fxml;
+    
+    // Export packages
+    exports application;
+    exports view;
 }
