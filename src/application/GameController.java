@@ -7,6 +7,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -241,28 +243,35 @@ public class GameController extends Application {
                 // Fix: move ALL registration logic (duplicate check, new Spieler,
                 // setReady, removeListener) INSIDE thenAccept so it only runs after
                 // we have a confirmed answer from the server.
-                checkUserExistsAsync(id).thenAccept(exists -> Platform.runLater(() -> {
+                //
+                // BUG FIX: Changed from checkUserExistsAsync to fetchUserDataAsync
+                // to get the nickname from API instead of using the ID
+                fetchUserDataAsync(id).thenAccept(userData -> Platform.runLater(() -> {
                     try {
-                        if (!exists) {
+                        if (userData == null) {
                             new Alert(Alert.AlertType.ERROR,
                                 "Benutzer '" + id + "' nicht in der Datenbank gefunden!\n" +
                                 "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
                             return; // don't register — isProcessing reset in finally
                         }
 
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(id))) {
+                        // Use the nickname from API
+                        String nickname = userData.nickname;
+
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(nickname))) {
                             new Alert(Alert.AlertType.WARNING,
-                                "Benutzer '" + id + "' ist bereits angemeldet!\n" +
+                                "Benutzer '" + nickname + "' ist bereits angemeldet!\n" +
                                 "Bitte einen anderen Benutzer wählen.", ButtonType.OK).showAndWait();
                             return; // don't register
                         }
 
-                        // Only reaches here if: API says exists AND not a duplicate
-                        Spieler s = new Spieler(id, buzzer);
+                        // Only reaches here if: API returned user data AND not a duplicate
+                        // BUG FIX: Use nickname instead of ID
+                        Spieler s = new Spieler(nickname, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
-                        lobby.setReady(playerNum, id);
-                        System.out.println("✓ " + id + " erfolgreich angemeldet (Spieler " + playerNum + ")");
+                        lobby.setReady(playerNum, nickname);
+                        System.out.println("✓ " + nickname + " erfolgreich angemeldet (Spieler " + playerNum + ")");
 
                     } finally {
                         isProcessing[0] = false;
@@ -275,25 +284,39 @@ public class GameController extends Application {
         return holder[0];
     }
 
-    private CompletableFuture<Boolean> checkUserExistsAsync(String id) {
-        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
+    private CompletableFuture<UserData> fetchUserDataAsync(String id) {
+        String url = "http://192.168.100.141:8080/teilnehmer/" + id;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .header("Content-Type", "application/json")
                 .GET()
                 .build();
 
         // BUG FIX: reuse the shared httpClient instead of new HttpClient() per call
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    boolean exists = response.statusCode() == 200;
-                    System.out.println((exists ? "✓" : "✗") +
-                        " User check for ID '" + id + "': " +
-                        (exists ? "FOUND" : "NOT FOUND (Status: " + response.statusCode() + ")"));
-                    return exists;
+                    if (response.statusCode() == 200) {
+                        try {
+                            // Parse JSON to get nickname
+                            JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                            String nickname = json.get("nickname").getAsString();
+                            
+                            System.out.println("✓ User check for ID '" + id + "': FOUND");
+                            System.out.println("  → Nickname: " + nickname);
+                            
+                            return new UserData(id, nickname);
+                        } catch (Exception e) {
+                            System.err.println("✗ Error parsing JSON for ID '" + id + "': " + e.getMessage());
+                            return null;
+                        }
+                    } else {
+                        System.out.println("✗ User check for ID '" + id + "': NOT FOUND (Status: " + response.statusCode() + ")");
+                        return null;
+                    }
                 })
                 .exceptionally(e -> {
                     System.err.println("✗ User-Check Fehler für ID '" + id + "': " + e.getMessage());
-                    return false;
+                    return null;
                 });
     }
 
@@ -429,5 +452,18 @@ public class GameController extends Application {
 
     public Set<Spieler> getSpielerliste() {
         return alleSpieler;
+    }
+    
+    /**
+     * Helper class to hold user data from API
+     */
+    private static class UserData {
+        final String id;
+        final String nickname;
+        
+        UserData(String id, String nickname) {
+            this.id = id;
+            this.nickname = nickname;
+        }
     }
 }
