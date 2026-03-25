@@ -37,7 +37,7 @@
                                 <Image url="@../resources/images/IAE_Logo_S.png" />
                             </image>
                         </ImageView>
-                        <Label id="lblBildenZukunft" text="#IAE_Future_Skills" />
+                        <Label id="lblBildenZukunft" text="IAE" />
                     </children>
                 </HBox>
 
