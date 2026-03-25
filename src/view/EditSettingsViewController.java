@@ -41,14 +41,10 @@ public class EditSettingsViewController implements Initializable {
     
     private Preferences prefs;
 
-    /**
-     * Open file chooser for question file selection
-     */
     @FXML
     public void openFileChooser(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         
-        // Set initial directory
         File initialFile = new File("resources/fragenBuzzerGame.csv");
         if (initialFile.getParentFile() != null && initialFile.getParentFile().exists()) {
             fileChooser.setInitialDirectory(initialFile.getParentFile());
@@ -56,7 +52,9 @@ public class EditSettingsViewController implements Initializable {
         
         fileChooser.setTitle("Frage-Datei auswählen");
         fileChooser.getExtensionFilters().addAll(
-            new ExtensionFilter("CSV-Dateien", "*.csv"),
+            // FIX: added "*.CSV" (uppercase) so files like fragenBuzzerGameNeu.CSV
+            // are visible in the dialog on case-sensitive file systems (Linux/Pi).
+            new ExtensionFilter("CSV-Dateien", "*.csv", "*.CSV"),
             new ExtensionFilter("Alle Dateien", "*.*")
         );
         
@@ -68,34 +66,28 @@ public class EditSettingsViewController implements Initializable {
         }
     }
 
-    /**
-     * Load settings from preferences
-     */
     public void setPreferences(Preferences prefs) {
         this.prefs = prefs;
         
         if (prefs == null) return;
         
-        // Load question file path
         if (txtQuestionFile != null) {
             txtQuestionFile.setText(
                 prefs.get("questions_file", "resources/fragenBuzzerGame.csv")
             );
         }
         
-        // Load number of questions
         if (comboAnzahlFragen != null) {
             String anzahl = prefs.get("anzahl_fragen", "5");
             comboAnzahlFragen.getSelectionModel().select(anzahl);
         }
         
-        // Load time per question
+        // Default selection is now "30" to match the new default question time
         if (comboZeitFrage != null) {
-            String zeit = prefs.get("time_out", "10");
+            String zeit = prefs.get("time_out", "30");
             comboZeitFrage.getSelectionModel().select(zeit);
         }
         
-        // Load shuffle setting
         boolean isRandom = prefs.getBoolean("shuffle_questions", true);
         if (toggleRandomQuestionTrue != null && toggleRandomQuestionFalse != null) {
             if (isRandom) {
@@ -106,25 +98,17 @@ public class EditSettingsViewController implements Initializable {
         }
     }
     
-    /**
-     * Bind buzzer buttons to state properties for hardware testing
-     */
     public void setBuzzers(IBuzzer buzzer1, IBuzzer buzzer2, IBuzzer buzzer3) {
-        // Buzzer 1
         if (buzzer1 != null) {
             if (gpio1A != null) gpio1A.selectedProperty().bind(buzzer1.btnAState);
             if (gpio1B != null) gpio1B.selectedProperty().bind(buzzer1.btnBState);
             if (gpio1C != null) gpio1C.selectedProperty().bind(buzzer1.btnCState);
         }
-        
-        // Buzzer 2
         if (buzzer2 != null) {
             if (gpio2A != null) gpio2A.selectedProperty().bind(buzzer2.btnAState);
             if (gpio2B != null) gpio2B.selectedProperty().bind(buzzer2.btnBState);
             if (gpio2C != null) gpio2C.selectedProperty().bind(buzzer2.btnCState);
         }
-        
-        // Buzzer 3
         if (buzzer3 != null) {
             if (gpio3A != null) gpio3A.selectedProperty().bind(buzzer3.btnAState);
             if (gpio3B != null) gpio3B.selectedProperty().bind(buzzer3.btnBState);
@@ -134,8 +118,9 @@ public class EditSettingsViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Populate combo boxes with options
-        String[] values = new String[]{"1", "3", "5", "7", "10", "13", "15", "20", "42"};
+        // FIX: added "30" to both combo boxes so 30 seconds is a selectable option.
+        // The list is kept in ascending order for clarity.
+        String[] values = new String[]{"1", "3", "5", "7", "10", "13", "15", "20", "30", "42"};
         
         if (comboZeitFrage != null) {
             comboZeitFrage.getItems().addAll(values);
@@ -146,9 +131,6 @@ public class EditSettingsViewController implements Initializable {
         }
     }
     
-    /**
-     * Save settings and close window
-     */
     @FXML 
     public void save() {
         if (prefs == null) {
@@ -156,52 +138,39 @@ public class EditSettingsViewController implements Initializable {
             return;
         }
         
-        // Save question file
         if (txtQuestionFile != null && txtQuestionFile.getText() != null) {
             prefs.put("questions_file", txtQuestionFile.getText());
         }
         
-        // Save number of questions
         if (comboAnzahlFragen != null && 
             comboAnzahlFragen.getSelectionModel().getSelectedItem() != null) {
             prefs.put("anzahl_fragen", 
                      comboAnzahlFragen.getSelectionModel().getSelectedItem());
         }
         
-        // Save time per question
         if (comboZeitFrage != null && 
             comboZeitFrage.getSelectionModel().getSelectedItem() != null) {
             prefs.put("time_out", 
                      comboZeitFrage.getSelectionModel().getSelectedItem());
         }
         
-        // Save shuffle setting
         if (toggleRandomQuestionTrue != null) {
             prefs.putBoolean("shuffle_questions", toggleRandomQuestionTrue.isSelected());
         }
         
-        System.out.println("Settings saved successfully");
+        System.out.println("Settings saved");
         closeWindow();
     }
     
-    /**
-     * Cancel without saving
-     */
     @FXML 
     public void cancel() {
-        System.out.println("Settings cancelled - not saving");
         closeWindow();
     }
     
-    /**
-     * Close the settings window
-     */
     private void closeWindow() {
         if (txtQuestionFile != null && txtQuestionFile.getScene() != null) {
             Stage stage = (Stage) txtQuestionFile.getScene().getWindow();
-            if (stage != null) {
-                stage.close();
-            }
+            if (stage != null) stage.close();
         }
     }
 }
