@@ -48,7 +48,7 @@ public class GameController extends Application {
     private Set<Spieler> alleSpieler = new HashSet<>();
     private IBuzzer buzzer1, buzzer2, buzzer3;
 
-    private int MAX_ZEIT = 20;
+    private int MAX_ZEIT = 30;   // changed default: 30 s
     private int MAX_FRAGEN = 5;
     private Frage aktuelleFrage;
     private boolean shuffleQuestions = true;
@@ -62,7 +62,6 @@ public class GameController extends Application {
     private ChangeListener<Number> showAnswerSceneListener;
     private ChangeListener<Number> showNextQuestionListener;
 
-    // BUG FIX: reuse one HttpClient instead of creating a new one per request
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public static void main(String[] args) {
@@ -71,11 +70,11 @@ public class GameController extends Application {
 
     private void readPreferences() {
         prefs = Preferences.userRoot().node(this.getClass().getName());
-        MAX_FRAGEN      = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
-        MAX_ZEIT        = Integer.parseInt(prefs.get("time_out", "20"));
+        MAX_FRAGEN       = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
+        MAX_ZEIT         = Integer.parseInt(prefs.get("time_out", "30"));  // default now 30 s
         shuffleQuestions = prefs.getBoolean("shuffle_questions", true);
-        fullScreen      = prefs.getBoolean("full_screen", true);
-        questionFile    = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
+        fullScreen       = prefs.getBoolean("full_screen", true);
+        questionFile     = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
     }
 
     private void initListeners() {
@@ -126,7 +125,7 @@ public class GameController extends Application {
 
     private void preloadViews() {
         try {
-            System.out.println("⏳ Preloading views for smooth transitions...");
+            System.out.println("⏳ Preloading views...");
 
             FXMLLoader l1 = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
             startupView = l1.load();
@@ -152,7 +151,7 @@ public class GameController extends Application {
             endController = l5.getController();
             endController.setMainController(this);
 
-            System.out.println("✓ All views preloaded successfully!");
+            System.out.println("✓ All views preloaded!");
         } catch (Exception e) {
             System.err.println("Error preloading views: " + e.getMessage());
             e.printStackTrace();
@@ -219,92 +218,100 @@ public class GameController extends Application {
             Platform.runLater(() -> {
                 TextInputDialog dialog = new TextInputDialog();
                 dialog.setTitle("Anmeldung – Spieler " + playerNum);
-                dialog.setHeaderText("Benutzername oder ID");
-                dialog.setContentText("Dein Username / ID:");
+                dialog.setHeaderText("Spieler-ID eingeben");
+                dialog.setContentText("Deine ID:");
                 dialog.initModality(Modality.APPLICATION_MODAL);
 
                 Optional<String> result = dialog.showAndWait();
 
                 if (!result.isPresent() || result.get().trim().isEmpty()) {
-                    isProcessing[0] = false; // allow retry
+                    isProcessing[0] = false;
                     return;
                 }
 
                 String id = result.get().trim();
 
-                // BUG FIX: the original code called thenAccept() for the API check
-                // but then immediately continued executing the lines below it —
-                // thenAccept() only schedules a callback, it does NOT block.
-                // This meant the player was always registered BEFORE the HTTP reply
-                // arrived, so the API check had zero effect on registration.
-                //
-                // Fix: move ALL registration logic (duplicate check, new Spieler,
-                // setReady, removeListener) INSIDE thenAccept so it only runs after
-                // we have a confirmed answer from the server.
-                checkUserExistsAsync(id).thenAccept(exists -> Platform.runLater(() -> {
+                // Fetch the player's actual nickname from the API.
+                // All registration logic runs inside thenAccept so it only
+                // executes after we have the server response.
+                fetchNicknameAsync(id).thenAccept(nicknameOpt -> Platform.runLater(() -> {
                     try {
-                        if (!exists) {
+                        if (!nicknameOpt.isPresent()) {
                             new Alert(Alert.AlertType.ERROR,
-                                "Benutzer '" + id + "' nicht in der Datenbank gefunden!\n" +
+                                "ID '" + id + "' nicht in der Datenbank gefunden!\n" +
                                 "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
-                            return; // don't register — isProcessing reset in finally
+                            return;
                         }
 
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(id))) {
+                        String nickname = nicknameOpt.get();
+
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(nickname))) {
                             new Alert(Alert.AlertType.WARNING,
-                                "Benutzer '" + id + "' ist bereits angemeldet!\n" +
-                                "Bitte einen anderen Benutzer wählen.", ButtonType.OK).showAndWait();
-                            return; // don't register
+                                "'" + nickname + "' ist bereits angemeldet!\n" +
+                                "Bitte eine andere ID wählen.", ButtonType.OK).showAndWait();
+                            return;
                         }
 
-                        // Only reaches here if: API says exists AND not a duplicate
-                        Spieler s = new Spieler(id, buzzer);
+                        // Register with the real nickname, not the raw ID
+                        Spieler s = new Spieler(nickname, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
-                        lobby.setReady(playerNum, id);
-                        System.out.println("✓ " + id + " erfolgreich angemeldet (Spieler " + playerNum + ")");
+                        lobby.setReady(playerNum, nickname);
+                        System.out.println("✓ " + nickname + " (ID " + id + ") angemeldet als Spieler " + playerNum);
 
                     } finally {
                         isProcessing[0] = false;
                     }
                 }));
-                // NOTE: isProcessing stays true while the HTTP call is in flight,
-                // preventing a second buzzer press from opening a second dialog.
             });
         };
         return holder[0];
     }
 
-    private CompletableFuture<Boolean> checkUserExistsAsync(String id) {
+    /**
+     * Calls the API with the given ID and returns the player's nickname.
+     * Returns Optional.empty() if the ID is not found or the request fails.
+     *
+     * The API returns a paginated JSON object like:
+     *   {"count":1,"results":[{"id":1,"nickname":"PRODUCTIVE_GECKO",...}]}
+     * We extract the first "nickname" value from the response body.
+     */
+    private CompletableFuture<Optional<String>> fetchNicknameAsync(String id) {
         String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
 
-        // BUG FIX: reuse the shared httpClient instead of new HttpClient() per call
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    boolean exists = response.statusCode() == 200;
-                    System.out.println((exists ? "✓" : "✗") +
-                        " User check for ID '" + id + "': " +
-                        (exists ? "FOUND" : "NOT FOUND (Status: " + response.statusCode() + ")"));
-                    return exists;
+                    if (response.statusCode() != 200) {
+                        System.out.println("✗ ID '" + id + "': NOT FOUND (Status: "
+                                + response.statusCode() + ")");
+                        return Optional.<String>empty();
+                    }
+
+                    // Parse "nickname":"VALUE" from the JSON response body
+                    // without requiring an external JSON library.
+                    java.util.regex.Matcher m = java.util.regex.Pattern
+                            .compile("\"nickname\"\\s*:\\s*\"([^\"]+)\"")
+                            .matcher(response.body());
+
+                    if (m.find()) {
+                        String nickname = m.group(1);
+                        System.out.println("✓ ID '" + id + "' → nickname: " + nickname);
+                        return Optional.of(nickname);
+                    }
+
+                    System.out.println("✗ ID '" + id + "': response OK but no nickname in body");
+                    return Optional.<String>empty();
                 })
                 .exceptionally(e -> {
-                    System.err.println("✗ User-Check Fehler für ID '" + id + "': " + e.getMessage());
-                    return false;
+                    System.err.println("✗ API-Fehler für ID '" + id + "': " + e.getMessage());
+                    return Optional.empty();
                 });
     }
 
-    // BUG FIX: original sendFinalScoresToApi() used client.send() — a BLOCKING call —
-    // on the JavaFX Application Thread inside showEndScene().  With 3 players and a
-    // slow or unreachable server, this froze the UI for up to 3 × network-timeout
-    // seconds (often 30 s each = 90 s of a completely frozen screen).
-    //
-    // Fix: fire all three POSTs concurrently with sendAsync() and let them complete
-    // in the background.  Also fixed the JSON: teilnehmer must be a quoted string,
-    // not a bare identifier (original had "teilnehmer":%s without quotes around %s).
     private void sendFinalScoresToApiAsync() {
         System.out.println("=== Sending Final Scores to API (async) ===");
         String url = "http://192.168.100.141:8080/scores/";
@@ -315,9 +322,6 @@ public class GameController extends Application {
             String name  = spieler.getName();
             int    score = spieler.getPunktestand().get();
 
-            // BUG FIX: original JSON was "teilnehmer":%s — missing quotes around the
-            // string value, producing invalid JSON like "teilnehmer":Max instead of
-            // "teilnehmer":"Max". Fixed to use %s with surrounding quotes.
             String json = String.format(
                 "{\"teilnehmer\":\"%s\",\"score\":%d,\"game_type\":\"quiz\"}",
                 name, score);
@@ -336,9 +340,9 @@ public class GameController extends Application {
                         if (response.statusCode() == 200 || response.statusCode() == 201) {
                             System.out.println("    ✓ Score saved for " + name);
                         } else {
-                            System.err.println("    ✗ Failed for " + name +
-                                " – Status: " + response.statusCode() +
-                                " – " + response.body());
+                            System.err.println("    ✗ Failed for " + name
+                                + " – Status: " + response.statusCode()
+                                + " – " + response.body());
                         }
                     })
                     .exceptionally(e -> {
@@ -385,7 +389,7 @@ public class GameController extends Application {
     }
 
     public void showEndScene() {
-        sendFinalScoresToApiAsync(); // non-blocking — UI switches immediately
+        sendFinalScoresToApiAsync();
         endController.setSpielerInformation(alleSpieler);
         switchToView(endView);
     }
