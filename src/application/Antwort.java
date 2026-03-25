@@ -2,11 +2,6 @@ package application;
 
 import java.io.Serializable;
 
-/**
- * Erfasst eine Antwort
- * @author jacmo
- *
- */
 public class Antwort implements Serializable{
 
 	private String antwort;
