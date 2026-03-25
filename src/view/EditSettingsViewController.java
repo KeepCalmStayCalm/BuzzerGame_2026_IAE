@@ -120,7 +120,7 @@ public class EditSettingsViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // FIX: added "30" to both combo boxes so 30 seconds is a selectable option.
         // The list is kept in ascending order for clarity.
-        String[] values = new String[]{"1", "3", "5", "10", "15", "20", "25", "30", "40", "50", "60"};
+        String[] values = new String[]{"1", "3", "5", "10", "15", "20", "25", "30", "40", "50", "60", "120"};
         
         if (comboZeitFrage != null) {
             comboZeitFrage.getItems().addAll(values);
