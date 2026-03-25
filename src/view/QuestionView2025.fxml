@@ -30,7 +30,7 @@
                             <Image url="@../resources/images/IAE_Logo_S.png" />
                         </image>
                     </ImageView>
-                    <Label text="#IAE_Future_Skills" style="-fx-text-fill: #8b949e; -fx-font-size: 22pt;" />
+                    <Label text="IAE" style="-fx-text-fill: #8b949e; -fx-font-size: 22pt;" />
                     
                     <ImageView fx:id="image" fitHeight="1.0" fitWidth="1.0" opacity="0.0" />
                 </children>
