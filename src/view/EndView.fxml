@@ -38,7 +38,7 @@
                 <Label
                     id="lblTitle2"
                     alignment="CENTER"
-                    text="Herzlichen Glückwunsch! 🏆"
+                    text="Herzlichen Glückwunsch!"
                     AnchorPane.leftAnchor="80.0"
                     AnchorPane.rightAnchor="80.0"
                     AnchorPane.topAnchor="120.0" />
@@ -54,7 +54,7 @@
                 <VBox alignment="BOTTOM_CENTER" prefWidth="360.0" spacing="0.0">
                     <children>
                         <Label
-                            text="🥈  Platz 2"
+                            text="Platz 2"
                             alignment="CENTER"
                             style="-fx-text-fill: #b8b8b8; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
@@ -85,7 +85,7 @@
                 <VBox alignment="BOTTOM_CENTER" prefWidth="360.0" spacing="0.0">
                     <children>
                         <Label
-                            text="🥇  Platz 1"
+                            text="Platz 1"
                             alignment="CENTER"
                             style="-fx-text-fill: #f7d058; -fx-font-size: 24pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
@@ -116,7 +116,7 @@
                 <VBox alignment="BOTTOM_CENTER" prefWidth="360.0" spacing="0.0">
                     <children>
                         <Label
-                            text="🥉  Platz 3"
+                            text="Platz 3"
                             alignment="CENTER"
                             style="-fx-text-fill: #b87333; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 6 0;"
                             maxWidth="1.7976931348623157E308" />
