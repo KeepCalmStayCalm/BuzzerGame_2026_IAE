@@ -1,4 +1,3 @@
-﻿Frage;Option A;Option B;Option C;Antwort
 "x = 5; x = x + 10. Welchen Wert hat x am Ende?";15;10;5;1
 Wie nennt man eine Schritt-für-Schritt-Anleitung zur Lösung eines Problems in der Informatik?;Algorithmus;Rhythmus;Logarithmus;1
 Ein Programm stürzt ab, weil Text in ein Zahlenfeld eingegeben wurde. Das ist ein...;Hardware-Schaden;Windows-Update;Bug (Programmierfehler);3
