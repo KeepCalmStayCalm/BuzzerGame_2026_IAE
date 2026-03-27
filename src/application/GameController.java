@@ -28,13 +28,6 @@ public class GameController extends Application {
 
     public static final boolean IS_DEV_MODE = false;
 
-    /** Holds both the numeric API pk and the display nickname. */
-    private static class PlayerInfo {
-        final int    id;
-        final String nickname;
-        PlayerInfo(int id, String nickname) { this.id = id; this.nickname = nickname; }
-    }
-
     private Stage myStage;
     private Scene mainScene;
 
@@ -55,7 +48,7 @@ public class GameController extends Application {
     private Set<Spieler> alleSpieler = new HashSet<>();
     private IBuzzer buzzer1, buzzer2, buzzer3;
 
-    private int MAX_ZEIT = 30;
+    private int MAX_ZEIT = 30;   // changed default: 30 s
     private int MAX_FRAGEN = 5;
     private Frage aktuelleFrage;
     private boolean shuffleQuestions = true;
@@ -71,12 +64,14 @@ public class GameController extends Application {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public static void main(String[] args) { launch(args); }
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     private void readPreferences() {
         prefs = Preferences.userRoot().node(this.getClass().getName());
         MAX_FRAGEN       = Integer.parseInt(prefs.get("anzahl_fragen", "5"));
-        MAX_ZEIT         = Integer.parseInt(prefs.get("time_out", "30"));
+        MAX_ZEIT         = Integer.parseInt(prefs.get("time_out", "30"));  // default now 30 s
         shuffleQuestions = prefs.getBoolean("shuffle_questions", true);
         fullScreen       = prefs.getBoolean("full_screen", true);
         questionFile     = prefs.get("questions_file", "resources/fragenBuzzerGame.csv");
@@ -98,7 +93,9 @@ public class GameController extends Application {
     }
 
     @Override
-    public void stop() { if (pi4j != null) pi4j.shutdown(); }
+    public void stop() {
+        if (pi4j != null) pi4j.shutdown();
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -107,12 +104,6 @@ public class GameController extends Application {
 
         style = getClass().getResource("buzzerStyle2025.css").toExternalForm();
         eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
-
-        // FIX: warn the user immediately at startup if the CSV could not be loaded,
-        // rather than silently continuing with 0 questions and crashing on game start.
-        if (eingeleseneFragen.isEmpty()) {
-            System.err.println("WARNING: No questions loaded from: " + questionFile);
-        }
 
         myStage = primaryStage;
         myStage.setTitle("IAE Buzzer Quiz");
@@ -134,7 +125,7 @@ public class GameController extends Application {
 
     private void preloadViews() {
         try {
-            System.out.println("Preloading views...");
+            System.out.println("⏳ Preloading views...");
 
             FXMLLoader l1 = new FXMLLoader(getClass().getResource("/view/StartupView.fxml"));
             startupView = l1.load();
@@ -160,21 +151,20 @@ public class GameController extends Application {
             endController = l5.getController();
             endController.setMainController(this);
 
-            System.out.println("All views preloaded.");
+            System.out.println("✓ All views preloaded!");
         } catch (Exception e) {
             System.err.println("Error preloading views: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private void switchToView(Parent view) { mainScene.setRoot(view); }
+    private void switchToView(Parent view) {
+        mainScene.setRoot(view);
+    }
 
     public void showStartupView() { switchToView(startupView); }
 
     public void showLobbyView() {
-        // Re-read the question file every time the lobby is entered so that
-        // a CSV change in settings takes effect without restarting the app.
-        eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
         alleSpieler.clear();
 
         if (!IS_DEV_MODE) {
@@ -191,8 +181,8 @@ public class GameController extends Application {
 
         lobbyController.resetReadyStates();
 
-        List<IBuzzer> buzzers   = List.of(buzzer1, buzzer2, buzzer3);
-        String[] defaultNames   = {"Spieler 1", "Spieler 2", "Spieler 3"};
+        List<IBuzzer> buzzers = List.of(buzzer1, buzzer2, buzzer3);
+        String[] defaultNames = {"Spieler 1", "Spieler 2", "Spieler 3"};
 
         for (int i = 0; i < 3; i++) {
             final IBuzzer b        = buzzers.get(i);
@@ -210,10 +200,8 @@ public class GameController extends Application {
         }
 
         if (shuffleQuestions) Collections.shuffle(eingeleseneFragen);
-
-        int available = eingeleseneFragen.size();
         spielrunde = new Spielrunde(
-            eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, available)));
+            eingeleseneFragen.subList(0, Math.min(MAX_FRAGEN, eingeleseneFragen.size())));
 
         switchToView(lobbyView);
     }
@@ -229,7 +217,7 @@ public class GameController extends Application {
 
             Platform.runLater(() -> {
                 TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Anmeldung - Spieler " + playerNum);
+                dialog.setTitle("Anmeldung – Spieler " + playerNum);
                 dialog.setHeaderText("Spieler-ID eingeben");
                 dialog.setContentText("Deine ID:");
                 dialog.initModality(Modality.APPLICATION_MODAL);
@@ -241,33 +229,35 @@ public class GameController extends Application {
                     return;
                 }
 
-                String inputId = result.get().trim();
+                String id = result.get().trim();
 
-                fetchPlayerInfoAsync(inputId).thenAccept(infoOpt -> Platform.runLater(() -> {
+                // Fetch the player's actual nickname from the API.
+                // All registration logic runs inside thenAccept so it only
+                // executes after we have the server response.
+                fetchNicknameAsync(id).thenAccept(nicknameOpt -> Platform.runLater(() -> {
                     try {
-                        if (!infoOpt.isPresent()) {
+                        if (!nicknameOpt.isPresent()) {
                             new Alert(Alert.AlertType.ERROR,
-                                "ID '" + inputId + "' nicht in der Datenbank gefunden!\n" +
+                                "ID '" + id + "' nicht in der Datenbank gefunden!\n" +
                                 "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
                             return;
                         }
 
-                        PlayerInfo info = infoOpt.get();
+                        String nickname = nicknameOpt.get();
 
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(info.nickname))) {
+                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(nickname))) {
                             new Alert(Alert.AlertType.WARNING,
-                                "'" + info.nickname + "' ist bereits angemeldet!\n" +
-                                "Bitte eine andere ID waehlen.", ButtonType.OK).showAndWait();
+                                "'" + nickname + "' ist bereits angemeldet!\n" +
+                                "Bitte eine andere ID wählen.", ButtonType.OK).showAndWait();
                             return;
                         }
 
-                        Spieler s = new Spieler(info.nickname, buzzer);
-                        s.setApiId(info.id);
+                        // Register with the real nickname, not the raw ID
+                        Spieler s = new Spieler(nickname, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
-                        lobby.setReady(playerNum, info.nickname);
-                        System.out.println("Registered: " + info.nickname
-                            + " (pk=" + info.id + ") as player " + playerNum);
+                        lobby.setReady(playerNum, nickname);
+                        System.out.println("✓ " + nickname + " (ID " + id + ") angemeldet als Spieler " + playerNum);
 
                     } finally {
                         isProcessing[0] = false;
@@ -279,74 +269,64 @@ public class GameController extends Application {
     }
 
     /**
-     * Fetches both the numeric pk and the nickname from the first result.
+     * Calls the API with the given ID and returns the player's nickname.
      * Returns Optional.empty() if the ID is not found or the request fails.
+     *
+     * The API returns a paginated JSON object like:
+     *   {"count":1,"results":[{"id":1,"nickname":"PRODUCTIVE_GECKO",...}]}
+     * We extract the first "nickname" value from the response body.
      */
-    private CompletableFuture<Optional<PlayerInfo>> fetchPlayerInfoAsync(String searchId) {
-        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + searchId;
+    private CompletableFuture<Optional<String>> fetchNicknameAsync(String id) {
+        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url)).GET().build();
+                .uri(URI.create(url))
+                .GET()
+                .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
-                        System.out.println("ID '" + searchId + "': HTTP " + response.statusCode());
-                        return Optional.<PlayerInfo>empty();
-                    }
-                    String body = response.body();
-
-                    java.util.regex.Matcher countM = java.util.regex.Pattern
-                            .compile("\"count\"\\s*:\\s*(\\d+)").matcher(body);
-                    if (countM.find() && Integer.parseInt(countM.group(1)) == 0) {
-                        System.out.println("ID '" + searchId + "': not found (count=0)");
-                        return Optional.<PlayerInfo>empty();
+                        System.out.println("✗ ID '" + id + "': NOT FOUND (Status: "
+                                + response.statusCode() + ")");
+                        return Optional.<String>empty();
                     }
 
-                    java.util.regex.Matcher idM = java.util.regex.Pattern
-                            .compile("\"id\"\\s*:\\s*(\\d+)").matcher(body);
-                    java.util.regex.Matcher nickM = java.util.regex.Pattern
-                            .compile("\"nickname\"\\s*:\\s*\"([^\"]+)\"").matcher(body);
+                    // Parse "nickname":"VALUE" from the JSON response body
+                    // without requiring an external JSON library.
+                    java.util.regex.Matcher m = java.util.regex.Pattern
+                            .compile("\"nickname\"\\s*:\\s*\"([^\"]+)\"")
+                            .matcher(response.body());
 
-                    if (idM.find() && nickM.find()) {
-                        int    apiId    = Integer.parseInt(idM.group(1));
-                        String nickname = nickM.group(1);
-                        System.out.println("ID '" + searchId + "' -> " + nickname + " (pk=" + apiId + ")");
-                        return Optional.of(new PlayerInfo(apiId, nickname));
+                    if (m.find()) {
+                        String nickname = m.group(1);
+                        System.out.println("✓ ID '" + id + "' → nickname: " + nickname);
+                        return Optional.of(nickname);
                     }
 
-                    System.out.println("ID '" + searchId + "': response OK but no id/nickname found");
-                    return Optional.<PlayerInfo>empty();
+                    System.out.println("✗ ID '" + id + "': response OK but no nickname in body");
+                    return Optional.<String>empty();
                 })
                 .exceptionally(e -> {
-                    System.err.println("API error for ID '" + searchId + "': " + e.getMessage());
+                    System.err.println("✗ API-Fehler für ID '" + id + "': " + e.getMessage());
                     return Optional.empty();
                 });
     }
 
-    /**
-     * Posts final scores using the numeric player pk.
-     * "teilnehmer" is the integer pk, not the nickname string.
-     */
     private void sendFinalScoresToApiAsync() {
-        System.out.println("=== Sending final scores to API ===");
+        System.out.println("=== Sending Final Scores to API (async) ===");
         String url = "http://192.168.100.141:8080/scores/";
+
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (Spieler spieler : alleSpieler) {
             String name  = spieler.getName();
             int    score = spieler.getPunktestand().get();
-            int    apiId = spieler.getApiId();
-
-            if (apiId < 0) {
-                System.out.println("Skipping " + name + " (no API id - dev mode)");
-                continue;
-            }
 
             String json = String.format(
-                "{\"teilnehmer\":%d,\"score\":%d,\"game_type\":\"quiz\"}",
-                apiId, score);
+                "{\"teilnehmer\":\"%s\",\"score\":%d,\"game_type\":\"quiz\"}",
+                name, score);
 
-            System.out.println("Queuing score for " + name + " (pk=" + apiId + "): " + score);
+            System.out.println("  → Queuing score for " + name + ": " + score);
 
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -358,15 +338,15 @@ public class GameController extends Application {
                 httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenAccept(response -> {
                         if (response.statusCode() == 200 || response.statusCode() == 201) {
-                            System.out.println("Score saved for " + name);
+                            System.out.println("    ✓ Score saved for " + name);
                         } else {
-                            System.err.println("Failed for " + name
-                                + " - Status: " + response.statusCode()
-                                + " - " + response.body());
+                            System.err.println("    ✗ Failed for " + name
+                                + " – Status: " + response.statusCode()
+                                + " – " + response.body());
                         }
                     })
                     .exceptionally(e -> {
-                        System.err.println("Error for " + name + ": " + e.getMessage());
+                        System.err.println("    ✗ Error for " + name + ": " + e.getMessage());
                         return null;
                     })
             );
@@ -377,26 +357,13 @@ public class GameController extends Application {
     }
 
     public void lobbyNotifyDone() {
-        if (alleSpieler.size() < 2) {
-            new Alert(Alert.AlertType.WARNING,
-                "Mindestens zwei Spieler benoetigt!", ButtonType.OK).showAndWait();
-            return;
+        if (alleSpieler.size() >= 2) {
+            rundenCounter = 0;
+            aktuelleFrage = spielrunde.naechsteFrage();
+            showQuestionView(aktuelleFrage);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "Mindestens zwei Spieler benötigt!", ButtonType.OK).showAndWait();
         }
-
-        // FIX: show a clear error if no questions were loaded (bad or missing CSV)
-        // instead of crashing with IndexOutOfBoundsException inside Spielrunde.
-        if (eingeleseneFragen.isEmpty()) {
-            new Alert(Alert.AlertType.ERROR,
-                "Keine Fragen geladen!\n\n" +
-                "Bitte pruefen Sie die Einstellungen und stellen Sie sicher,\n" +
-                "dass eine gueltige CSV-Datei ausgewaehlt ist.",
-                ButtonType.OK).showAndWait();
-            return;
-        }
-
-        rundenCounter = 0;
-        aktuelleFrage = spielrunde.naechsteFrage();
-        showQuestionView(aktuelleFrage);
     }
 
     public void showQuestionView(Frage question) {
@@ -429,8 +396,7 @@ public class GameController extends Application {
 
     public void editSettings() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/view/EditSettingsView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/EditSettingsView.fxml"));
             Scene scene = new Scene(loader.load());
             EditSettingsViewController controller = loader.getController();
             controller.setPreferences(prefs);
@@ -449,8 +415,7 @@ public class GameController extends Application {
 
     public void createBuzzerView(String playername, double x, double y) {
         try {
-            FXMLLoader root = new FXMLLoader(
-                getClass().getResource("/view/FXBuzzer.fxml"));
+            FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
             Parent parent = root.load();
             FXBuzzerController controller = root.getController();
             Spieler s = new Spieler(playername, controller);
@@ -466,5 +431,7 @@ public class GameController extends Application {
         }
     }
 
-    public Set<Spieler> getSpielerliste() { return alleSpieler; }
+    public Set<Spieler> getSpielerliste() {
+        return alleSpieler;
+    }
 }
