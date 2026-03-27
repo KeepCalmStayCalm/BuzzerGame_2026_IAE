@@ -408,6 +408,10 @@ public class GameController extends Application {
             stage.initOwner(myStage);
             stage.showAndWait();
             readPreferences();
+            // FIX: reload questions from the (possibly changed) questionFile.
+            // Previously only done once at startup, so changing the CSV in
+            // settings had no effect until the whole app was restarted.
+            eingeleseneFragen = EinAuslesenFragen.einlesenFragen(questionFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
