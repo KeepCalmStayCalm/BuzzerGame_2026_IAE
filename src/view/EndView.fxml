@@ -134,7 +134,7 @@
                             text="–"
                             wrapText="true"
                             maxWidth="1.7976931348623157E308"
-                            style="-fx-text-fill: #c9d1d9; -fx-font-size: 20pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+                            style="-fx-text-fill: #c9d1d9; -fx-font-size: 22pt; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
                         
                         <AnchorPane
                             fx:id="rectPlatz3"
