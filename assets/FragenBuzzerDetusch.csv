@@ -1,0 +1,78 @@
+"x = 5; x = x + 10. Welchen Wert hat x am Ende?";15;10;5;1
+Wie nennt man eine Schritt-für-Schritt-Anleitung zur Lösung eines Problems in der Informatik?;Algorithmus;Rhythmus;Logarithmus;1
+Ein Programm stürzt ab, weil Text in ein Zahlenfeld eingegeben wurde. Das ist ein...;Hardware-Schaden;Windows-Update;Bug (Programmierfehler);3
+Welches Werkzeug nutzt man im Code, um einen Befehl 50-mal zu wiederholen?;Reset-Knopf;Loop (Schleife);Neue Maus;2
+Warum trennt man HTML (Inhalt) und CSS (Design)?;Damit CSS im Dunkeln funktioniert;Damit das Internet schneller wird;Um das Design zentral zu ändern;3
+Wo werden in einer App tausende Benutzerkonten sicher gespeichert?;In einer Excel-Datei;In einer Datenbank;Direkt im Monitor;2
+Was passiert meistens, wenn man im Code eine Klammer oder ein Semikolon vergisst?;Schriftfarbe ändert sich;Computer wird langsamer;Programm startet nicht (Syntaxfehler);3
+Deine Wetter-App zeigt Live-Daten. Woher kommen diese technisch?;Der Computer schätzt;Durch ein Foto vom Himmel;Über eine API-Schnittstelle;3
+Was ist 'SQL'?;Ein neues Betriebssystem;Eine Sprache für Datenbanken;Ein Grafikprogramm;2
+Was bedeutet 'Frontend' in der Webentwicklung?;Das Stromkabel des Servers;Der Teil, der die Daten speichert;Der sichtbare Teil für den Nutzer;3
+Was ist ein 'Array'?;Ein Virus-Schutzschild;Ein spezieller Computertisch;Eine Liste von Elementen im Code;3
+Welcher Datentyp speichert Text wie 'Hallo Welt'?;Integer;String;Boolean;2
+Was macht ein 'Compiler'?;Übersetzt Code in Maschinensprache;Löscht alte Dateien;Druckt Dokumente aus;1
+Was ist Git?;Ein Programmierkurs für Kinder;Ein Versionsverwaltungssystem;Ein spezieller Bildschirm;2
+Welcher Datentyp kann nur 'wahr' (true) oder 'falsch' (false) sein?;String;Float;Boolean;3
+Was ist JavaScript hauptsächlich?;Programmiersprache für Web-Interaktion;Ein Schreibprogramm;Ein Tool für Excel;1
+Was bedeutet 'Backend'?;Die Rückseite des Monitors;Ein Support-Ticket;Die Logik und Datenverarbeitung im Hintergrund;3
+Was ist 'Clean Code'?;Ein Programm, das den PC reinigt;Code ohne Leerzeichen;Gut lesbarer und wartbarer Programmcode;3
+Was ist eine 'Variable'?;Eine instabile Internetleitung;Ein Platzhalter für Werte im Programm;Ein variabler Computertisch;2
+Was macht die Funktion 'print()' in vielen Sprachen?;Druckt Papier aus dem Drucker;Speichert ein Foto;Gibt Text auf dem Bildschirm aus;3
+Was ist die Hauptaufgabe eines 'Servers'?;Büromaterial bestellen;Dienste und Daten im Netzwerk bereitstellen;Den Monitor beleuchten;2
+Was macht ein 'Router'?;Kühlt den Prozessor;Zerstört alte Festplatten;Leitet Datenpakete zwischen Netzwerken;3
+Was ist eine 'IP-Adresse'?;Die eindeutige Kennung eines Geräts im Netzwerk;Die Postadresse der Firma;Das Passwort des WLANs;1
+Wofür steht 'VPN'?;Very Powerful Node;Video Player Network;Virtual Private Network (sichere Verbindung);3
+Was ist 'Cloud Computing'?;Ein System zur Wettervorhersage;IT-Ressourcen über das Internet nutzen;Ein Computer im Flugzeug;2
+Wofür braucht man eine 'Firewall'?;Um Dateien schneller zu löschen;Schutz vor unbefugten Netzwerkzugriffen;Damit der PC nicht brennt;2
+Was ist 'Virtualisierung'?;Mehrere virtuelle Server auf einer Hardware;Ein VR-Spiel für die Pause;Ein defekter Monitor;1
+Wofür steht 'DNS'?;Data Night Storage;Domain Name System (wandelt Namen in IPs);Digital Network Service;2
+Was ist 'Active Directory' (AD)?;Ein Kalender für Sportler;Ein Verzeichnisdienst zur Benutzerverwaltung;Ein Programm für Online-Werbung;2
+Was ist 'Open Source' Software?;Quellcode ist frei zugänglich und änderbar;Software, die nur nachts funktioniert;Ein geschlossenes Sicherheitssystem;1
+Was bedeutet 'Bandbreite'?;Die Anzahl der Tasten am Keyboard;Die Breite des Server-Schranks;Die maximale Datenübertragungsrate;3
+Was ist ein 'Patch'?;Ein kaputtes Kabel;Ein Software-Update zur Fehlerbehebung;Ein Aufkleber für den Laptop;2
+Was macht ein 'Backup'?;Erstellt eine Sicherheitskopie von Daten;Leert den Papierkorb automatisch;Macht den PC schneller;1
+Was ist 'Linux'?;Ein freies Betriebssystem;Eine neue Programmiersprache;Eine Hardware-Marke;1
+Was ist 'HTTPS'?;Ein Programm für Fotos;Eine verschlüsselte Verbindung zum Webserver;Ein sehr schnelles Internetkabel;2
+Was ist 'DHCP'?;Vergibt automatisch IP-Adressen im Netzwerk;Reinigt den Drucker;Speichert Dokumente in der Cloud;1
+Was ist ein 'Switch'?;Ein tragbares Spielgerät;Schaltet den PC komplett aus;Verbindet Geräte innerhalb eines Netzwerks;3
+Was ist 'SSH'?;Ein Protokoll für sicheren Fernzugriff auf Server;Eine Programmiersprache;Eine sehr schnelle SSD;1
+Was ist ein 'Rechenzentrum' (Data Center)?;Ein Gebäude voller Server und IT-Hardware;Eine Taschenrechner-Fabrik;Ein Büro für Buchhalter;1
+Wofür steht 'LAN'?;Large Apple Network;Long Access Node;Local Area Network (lokales Netzwerk);3
+Was ist die Hauptaufgabe einer Grafikkarte (GPU)?;Sorgt für Internetempfang;Speichert Word-Dokumente;Berechnet Bilder für den Monitor;3
+Warum nutzt man heute M.2 NVMe SSDs?;Sie sind extrem schnell und kompakt;Weil sie keinen Strom brauchen;Weil sie bunter leuchten;1
+Was bedeutet 'Ergonomie' am Arbeitsplatz?;Alle PCs haben die gleiche Farbe;Im Stehen schlafen können;Arbeitsplatz gesund und bequem einrichten;3
+Was ist ein 'Treiber' (Driver)?;Ein Antivirenprogramm;Software zur Kommunikation von Hardware und PC;Ein Mitarbeiter, der Pakete liefert;2
+Was ist die Aufgabe des 'First-Level-Support'?;Erste Anlaufstelle für technische Probleme;Support nur für den Chef;Team, das nur Hardware baut;1
+PC piept beim Start, Bildschirm bleibt schwarz. Was ist das?;Technischer Fehlercode (z.B. RAM);Ein Wecker;Stromsparmodus;1
+Was macht der Prozessor (CPU)?;Speichert alle Urlaubsfotos;Führt Befehle und Berechnungen aus;Kühlt das Zimmer;2
+Was ist 'RAM'?;Arbeitsspeicher für laufende Programme;Ein spezielles Kabel;Ein Speicher für Jahrzehnte;1
+Was ist ein 'Mainboard'?;Die Tastatur des PCs;Die Hauptplatine, die alle Bauteile verbindet;Ein Brett für den Monitor;2
+Was ist 'Phishing'?;Ein Programm zum Fische zählen;Ein neues Hobby für IT-Leute;Betrugsversuch über gefälschte E-Mails;3
+Wofür nutzt man ein 'Ticket-System'?;Zum Sammeln und Bearbeiten von Support-Anfragen;Um Kinokarten zu kaufen;Um Musik zu hören;1
+Was ist ein 'Betriebssystem'?;Die reine Hardware;Ein Computerspiel;Die Grundsoftware (z.B. Windows, macOS);3
+Woran erkennt man eine SSD gegenüber einer HDD?;Sie hat keine beweglichen Teile (leiser/schneller);Sie ist viel schwerer;Sie braucht Benzin;1
+Was ist die Aufgabe eines Netzteils?;Den PC im Internet finden;Strom für alle Komponenten umwandeln;Die CPU kühlen;2
+Was passiert beim 'Formatieren' einer Festplatte?;Die Festplatte wird bunt bemalt;Sie wird schneller drehen;Alle Daten werden gelöscht und Dateisystem neu erstellt;3
+Wofür steht 'USB'?;United Software Base;Universal Serial Bus;Under Second Battery;2
+Was ist ein 'Bit'?;Ein Teil der Maus;Die kleinste Informationseinheit (0 oder 1);Ein kleiner Keks für die Pause;2
+Wieviele Bits ergeben ein 'Byte'?;10;8;100;2
+Warum sollte man den PC 'Herunterfahren'?;Damit er nicht wegrennt;Damit Daten sicher gespeichert und Programme beendet werden;Damit er leichter wird;2
+Was ist '2FA' (Zwei-Faktor-Authentifizierung)?;Zwei Passwörter nacheinander;Zusätzliche Sicherheit durch einen zweiten Code;Zwei Monitore am PC;2
+Was bedeutet 'Responsive Design'?;Die Webseite antwortet auf Fragen;Das Design ist besonders bunt;Webseite passt sich automatisch an Handy/PC an;3
+Wofür steht 'RGB'?;Red Gold Black;Real Great Business;Red, Green, Blue (Farbsystem für Bildschirme);3
+Was ist 'CMYK'?;Ein neues soziale Netzwerk;Farbsystem für den Druck (Cyan, Magenta, Yellow, Key);Ein Videoformat;2
+Was ist ein 'Logo'?;Ein langes Wort;Ein grafisches Erkennungszeichen für Firmen;Ein Logbuch für Schiffe;2
+Was macht man beim 'Storyboarding'?;Code für Webseiten schreiben;Ablauf eines Films in Zeichnungen planen;Ein Buch im Regal ordnen;2
+Was ist 'Urheberrecht'?;Ein Gesetz für alte Gebäude;Schutz von geistigem Eigentum (Bilder, Texte);Das Recht, überall zu parken;2
+Was ist ein 'Pixel'?;Ein Speicherchip;Ein Tier im Wald;Ein einzelner Bildpunkt auf einem Monitor;3
+Wofür nutzt man 'Photoshop'?;Um Musik zu schneiden;Um Briefe zu schreiben;Bildbearbeitung und Fotoretusche;3
+Was ist eine 'Vektorgrafik'?;Grafik, die ohne Qualitätsverlust skalierbar ist;Ein Foto von einer Kamera;Ein Bild mit wenig Farben;1
+Was ist 'Marketing'?;Reparieren von Kameras;Einkaufen im Supermarkt;Maßnahmen zur Vermarktung von Produkten;3
+Was ist 'Typography'?;Ein spezielles Tastaturschreiben;Ein Foto von alten Häusern;Die Gestaltung und Auswahl von Schriftarten;3
+Was bedeutet 'Social Media Management'?;Betreuen und Planen von Inhalten auf Plattformen;Reparieren von Handys;Einstellen von neuen Mitarbeitern;1
+Wofür steht 'PDF'?;Portable Document Format;Public Data File;Personal Design Folder;1
+Was ist ein 'Layout'?;Ein Schlafsack;Ein Passwort;Die Anordnung von Elementen auf einer Fläche;3
+Was ist 'Branding'?;Essen kochen;Aufbau einer Marke mit Identität und Design;Löcher in Metall bohren;2
+Was ist ein 'Podcast'?;Eine Serie von Audiobeiträgen zum Abrufen;Ein kleiner Postkasten;Ein technisches Gerät zum Messen;1
+Was ist 'SEO'?;Suchmaschinenoptimierung (bessere Google-Rankings);Ein neues Videoformat;Ein Chef-Posten;1
+Was ist die 'Auflösung' eines Bildes?;Die Lösung eines Rätsels;Anzahl der Pixel (Schärfe des Bildes);Wie schnell ein Bild lädt;2
