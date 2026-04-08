@@ -190,7 +190,7 @@ public class GameController extends Application {
             final int    playerNum = i + 1;
 
             if (IS_DEV_MODE) {
-                Spieler s = new Spieler(defName, b);
+                Spieler s = new Spieler(0, defName, b);   // dummy ID for dev mode
                 alleSpieler.add(s);
                 lobbyController.setReady(playerNum, defName);
             } else {
@@ -252,8 +252,9 @@ public class GameController extends Application {
                             return;
                         }
 
-                        // Register with the real nickname, not the raw ID
-                        Spieler s = new Spieler(nickname, buzzer);
+                        // === FIXED: store the numeric ID (PK) instead of only the nickname ===
+                        int teilnehmerId = Integer.parseInt(id);
+                        Spieler s = new Spieler(teilnehmerId, nickname, buzzer);
                         alleSpieler.add(s);
                         obs.removeListener(holder[0]);
                         lobby.setReady(playerNum, nickname);
@@ -319,14 +320,14 @@ public class GameController extends Application {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (Spieler spieler : alleSpieler) {
-            String name  = spieler.getName();
-            int    score = spieler.getPunktestand().get();
+            int teilnehmerPk = spieler.getTeilnehmerId();
+            int score = spieler.getPunktestand().get();
 
             String json = String.format(
-                "{\"teilnehmer\":\"%s\",\"score\":%d,\"game_type\":\"quiz\"}",
-                name, score);
+                "{\"teilnehmer\":%d,\"score\":%d,\"game_type\":\"quiz\"}",
+                teilnehmerPk, score);
 
-            System.out.println("  → Queuing score for " + name + ": " + score);
+            System.out.println("  → Queuing score for " + spieler.getName() + " (ID " + teilnehmerPk + "): " + score);
 
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -338,15 +339,15 @@ public class GameController extends Application {
                 httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                     .thenAccept(response -> {
                         if (response.statusCode() == 200 || response.statusCode() == 201) {
-                            System.out.println("    ✓ Score saved for " + name);
+                            System.out.println("    ✓ Score saved for " + spieler.getName());
                         } else {
-                            System.err.println("    ✗ Failed for " + name
+                            System.err.println("    ✗ Failed for " + spieler.getName()
                                 + " – Status: " + response.statusCode()
                                 + " – " + response.body());
                         }
                     })
                     .exceptionally(e -> {
-                        System.err.println("    ✗ Error for " + name + ": " + e.getMessage());
+                        System.err.println("    ✗ Error for " + spieler.getName() + ": " + e.getMessage());
                         return null;
                     })
             );
@@ -422,7 +423,7 @@ public class GameController extends Application {
             FXMLLoader root = new FXMLLoader(getClass().getResource("/view/FXBuzzer.fxml"));
             Parent parent = root.load();
             FXBuzzerController controller = root.getController();
-            Spieler s = new Spieler(playername, controller);
+            Spieler s = new Spieler(0, playername, controller);   // dummy ID for test view
             alleSpieler.add(s);
             Stage stage = new Stage();
             stage.setTitle(playername);
