@@ -11,7 +11,6 @@ module buzzer.app {
     requires com.pi4j.library.pigpio;
     
     // Java standard modules
-    requires java.net.http;
     requires java.prefs;
     
     // SLF4J logging
