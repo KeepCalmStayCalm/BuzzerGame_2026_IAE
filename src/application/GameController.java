@@ -1,12 +1,7 @@
 package application;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -61,8 +56,6 @@ public class GameController extends Application {
 
     private ChangeListener<Number> showAnswerSceneListener;
     private ChangeListener<Number> showNextQuestionListener;
-
-    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public static void main(String[] args) {
         launch(args);
@@ -216,146 +209,51 @@ public class GameController extends Application {
             isProcessing[0] = true;
 
             Platform.runLater(() -> {
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Anmeldung – Spieler " + playerNum);
-                dialog.setHeaderText("Spieler-ID eingeben");
-                dialog.setContentText("Deine ID:");
-                dialog.initModality(Modality.APPLICATION_MODAL);
+                try {
+                    TextInputDialog dialog = new TextInputDialog(defaultName);
+                    dialog.setTitle("Anmeldung – Spieler " + playerNum);
+                    dialog.setHeaderText("Namen eingeben");
+                    dialog.setContentText("Dein Name:");
+                    dialog.initModality(Modality.APPLICATION_MODAL);
 
-                Optional<String> result = dialog.showAndWait();
+                    Optional<String> result = dialog.showAndWait();
 
-                if (!result.isPresent() || result.get().trim().isEmpty()) {
-                    isProcessing[0] = false;
-                    return;
-                }
-
-                String id = result.get().trim();
-
-                // Fetch the player's actual nickname from the API.
-                // All registration logic runs inside thenAccept so it only
-                // executes after we have the server response.
-                fetchNicknameAsync(id).thenAccept(nicknameOpt -> Platform.runLater(() -> {
-                    try {
-                        if (!nicknameOpt.isPresent()) {
-                            new Alert(Alert.AlertType.ERROR,
-                                "ID '" + id + "' nicht in der Datenbank gefunden!\n" +
-                                "Bitte erneut versuchen.", ButtonType.OK).showAndWait();
-                            return;
-                        }
-
-                        String nickname = nicknameOpt.get();
-
-                        if (alleSpieler.stream().anyMatch(s -> s.getName().equals(nickname))) {
-                            new Alert(Alert.AlertType.WARNING,
-                                "'" + nickname + "' ist bereits angemeldet!\n" +
-                                "Bitte eine andere ID wählen.", ButtonType.OK).showAndWait();
-                            return;
-                        }
-
-                        // === FIXED: store the numeric ID (PK) instead of only the nickname ===
-                        int teilnehmerId = Integer.parseInt(id);
-                        Spieler s = new Spieler(teilnehmerId, nickname, buzzer);
-                        alleSpieler.add(s);
-                        obs.removeListener(holder[0]);
-                        lobby.setReady(playerNum, nickname);
-                        System.out.println("✓ " + nickname + " (ID " + id + ") angemeldet als Spieler " + playerNum);
-
-                    } finally {
+                    if (!result.isPresent() || result.get().trim().isEmpty()) {
                         isProcessing[0] = false;
+                        return;
                     }
-                }));
+
+                    String name = result.get().trim();
+
+                    if (alleSpieler.stream().anyMatch(s -> s.getName().equals(name))) {
+                        new Alert(Alert.AlertType.WARNING,
+                            "'" + name + "' ist bereits angemeldet!\n" +
+                            "Bitte einen anderen Namen wählen.", ButtonType.OK).showAndWait();
+                        isProcessing[0] = false;
+                        return;
+                    }
+
+                    Spieler s = new Spieler(0, name, buzzer);
+                    alleSpieler.add(s);
+                    obs.removeListener(holder[0]);
+                    lobby.setReady(playerNum, name);
+                    System.out.println("✓ " + name + " angemeldet als Spieler " + playerNum);
+
+                } finally {
+                    isProcessing[0] = false;
+                }
             });
         };
         return holder[0];
     }
 
-    /**
-     * Calls the API with the given ID and returns the player's nickname.
-     * Returns Optional.empty() if the ID is not found or the request fails.
-     *
-     * The API returns a paginated JSON object like:
-     *   {"count":1,"results":[{"id":1,"nickname":"PRODUCTIVE_GECKO",...}]}
-     * We extract the first "nickname" value from the response body.
-     */
-    private CompletableFuture<Optional<String>> fetchNicknameAsync(String id) {
-        String url = "http://192.168.100.141:8080/teilnehmer/?id=" + id;
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> {
-                    if (response.statusCode() != 200) {
-                        System.out.println("✗ ID '" + id + "': NOT FOUND (Status: "
-                                + response.statusCode() + ")");
-                        return Optional.<String>empty();
-                    }
-
-                    // Parse "nickname":"VALUE" from the JSON response body
-                    // without requiring an external JSON library.
-                    java.util.regex.Matcher m = java.util.regex.Pattern
-                            .compile("\"nickname\"\\s*:\\s*\"([^\"]+)\"")
-                            .matcher(response.body());
-
-                    if (m.find()) {
-                        String nickname = m.group(1);
-                        System.out.println("✓ ID '" + id + "' → nickname: " + nickname);
-                        return Optional.of(nickname);
-                    }
-
-                    System.out.println("✗ ID '" + id + "': response OK but no nickname in body");
-                    return Optional.<String>empty();
-                })
-                .exceptionally(e -> {
-                    System.err.println("✗ API-Fehler für ID '" + id + "': " + e.getMessage());
-                    return Optional.empty();
-                });
-    }
-
     private void sendFinalScoresToApiAsync() {
-        System.out.println("=== Sending Final Scores to API (async) ===");
-        String url = "http://192.168.100.141:8080/scores/";
-
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-
+        System.out.println("=== Final Scores ===");
         for (Spieler spieler : alleSpieler) {
-            int teilnehmerPk = spieler.getTeilnehmerId();
-            int score = spieler.getPunktestand().get();
-
-            String json = String.format(
-                "{\"teilnehmer\":%d,\"score\":%d,\"game_type\":\"quiz\"}",
-                teilnehmerPk, score);
-
-            System.out.println("  → Queuing score for " + spieler.getName() + " (ID " + teilnehmerPk + "): " + score);
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            futures.add(
-                httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(response -> {
-                        if (response.statusCode() == 200 || response.statusCode() == 201) {
-                            System.out.println("    ✓ Score saved for " + spieler.getName());
-                        } else {
-                            System.err.println("    ✗ Failed for " + spieler.getName()
-                                + " – Status: " + response.statusCode()
-                                + " – " + response.body());
-                        }
-                    })
-                    .exceptionally(e -> {
-                        System.err.println("    ✗ Error for " + spieler.getName() + ": " + e.getMessage());
-                        return null;
-                    })
-            );
+            System.out.println("  " + spieler.getName() + ": " + spieler.getPunktestand().get() + " Punkte");
         }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(() -> System.out.println("=== All scores submitted ==="));
     }
+
 
     public void lobbyNotifyDone() {
         if (alleSpieler.size() >= 2) {
